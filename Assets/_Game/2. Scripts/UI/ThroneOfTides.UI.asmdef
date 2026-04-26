@@ -1,0 +1,16 @@
+{
+    "name": "ThroneOfTides.UI",
+    "rootNamespace": "ThroneOfTides.UI",
+    "references": [
+        "GUID:5e07d9d5988b12f4e8e8626be9243ad4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

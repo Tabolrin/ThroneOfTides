@@ -1,0 +1,17 @@
+{
+    "name": "ThroneOfTides.Systems",
+    "rootNamespace": "ThroneOfTides.Systems",
+    "references": [
+        "GUID:5e07d9d5988b12f4e8e8626be9243ad4",
+        "GUID:5850c61d938abf74f86e574834efcfb7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
