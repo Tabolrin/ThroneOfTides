@@ -31,10 +31,13 @@ namespace ThroneOfTides.Systems
             RefreshLayout(_enemyCards, _enemyHandAnchor);
         }
 
-        public void RemoveCardFromPlayerHand(CardView card)
+        public void RemoveCardFromPlayerHand(CardSO card)
         {
-            if (!_playerCards.Remove(card)) return;
-            Object.Destroy(card.gameObject);
+            // Find the CardView that matches this CardSO
+            CardView view = _playerCards.Find(v => v.CardData == card);
+            if (view == null) return;
+            _playerCards.Remove(view);
+            Object.Destroy(view.gameObject);
             RefreshLayout(_playerCards, _playerHandAnchor);
         }
 

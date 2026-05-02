@@ -1,9 +1,9 @@
 using System.Collections;
 using UnityEngine;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using ThroneOfTides.Systems;
 using ThroneOfTides.UI;
-using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Systems
 {
@@ -32,11 +32,25 @@ namespace ThroneOfTides.Systems
 
             SubscribeToStateEvents();
 
+            // Deal opening hand before state machine starts
+            DealOpeningHand();
+
             _stateMachine = new TurnStateMachine(_gameState, _config);
             _stateMachine.SetOnCardDrawn(_handLayoutManager.AddCardToPlayerHand);
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
             RefreshHUD();
+        }
+
+        private void DealOpeningHand()
+        {
+            for (int i = 0; i < _config.MaxHandSize; i++)
+            {
+                CardSO card = _gameState.PlayerDeck.Draw();
+                if (card == null) break;
+                _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
+                _handLayoutManager.AddCardToPlayerHand(card);
+            }
         }
 
         private void Update()
@@ -46,10 +60,11 @@ namespace ThroneOfTides.Systems
 
         private void SubscribeToStateEvents()
         {
-            _gameState.PlayerDeck.OnDeckStateChanged += OnPlayerDeckStateChanged;
-            _gameState.PlayerHand.OnHandStateChanged += OnPlayerHandStateChanged;
-            _gameState.EnemyDeck.OnDeckStateChanged  += OnEnemyDeckStateChanged;
-            _gameState.OnEnemyTurnReady              += OnEnemyTurnReady;
+            _gameState.PlayerDeck.OnDeckStateChanged  += OnPlayerDeckStateChanged;
+            _gameState.PlayerHand.OnHandStateChanged  += OnPlayerHandStateChanged;
+            _gameState.EnemyDeck.OnDeckStateChanged   += OnEnemyDeckStateChanged;
+            _gameState.OnEnemyTurnReady               += OnEnemyTurnReady;
+            _gameState.OnPlayerCardRemoved            += OnPlayerCardRemoved;
         }
 
         private void OnEnemyTurnReady()
@@ -59,9 +74,10 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator EnemyTurnRoutine()
         {
-            float delay = UnityEngine.Random.Range(_config.EnemyThinkTimeMin, _config.EnemyThinkTimeMax);
+            float delay = Random.Range(_config.EnemyThinkTimeMin, _config.EnemyThinkTimeMax);
             yield return new WaitForSeconds(delay);
 
+            // TODO - replace with real AI card selection when combat system is built
             _gameState.ApplyDamage(DamageTarget.Player, 1);
             RefreshHUD();
 
@@ -89,5 +105,9 @@ namespace ThroneOfTides.Systems
 
         private void OnEnemyDeckStateChanged(DeckState state) =>
             Debug.Log($"Enemy deck: {state}");
+
+        // TODO - replace with card view removal animation when VFX system is built
+        private void OnPlayerCardRemoved(CardSO card) =>
+            _handLayoutManager.RemoveCardFromPlayerHand(card);
     }
 }

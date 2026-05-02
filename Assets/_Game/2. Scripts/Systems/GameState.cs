@@ -33,6 +33,7 @@ namespace ThroneOfTides.Systems
 
         public Action         OnEnemyTurnReady;
         public Action<CardSO> OnCardDrawn;
+        public Action<CardSO> OnPlayerCardRemoved;
 
         public GameState(int startingHP, Deck playerDeck, Deck enemyDeck)
         {
@@ -105,8 +106,9 @@ namespace ThroneOfTides.Systems
             return Winner.None;
         }
 
-        public void NotifyEnemyTurnReady() => OnEnemyTurnReady?.Invoke();
-        public void NotifyCardDrawn(CardSO card) => OnCardDrawn?.Invoke(card);
+        public void NotifyEnemyTurnReady()             => OnEnemyTurnReady?.Invoke();
+        public void NotifyCardDrawn(CardSO card)       => OnCardDrawn?.Invoke(card);
+        public void NotifyPlayerCardRemoved(CardSO card) => OnPlayerCardRemoved?.Invoke(card);
 
         public void IncrementCombo(CardSO card)
         {

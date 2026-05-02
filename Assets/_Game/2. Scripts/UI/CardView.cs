@@ -10,8 +10,8 @@ namespace ThroneOfTides.UI
     {
         [SerializeField] private SpriteRenderer _cardBackground;
         [SerializeField] private SpriteRenderer _cardArt;
-        [SerializeField] private TextMesh       _nameLabel;
-        [SerializeField] private TextMesh       _damageLabel;
+        [SerializeField] private TMP_Text       _nameLabel;
+        [SerializeField] private TMP_Text       _damageLabel;
 
         public CardSO CardData { get; private set; }
 

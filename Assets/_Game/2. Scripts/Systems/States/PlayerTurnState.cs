@@ -11,7 +11,6 @@ namespace ThroneOfTides.Systems
         private readonly TurnStateMachine _machine;
         private readonly GameConfigSO     _config;
 
-        // Callback to GameManager to spawn card view on draw
         private Action<CardSO> _onCardDrawn;
 
         public PlayerTurnState(GameState gameState, TurnStateMachine machine, GameConfigSO config)
@@ -25,11 +24,15 @@ namespace ThroneOfTides.Systems
 
         public void Enter()
         {
-            CardSO drawn = _gameState.PlayerDeck.Draw();
-            if (drawn != null)
+            // Only draw if hand is not already full
+            if (_gameState.PlayerHand.Count < _config.MaxHandSize)
             {
-                _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
-                _onCardDrawn?.Invoke(drawn);
+                CardSO drawn = _gameState.PlayerDeck.Draw();
+                if (drawn != null)
+                {
+                    _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
+                    _onCardDrawn?.Invoke(drawn);
+                }
             }
 
             _gameState.IsPlayerTurn = true;
@@ -43,6 +46,14 @@ namespace ThroneOfTides.Systems
 
             if (_gameState.ComboStackCount > 0)
                 _gameState.ResetCombo();
+
+            // TODO - replace with real card play logic when combat system is built
+            if (_gameState.PlayerHand.CardsSO.Count > 0)
+            {
+                CardSO card = _gameState.PlayerHand.CardsSO[0];
+                _gameState.PlayerHand.RemoveCard(card);
+                _gameState.NotifyPlayerCardRemoved(card);
+            }
 
             _machine.TransitionTo(_machine.EnemyTurn);
         }
