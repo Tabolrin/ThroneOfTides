@@ -10,13 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
-  m_Name: RumCardSO
+  m_Name: CannonBallCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
-  Name: Rum
-  Damage: 0
-  Type: 1
-  ComboPartner: {fileID: 11400000, guid: 626df873eb0d28b4392e7cfd5ee85308, type: 2}
-  ComboDamage: 8
-  ComboStackBonus: 2
-  Description: 
-  Art: {fileID: 21300000, guid: f40759b7fec59224bb598958cb315cd8, type: 3}
+  _name: Cannonball
+  _cardType: 0
+  _description: Iron through hull and bone. Deal 2 damage.
+  _damage: 2
+  _comboDamage: 0
+  _comboStackBonus: 0
+  _comboPartner: {fileID: 0}
+  _dotDamagePerTurn: 0
+  _dotDuration: 0
+  _actionEffect: {fileID: 0}
+  _art: {fileID: 0}
+  _cardTypeSymbol: {fileID: 0}
+  _cardArtAnimator: {fileID: 0}

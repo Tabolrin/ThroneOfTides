@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 
 namespace ThroneOfTides.UI
@@ -8,8 +10,8 @@ namespace ThroneOfTides.UI
     {
         [SerializeField] private SpriteRenderer _cardBackground;
         [SerializeField] private SpriteRenderer _cardArt;
-        [SerializeField] private TMP_Text     _nameLabel;
-        [SerializeField] private TMP_Text       _damageLabel;
+        [SerializeField] private TextMesh       _nameLabel;
+        [SerializeField] private TextMesh       _damageLabel;
 
         public CardSO CardData { get; private set; }
 
@@ -19,7 +21,7 @@ namespace ThroneOfTides.UI
             _nameLabel.text        = card.Name;
             _damageLabel.text      = card.Damage.ToString();
             _cardArt.sprite        = card.Art;
-            _cardBackground.color  = card.Type == CardType.Combo
+            _cardBackground.color  = card.CardType == CardType.Combo
                 ? new Color(1f, 0.85f, 0f)
                 : new Color(0.3f, 0.5f, 1f);
         }

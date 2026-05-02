@@ -10,17 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
-  m_Name: BallistaCardSO
+  m_Name: HailStormCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
-  _name: Ballista
-  _cardType: 0
-  _description: A bolt that splits the horizon. Deal 5 damage.
-  _damage: 5
+  _name: Hail Storm
+  _cardType: 3
+  _description: No shelter. No mercy. No end to the rain. Deal 2 damage per turn
+    for 3 turns.
+  _damage: 0
   _comboDamage: 0
   _comboStackBonus: 0
   _comboPartner: {fileID: 0}
-  _dotDamagePerTurn: 0
-  _dotDuration: 0
+  _dotDamagePerTurn: 2
+  _dotDuration: 3
   _actionEffect: {fileID: 0}
   _art: {fileID: 0}
   _cardTypeSymbol: {fileID: 0}

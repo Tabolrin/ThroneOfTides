@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
-  m_Name: BallistaCardSO
+  m_Name: DaedMan'sTurnCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
-  _name: Ballista
-  _cardType: 0
-  _description: A bolt that splits the horizon. Deal 5 damage.
-  _damage: 5
+  _name: Dead Man's Turn
+  _cardType: 2
+  _description: Legends don't dodge. They were never there to begin with. React in
+    time to negate the next incoming attack.
+  _damage: 0
   _comboDamage: 0
   _comboStackBonus: 0
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
-  _actionEffect: {fileID: 0}
+  _actionEffect: {fileID: 11400000, guid: c17fc0c546c84944a9af8ad1a0e248a1, type: 2}
   _art: {fileID: 0}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}

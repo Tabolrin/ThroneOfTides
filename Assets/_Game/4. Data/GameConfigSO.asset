@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43d431d09cf80964fbd4556c9a2ceca0, type: 3}
   m_Name: GameConfigSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.GameConfigSO
-  StartingHP: 10
+  StartingHP: 30
   MaxHandSize: 5
   LowDeckThreshold: 3
   CardSpacing: 1

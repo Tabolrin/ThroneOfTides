@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Systems
@@ -8,20 +10,20 @@ namespace ThroneOfTides.Systems
 
     public class Hand
     {
-        private List<CardSO> _cards;
-        private HandState    _currentState = HandState.Empty;
+        private readonly List<CardSO> _cards = new List<CardSO>();
+        private HandState             _currentState = HandState.Empty;
 
-        public int                   Count => _cards.Count;
-        public IReadOnlyList<CardSO> Cards => _cards.AsReadOnly();
-        public HandState             State => _currentState;
+        public int       Count => _cards.Count;
+        public HandState State => _currentState;
+
+        // ICard for cross-assembly access - UI holds CardSO refs directly via CardView
+        public IReadOnlyList<ICard>  Cards   => _cards.Cast<ICard>().ToList().AsReadOnly();
+
+        // CardSO for internal Systems use only
+        public IReadOnlyList<CardSO> CardsSO => _cards.AsReadOnly();
 
         // Fires only on state transition
         public Action<HandState> OnHandStateChanged;
-
-        public Hand()
-        {
-            _cards = new List<CardSO>();
-        }
 
         public void AddCard(CardSO card, int maxHandSize)
         {
@@ -38,15 +40,12 @@ namespace ThroneOfTides.Systems
             return removed;
         }
 
-        public bool HasCard(CardSO card)
-        {
-            return _cards.Contains(card);
-        }
+        public bool HasCard(CardSO card) => _cards.Contains(card);
 
         private void CheckHandState(int maxHandSize)
         {
-            HandState newState = _cards.Count == 0                                ? HandState.Empty  :
-                maxHandSize > 0 && _cards.Count >= maxHandSize   ? HandState.Full   :
+            HandState newState = _cards.Count == 0                              ? HandState.Empty :
+                maxHandSize > 0 && _cards.Count >= maxHandSize ? HandState.Full  :
                 HandState.Normal;
             if (newState == _currentState) return;
             _currentState = newState;

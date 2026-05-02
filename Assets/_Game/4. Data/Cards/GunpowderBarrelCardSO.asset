@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
-  m_Name: BallistaCardSO
+  m_Name: GunpowderBarrelCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
-  _name: Ballista
-  _cardType: 0
-  _description: A bolt that splits the horizon. Deal 5 damage.
-  _damage: 5
-  _comboDamage: 0
-  _comboStackBonus: 0
-  _comboPartner: {fileID: 0}
+  _name: Gunpowder Barrel
+  _cardType: 1
+  _description: "Let it build. Let it burn. Prime the combo \u2014 stack each turn
+    to increase Torch damage."
+  _damage: 0
+  _comboDamage: 8
+  _comboStackBonus: 2
+  _comboPartner: {fileID: 11400000, guid: 626df873eb0d28b4392e7cfd5ee85308, type: 2}
   _dotDamagePerTurn: 0
   _dotDuration: 0
   _actionEffect: {fileID: 0}

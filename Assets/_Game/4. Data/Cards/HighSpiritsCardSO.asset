@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
-  m_Name: BallistaCardSO
+  m_Name: HighSpiritsCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
-  _name: Ballista
-  _cardType: 0
-  _description: A bolt that splits the horizon. Deal 5 damage.
-  _damage: 5
+  _name: High Spirits
+  _cardType: 2
+  _description: They didn't sail through hell to die here. Neither did you. Restore
+    5 HP.
+  _damage: 0
   _comboDamage: 0
   _comboStackBonus: 0
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
-  _actionEffect: {fileID: 0}
+  _actionEffect: {fileID: 11400000, guid: 9b56f54a6946f4e4992f9d5a4197c0e3, type: 2}
   _art: {fileID: 0}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}

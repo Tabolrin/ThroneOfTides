@@ -216,7 +216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.GameManager
   _config: {fileID: 11400000, guid: 9e980ee082354a844bf0a1ee974b4207, type: 2}
   _playerDeckDefinition: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
-  _enemyDeckDefinition: {fileID: 11400000, guid: 7bfc4476f6c59ce4c987e16b5dc29717, type: 2}
+  _enemyDeckDefinition: {fileID: 11400000, guid: f7b4417d898e0684d9b52e7c179cd729, type: 2}
   _gameHUD: {fileID: 55895883}
   _handLayoutManager: {fileID: 55895886}
 --- !u!1 &58216492
