@@ -51,5 +51,9 @@ namespace ThroneOfTides.Data
         public Sprite                    Art              => _art;
         public Sprite                    CardTypeSymbol   => _cardTypeSymbol;
         public RuntimeAnimatorController CardArtAnimator  => _cardArtAnimator;
+        
+        // Whether this card can be paired with a damage card in the same turn
+        [SerializeField] private bool _isEligibleAsActionPair;
+        public bool IsEligibleAsActionPair => _isEligibleAsActionPair;
     }
 }

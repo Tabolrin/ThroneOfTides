@@ -31,8 +31,6 @@ namespace ThroneOfTides.Systems
             _gameState = new GameState(_config.StartingHP, playerDeck, enemyDeck);
 
             SubscribeToStateEvents();
-
-            // Deal opening hand before state machine starts
             DealOpeningHand();
 
             _stateMachine = new TurnStateMachine(_gameState, _config);
@@ -60,11 +58,30 @@ namespace ThroneOfTides.Systems
 
         private void SubscribeToStateEvents()
         {
-            _gameState.PlayerDeck.OnDeckStateChanged  += OnPlayerDeckStateChanged;
-            _gameState.PlayerHand.OnHandStateChanged  += OnPlayerHandStateChanged;
-            _gameState.EnemyDeck.OnDeckStateChanged   += OnEnemyDeckStateChanged;
-            _gameState.OnEnemyTurnReady               += OnEnemyTurnReady;
-            _gameState.OnPlayerCardRemoved            += OnPlayerCardRemoved;
+            _gameState.PlayerDeck.OnDeckStateChanged += OnPlayerDeckStateChanged;
+            _gameState.PlayerHand.OnHandStateChanged += OnPlayerHandStateChanged;
+            _gameState.EnemyDeck.OnDeckStateChanged  += OnEnemyDeckStateChanged;
+            _gameState.OnEnemyTurnReady              += OnEnemyTurnReady;
+            _gameState.OnPlayerCardRemoved           += OnPlayerCardRemoved;
+            PlayZoneHandler.OnCardPlayed             += OnCardPlayed;
+        }
+
+        private void OnDestroy()
+        {
+            PlayZoneHandler.OnCardPlayed -= OnCardPlayed;
+        }
+
+        private void OnCardPlayed(CardSO card)
+        {
+            // TODO - route to CombatSystem when built
+            _gameState.PlayerHand.RemoveCard(card);
+            _gameState.NotifyPlayerCardRemoved(card);
+            _gameState.ApplyDamage(DamageTarget.Enemy, card.Damage);
+            RefreshHUD();
+            Debug.Log($"Card played: {card.Name} - damage: {card.Damage} - enemy HP: {_gameState.EnemyHP}");
+
+            if (_gameState.IsGameOver())
+                _stateMachine.TransitionTo(_stateMachine.GameOver);
         }
 
         private void OnEnemyTurnReady()
@@ -96,7 +113,9 @@ namespace ThroneOfTides.Systems
                 _gameState.IsPlayerTurn);
         }
 
-        // Placeholder handlers - replace with UI reactions in future steps
+        private void OnPlayerCardRemoved(CardSO card) =>
+            _handLayoutManager.RemoveCardFromPlayerHand(card);
+
         private void OnPlayerDeckStateChanged(DeckState state) =>
             Debug.Log($"Player deck: {state}");
 
@@ -105,9 +124,5 @@ namespace ThroneOfTides.Systems
 
         private void OnEnemyDeckStateChanged(DeckState state) =>
             Debug.Log($"Enemy deck: {state}");
-
-        // TODO - replace with card view removal animation when VFX system is built
-        private void OnPlayerCardRemoved(CardSO card) =>
-            _handLayoutManager.RemoveCardFromPlayerHand(card);
     }
 }

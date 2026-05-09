@@ -24,7 +24,6 @@ namespace ThroneOfTides.Systems
 
         public void Enter()
         {
-            // Only draw if hand is not already full
             if (_gameState.PlayerHand.Count < _config.MaxHandSize)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
@@ -42,18 +41,12 @@ namespace ThroneOfTides.Systems
         public void Tick()
         {
             if (Keyboard.current == null) return;
+
+            // TODO - replace Space with End Turn button
             if (!Keyboard.current.spaceKey.wasPressedThisFrame) return;
 
             if (_gameState.ComboStackCount > 0)
                 _gameState.ResetCombo();
-
-            // TODO - replace with real card play logic when combat system is built
-            if (_gameState.PlayerHand.CardsSO.Count > 0)
-            {
-                CardSO card = _gameState.PlayerHand.CardsSO[0];
-                _gameState.PlayerHand.RemoveCard(card);
-                _gameState.NotifyPlayerCardRemoved(card);
-            }
 
             _machine.TransitionTo(_machine.EnemyTurn);
         }
