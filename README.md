@@ -107,5 +107,5 @@ Playable build in progress.
 ---
 
 ## Contact
-👤 [LinkedIn](<www.linkedin.com/in/peerml>)  
+👤 [LinkedIn](<https://www.linkedin.com/in/peerml/?skipRedirect=true>)  
 🎮 [itch.io](<https://tabolrin.itch.io/>)  
