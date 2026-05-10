@@ -22,8 +22,8 @@ balance spreadsheet maintained across four major versions.
 ---
 
 ## Design Documents
-📄 [Game Design Document (GDD) — v4](<https://docs.google.com/document/d/1MkV1CaZWJsu4zOP6ZjAu_O4Zo4t17NGckKYAUY4Jhxk/edit?usp=sharing>)  
-📄 [High-Level Design Document (HLD) — v5](<https://docs.google.com/document/d/133qzpSa4RO27y_zbFs6qLWrUmpmaZXtODrBtMcZaaso/edit?usp=sharing>)  
+📄 [Game Design Document (GDD) - v4](<https://docs.google.com/document/d/1MkV1CaZWJsu4zOP6ZjAu_O4Zo4t17NGckKYAUY4Jhxk/edit?usp=sharing>)  
+📄 [High-Level Design Document (HLD) - v5](<https://docs.google.com/document/d/133qzpSa4RO27y_zbFs6qLWrUmpmaZXtODrBtMcZaaso/edit?usp=sharing>)  
 📊 [Balance Spreadsheet](<https://docs.google.com/spreadsheets/d/1qG3uNH2hfbM_wV13tYVdbw4M_pffa1z3ndoEvEb-3go/edit?usp=sharing>)  
 📋 [Master Asset List](<https://miro.com/app/board/uXjVHdt4P7U=/?moveToWidget=3458764669833709512&cot=14>)
 
