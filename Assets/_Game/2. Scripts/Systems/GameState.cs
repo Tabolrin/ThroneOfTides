@@ -24,16 +24,13 @@ namespace ThroneOfTides.Systems
         public int    ComboStackCount { get; private set; }
         public CardSO ActiveComboCard { get; private set; }
 
-        // Cleared after attack card played or turn ends
         public bool SirenSongActive    { get; private set; }
         public bool PendingUnblockable { get; private set; }
 
-        // Processed at start of each turn
         private readonly List<DotEffect> _dotEffects = new List<DotEffect>();
 
-        public Action         OnEnemyTurnReady;
-        public Action<CardSO> OnCardDrawn;
-        public Action<CardSO> OnPlayerCardRemoved;
+        // Internal timing signal - stays on GameState not on bus
+        public Action OnEnemyTurnReady;
 
         public GameState(int startingHP, Deck playerDeck, Deck enemyDeck)
         {
@@ -52,11 +49,15 @@ namespace ThroneOfTides.Systems
                 PlayerHP = Mathf.Max(0, PlayerHP - amount);
             else
                 EnemyHP  = Mathf.Max(0, EnemyHP  - amount);
+
+            GameEventBus.FireDamageDealt(target, amount);
+            GameEventBus.FireHPChanged(target == DamageTarget.Player ? PlayerHP : EnemyHP);
         }
 
         public void HealPlayer(int amount)
         {
             PlayerHP = Mathf.Min(PlayerHP + amount, _maxHP);
+            GameEventBus.FireHPChanged(PlayerHP);
         }
 
         public void SetSirenActive()
@@ -74,6 +75,7 @@ namespace ThroneOfTides.Systems
         public void AddDotEffect(DotEffect effect)
         {
             _dotEffects.Add(effect);
+            GameEventBus.FireDOTApplied(effect);
         }
 
         // Iterates backwards so removal does not skip entries
@@ -83,6 +85,7 @@ namespace ThroneOfTides.Systems
             {
                 DotEffect dot = _dotEffects[i];
                 ApplyDamage(dot.Target, dot.DamagePerTurn);
+                GameEventBus.FireDOTTick(dot);
 
                 if (dot.TurnsRemaining <= 1)
                     _dotEffects.RemoveAt(i);
@@ -106,14 +109,16 @@ namespace ThroneOfTides.Systems
             return Winner.None;
         }
 
-        public void NotifyEnemyTurnReady()             => OnEnemyTurnReady?.Invoke();
-        public void NotifyCardDrawn(CardSO card)       => OnCardDrawn?.Invoke(card);
-        public void NotifyPlayerCardRemoved(CardSO card) => OnPlayerCardRemoved?.Invoke(card);
+        public void NotifyEnemyTurnReady() => OnEnemyTurnReady?.Invoke();
+
+        public void NotifyCardDrawn(CardSO card)       => GameEventBus.FireCardDrawn(card);
+        public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
 
         public void IncrementCombo(CardSO card)
         {
             ActiveComboCard = card;
             ComboStackCount++;
+            GameEventBus.FireComboStackChanged(ComboStackCount);
         }
 
         public int ResolveCombo()
@@ -121,6 +126,7 @@ namespace ThroneOfTides.Systems
             int damage = ActiveComboCard.ComboDamage +
                          ((ComboStackCount - 1) * ActiveComboCard.ComboStackBonus);
             ResetCombo();
+            GameEventBus.FireComboResolved();
             return damage;
         }
 
@@ -128,6 +134,7 @@ namespace ThroneOfTides.Systems
         {
             ComboStackCount = 0;
             ActiveComboCard = null;
+            GameEventBus.FireComboStackChanged(0);
         }
     }
 }

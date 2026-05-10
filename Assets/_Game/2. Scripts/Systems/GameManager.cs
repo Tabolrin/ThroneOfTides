@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using ThroneOfTides.Systems;
@@ -17,11 +18,22 @@ namespace ThroneOfTides.Systems
         [SerializeField] private DeckDefinitionSO _enemyDeckDefinition;
 
         [Header("References")]
-        [SerializeField] private GameHUD           _gameHUD;
-        [SerializeField] private HandLayoutManager _handLayoutManager;
+        [SerializeField] private GameHUD               _gameHUD;
+        [SerializeField] private HandLayoutManager     _handLayoutManager;
+        [SerializeField] private UnityEngine.UI.Button _endTurnButton;
 
-        private GameState        _gameState;
-        private TurnStateMachine _stateMachine;
+        private GameState                 _gameState;
+        private TurnStateMachine          _stateMachine;
+        private ThroneOfTidesInputActions _inputActions;
+
+        private void Awake()
+        {
+            _inputActions = new ThroneOfTidesInputActions();
+            _inputActions.Gameplay.EndTurn.performed += OnEndTurnPressed;
+        }
+
+        private void OnEnable()  => _inputActions.Enable();
+        private void OnDisable() => _inputActions.Disable();
 
         private void Start()
         {
@@ -30,12 +42,14 @@ namespace ThroneOfTides.Systems
 
             _gameState = new GameState(_config.StartingHP, playerDeck, enemyDeck);
 
-            SubscribeToStateEvents();
+            SubscribeToEvents();
             DealOpeningHand();
 
             _stateMachine = new TurnStateMachine(_gameState, _config);
             _stateMachine.SetOnCardDrawn(_handLayoutManager.AddCardToPlayerHand);
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
+
+            _endTurnButton.onClick.AddListener(() => EndTurn());
 
             RefreshHUD();
         }
@@ -51,43 +65,59 @@ namespace ThroneOfTides.Systems
             }
         }
 
-        private void Update()
-        {
-            _stateMachine?.Tick();
-        }
+        private void Update() => _stateMachine?.Tick();
 
-        private void SubscribeToStateEvents()
+        private void SubscribeToEvents()
         {
             _gameState.PlayerDeck.OnDeckStateChanged += OnPlayerDeckStateChanged;
             _gameState.PlayerHand.OnHandStateChanged += OnPlayerHandStateChanged;
             _gameState.EnemyDeck.OnDeckStateChanged  += OnEnemyDeckStateChanged;
             _gameState.OnEnemyTurnReady              += OnEnemyTurnReady;
-            _gameState.OnPlayerCardRemoved           += OnPlayerCardRemoved;
-            PlayZoneHandler.OnCardPlayed             += OnCardPlayed;
+
+            GameEventBus.OnCardPlayed         += OnCardPlayed;
+            GameEventBus.OnPlayerCardRemoved  += OnPlayerCardRemoved;
+            GameEventBus.OnMatchWin           += OnMatchWin;
+            GameEventBus.OnMatchLoss          += OnMatchLoss;
         }
 
         private void OnDestroy()
         {
-            PlayZoneHandler.OnCardPlayed -= OnCardPlayed;
+            _inputActions.Gameplay.EndTurn.performed -= OnEndTurnPressed;
+            _inputActions.Dispose();
+            _endTurnButton.onClick.RemoveAllListeners();
+            GameEventBus.ClearAllListeners();
         }
 
-        private void OnCardPlayed(CardSO card)
+        private void OnEndTurnPressed(InputAction.CallbackContext context) => EndTurn();
+
+        private void EndTurn()
         {
+            if (!_gameState.IsPlayerTurn) return;
+            _stateMachine.TransitionTo(_stateMachine.EnemyTurn);
+        }
+
+        private void OnCardPlayed(ICard card)
+        {
+            // Cast to CardSO - safe since all cards in this game are CardSO
+            var cardSO = card as CardSO;
+            if (cardSO == null) return;
+
             // TODO - route to CombatSystem when built
-            _gameState.PlayerHand.RemoveCard(card);
-            _gameState.NotifyPlayerCardRemoved(card);
-            _gameState.ApplyDamage(DamageTarget.Enemy, card.Damage);
+            _gameState.PlayerHand.RemoveCard(cardSO);
+            _gameState.NotifyPlayerCardRemoved(cardSO);
+            _gameState.ApplyDamage(DamageTarget.Enemy, cardSO.Damage);
             RefreshHUD();
-            Debug.Log($"Card played: {card.Name} - damage: {card.Damage} - enemy HP: {_gameState.EnemyHP}");
 
             if (_gameState.IsGameOver())
-                _stateMachine.TransitionTo(_stateMachine.GameOver);
+            {
+                if (_gameState.GetWinner() == Winner.Player)
+                    GameEventBus.FireMatchWin();
+                else
+                    GameEventBus.FireMatchLoss();
+            }
         }
 
-        private void OnEnemyTurnReady()
-        {
-            StartCoroutine(EnemyTurnRoutine());
-        }
+        private void OnEnemyTurnReady() => StartCoroutine(EnemyTurnRoutine());
 
         private IEnumerator EnemyTurnRoutine()
         {
@@ -98,10 +128,16 @@ namespace ThroneOfTides.Systems
             _gameState.ApplyDamage(DamageTarget.Player, 1);
             RefreshHUD();
 
-            _stateMachine.TransitionTo(
-                _gameState.IsGameOver()
-                    ? (IState)_stateMachine.GameOver
-                    : _stateMachine.PlayerTurn);
+            if (_gameState.IsGameOver())
+            {
+                if (_gameState.GetWinner() == Winner.Player)
+                    GameEventBus.FireMatchWin();
+                else
+                    GameEventBus.FireMatchLoss();
+                yield break;
+            }
+
+            _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
         }
 
         private void RefreshHUD()
@@ -111,10 +147,15 @@ namespace ThroneOfTides.Systems
                 _gameState.EnemyHP,  _config.StartingHP,
                 _gameState.PlayerDeck.Count,
                 _gameState.IsPlayerTurn);
+
+            _endTurnButton.interactable = _gameState.IsPlayerTurn;
         }
 
-        private void OnPlayerCardRemoved(CardSO card) =>
-            _handLayoutManager.RemoveCardFromPlayerHand(card);
+        private void OnPlayerCardRemoved(ICard card) =>
+            _handLayoutManager.RemoveCardFromPlayerHand(card as CardSO);
+
+        private void OnMatchWin()  => Debug.Log("Match Won");
+        private void OnMatchLoss() => Debug.Log("Match Lost");
 
         private void OnPlayerDeckStateChanged(DeckState state) =>
             Debug.Log($"Player deck: {state}");

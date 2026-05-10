@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "name": "ThroneOfTidesInputActions",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "0331a831-12ac-44a0-9122-5309b1377d5b",
+            "actions": [
+                {
+                    "name": "EndTurn",
+                    "type": "Button",
+                    "id": "b2de2494-3c03-4673-abc9-ee73071e40f0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "3f84a43f-69a1-43a3-b6c6-769202612670",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "20f331d1-75e6-41aa-85dd-2dcb0b29131c",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EndTurn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2248e5d4-0f2e-4049-9207-d1457ddc0ee1",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

@@ -1,7 +1,7 @@
 using System;
-using UnityEngine;
-using UnityEngine.InputSystem;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using UnityEngine;
 
 namespace ThroneOfTides.Systems
 {
@@ -31,25 +31,16 @@ namespace ThroneOfTides.Systems
                 {
                     _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
                     _onCardDrawn?.Invoke(drawn);
+                    GameEventBus.FireCardDrawn(drawn);
                 }
             }
 
             _gameState.IsPlayerTurn = true;
+            GameEventBus.FireTurnPhaseChanged(TurnPhase.Draw);
             Debug.Log($"Player Turn - HP: {_gameState.PlayerHP}, Combo: {_gameState.ComboStackCount}");
         }
 
-        public void Tick()
-        {
-            if (Keyboard.current == null) return;
-
-            // TODO - replace Space with End Turn button
-            if (!Keyboard.current.spaceKey.wasPressedThisFrame) return;
-
-            if (_gameState.ComboStackCount > 0)
-                _gameState.ResetCombo();
-
-            _machine.TransitionTo(_machine.EnemyTurn);
-        }
+        public void Tick() { }
 
         public void Exit() => Debug.Log("Player Turn Ended");
     }

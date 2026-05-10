@@ -1,3 +1,5 @@
+using ThroneOfTides.Core;
+using ThroneOfTides.Systems;
 using UnityEngine;
 
 namespace ThroneOfTides.Systems
@@ -11,7 +13,17 @@ namespace ThroneOfTides.Systems
             _gameState = gameState;
         }
 
-        public void Enter() => Debug.Log($"Game Over - Winner: {_gameState.GetWinner()}");
+        public void Enter()
+        {
+            Winner winner = _gameState.GetWinner();
+            Debug.Log($"Game Over - Winner: {winner}");
+
+            if (winner == Winner.Player)
+                GameEventBus.FireMatchWin();
+            else
+                GameEventBus.FireMatchLoss();
+        }
+
         public void Tick()  { }
         public void Exit()  { }
     }
