@@ -11,6 +11,7 @@ namespace ThroneOfTides.Systems
         [SerializeField] private RectTransform _playerHandAnchor;
         [SerializeField] private RectTransform _enemyHandAnchor;
         [SerializeField] private CardView      _cardPrefab;
+        [SerializeField] private Canvas        _dragCanvas;
 
         [Header("Arc Settings")]
         [SerializeField] private float _arcRadius  = 800f;
@@ -24,15 +25,22 @@ namespace ThroneOfTides.Systems
 
         public void AddCardToPlayerHand(CardSO card)
         {
-            CardView view = Instantiate(_cardPrefab, _playerHandAnchor);
+            CardView view = SpawnCard(_playerHandAnchor);
             view.Setup(card);
             _playerCards.Add(view);
         }
 
         public void AddCardToEnemyHand(CardSO card)
         {
-            CardView view = Instantiate(_cardPrefab, _enemyHandAnchor);
-            _enemyCards.Add(view);
+            _enemyCards.Add(SpawnCard(_enemyHandAnchor));
+        }
+
+        private CardView SpawnCard(RectTransform anchor)
+        {
+            CardView view = Instantiate(_cardPrefab, anchor);
+            // Inject drag canvas so the card can re-parent itself on drag
+            view.GetComponent<CardDragHandler>()?.SetDragCanvas(_dragCanvas);
+            return view;
         }
 
         public void RemoveCardFromPlayerHand(CardView card)
