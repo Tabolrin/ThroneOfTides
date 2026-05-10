@@ -43,6 +43,14 @@ namespace ThroneOfTides.Systems
             return view;
         }
 
+        // Called by GameManager via the GameEventBus (passes CardSO)
+        public void RemoveCardFromPlayerHand(CardSO card)
+        {
+            CardView view = _playerCards.Find(v => v.CardData == card);
+            if (view != null) RemoveCardFromPlayerHand(view);
+        }
+
+        // Called directly when the CardView reference is already known
         public void RemoveCardFromPlayerHand(CardView card)
         {
             if (!_playerCards.Remove(card)) return;
