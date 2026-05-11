@@ -1,3 +1,4 @@
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
 
@@ -21,8 +22,9 @@ namespace ThroneOfTides.Systems
                 _gameState.EnemyHand.AddCard(drawn, 5);
 
             _gameState.IsPlayerTurn = false;
+            GameEventBus.FireTurnPhaseChanged(TurnPhase.EnemyDraw);
 
-            // Notify GameManager to run the coroutine - damage and transition happen there
+            // Notify GameManager to run the coroutine
             _gameState.NotifyEnemyTurnReady();
         }
 

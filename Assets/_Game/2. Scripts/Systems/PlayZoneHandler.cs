@@ -1,18 +1,18 @@
 using UnityEngine;
-using ThroneOfTides.UI;
+using UnityEngine.EventSystems;
+using ThroneOfTides.Core;
 
-namespace ThroneOfTides.Systems
+namespace ThroneOfTides.UI
 {
-    public class PlayZoneHandler : MonoBehaviour
+    public class PlayZoneHandler : MonoBehaviour, IDropHandler
     {
-        // OnTriggerEnter2D requires a Rigidbody2D on the card (Kinematic)
-        private void OnTriggerEnter2D(Collider2D other)
+        public void OnDrop(PointerEventData eventData)
         {
-            CardView card = other.GetComponent<CardView>();
-            if (card == null) return;
+            CardView card = eventData.pointerDrag?.GetComponent<CardView>();
+            if (card == null || card.CardData == null) return;
 
             Debug.Log($"Card played: {card.CardData.Name}");
-            // Full card play logic added in Step 7
+            GameEventBus.FireCardPlayed(card.CardData);
         }
     }
 }

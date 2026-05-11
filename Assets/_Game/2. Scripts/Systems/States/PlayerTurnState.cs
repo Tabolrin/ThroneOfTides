@@ -1,7 +1,7 @@
 using System;
-using UnityEngine;
-using UnityEngine.InputSystem;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using UnityEngine;
 
 namespace ThroneOfTides.Systems
 {
@@ -11,7 +11,6 @@ namespace ThroneOfTides.Systems
         private readonly TurnStateMachine _machine;
         private readonly GameConfigSO     _config;
 
-        // Callback to GameManager to spawn card view on draw
         private Action<CardSO> _onCardDrawn;
 
         public PlayerTurnState(GameState gameState, TurnStateMachine machine, GameConfigSO config)
@@ -25,27 +24,23 @@ namespace ThroneOfTides.Systems
 
         public void Enter()
         {
-            CardSO drawn = _gameState.PlayerDeck.Draw();
-            if (drawn != null)
+            if (_gameState.PlayerHand.Count < _config.MaxHandSize)
             {
-                _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
-                _onCardDrawn?.Invoke(drawn);
+                CardSO drawn = _gameState.PlayerDeck.Draw();
+                if (drawn != null)
+                {
+                    _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
+                    _onCardDrawn?.Invoke(drawn);
+                    GameEventBus.FireCardDrawn(drawn);
+                }
             }
 
             _gameState.IsPlayerTurn = true;
+            GameEventBus.FireTurnPhaseChanged(TurnPhase.Draw);
             Debug.Log($"Player Turn - HP: {_gameState.PlayerHP}, Combo: {_gameState.ComboStackCount}");
         }
 
-        public void Tick()
-        {
-            if (Keyboard.current == null) return;
-            if (!Keyboard.current.spaceKey.wasPressedThisFrame) return;
-
-            if (_gameState.ComboStackCount > 0)
-                _gameState.ResetCombo();
-
-            _machine.TransitionTo(_machine.EnemyTurn);
-        }
+        public void Tick() { }
 
         public void Exit() => Debug.Log("Player Turn Ended");
     }
