@@ -75,6 +75,7 @@ namespace ThroneOfTides.UI
             _enemyCards.Add(view);
         }
 
+<<<<<<< HEAD
         public void RemoveCardFromPlayerHand(CardSO card)
 >>>>>>> parent of d5a8aee (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
         {
@@ -85,6 +86,9 @@ namespace ThroneOfTides.UI
         }
 
         public void RemoveCardFromEnemyHand()
+=======
+        public void RemoveCardFromPlayerHand(CardView card)
+>>>>>>> parent of 37e8df4 (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
         {
             if (_enemyCards.Count == 0) return;
             CardView view = _enemyCards[0];
