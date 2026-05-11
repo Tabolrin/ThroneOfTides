@@ -10,8 +10,11 @@ namespace ThroneOfTides.UI
         [SerializeField] private RectTransform _playerHandContainer;
         [SerializeField] private RectTransform _enemyHandContainer;
         [SerializeField] private CardView      _cardPrefab;
+<<<<<<< HEAD
         [SerializeField] private Canvas        _dragCanvas;
 <<<<<<< HEAD
+=======
+>>>>>>> parent of 9c6ae3c (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
 
         [Header("Arc Settings")]
         [SerializeField] private float _arcRadius  = 800f;
@@ -28,10 +31,14 @@ namespace ThroneOfTides.UI
         public void AddCardToPlayerHand(CardSO card)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             CardView view = SpawnCard(_playerHandAnchor);
 =======
             CardView view = Instantiate(_cardPrefab, _playerHandContainer);
 >>>>>>> parent of d5a8aee (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
+=======
+            CardView view = Instantiate(_cardPrefab, _playerHandAnchor);
+>>>>>>> parent of 9c6ae3c (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
             view.Setup(card);
 
             // Assign drag canvas reference to drag handler
@@ -45,6 +52,7 @@ namespace ThroneOfTides.UI
         public void AddCardToEnemyHand(CardSO card)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             _enemyCards.Add(SpawnCard(_enemyHandAnchor));
         }
 
@@ -54,6 +62,10 @@ namespace ThroneOfTides.UI
             // Inject drag canvas so the card can re-parent itself on drag
             view.GetComponent<CardDragHandler>()?.SetDragCanvas(_dragCanvas);
             return view;
+=======
+            CardView view = Instantiate(_cardPrefab, _enemyHandAnchor);
+            _enemyCards.Add(view);
+>>>>>>> parent of 9c6ae3c (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
         }
 
         // Called by GameManager via the GameEventBus (passes CardSO)
