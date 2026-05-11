@@ -6,29 +6,22 @@ using ThroneOfTides.Data;
 
 namespace ThroneOfTides.UI
 {
-    [RequireComponent(typeof(RectTransform))]
     public class CardView : MonoBehaviour
     {
-        [SerializeField] private Image            _cardBackground;
-        [SerializeField] private Image            _cardArt;
-        [SerializeField] private TextMeshProUGUI  _nameLabel;
-        [SerializeField] private TextMeshProUGUI  _damageLabel;
+        [SerializeField] private SpriteRenderer _cardBackground;
+        [SerializeField] private SpriteRenderer _cardArt;
+        [SerializeField] private TextMesh       _nameLabel;
+        [SerializeField] private TextMesh       _damageLabel;
 
-        public CardSO       CardData { get; private set; }
-        public RectTransform Rect    { get; private set; }
-
-        private void Awake()
-        {
-            Rect = (RectTransform)transform;
-        }
+        public CardSO CardData { get; private set; }
 
         public void Setup(CardSO card)
         {
-            CardData              = card;
-            _nameLabel.text       = card.Name;
-            _damageLabel.text     = card.Damage.ToString();
-            _cardArt.sprite       = card.Art;
-            _cardBackground.color = card.CardType == CardType.Combo
+            CardData               = card;
+            _nameLabel.text        = card.Name;
+            _damageLabel.text      = card.Damage.ToString();
+            _cardArt.sprite        = card.Art;
+            _cardBackground.color  = card.CardType == CardType.Combo
                 ? new Color(1f, 0.85f, 0f)
                 : new Color(0.3f, 0.5f, 1f);
         }
