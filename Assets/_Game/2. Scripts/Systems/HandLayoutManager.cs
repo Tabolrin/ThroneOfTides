@@ -68,14 +68,6 @@ namespace ThroneOfTides.UI
 >>>>>>> parent of 9c6ae3c (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
         }
 
-        // Called by GameManager via the GameEventBus (passes CardSO)
-        public void RemoveCardFromPlayerHand(CardSO card)
-        {
-            CardView view = _playerCards.Find(v => v.CardData == card);
-            if (view != null) RemoveCardFromPlayerHand(view);
-        }
-
-        // Called directly when the CardView reference is already known
         public void RemoveCardFromPlayerHand(CardView card)
 =======
             CardView view = Instantiate(_cardPrefab, _enemyHandContainer);
