@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using ThroneOfTides.Data;
-using ThroneOfTides.UI;
 
-namespace ThroneOfTides.Systems
+namespace ThroneOfTides.UI
 {
     public class HandLayoutManager : MonoBehaviour
     {
-        [Header("References")]
-        [SerializeField] private RectTransform _playerHandAnchor;
-        [SerializeField] private RectTransform _enemyHandAnchor;
+        [SerializeField] private RectTransform _playerHandContainer;
+        [SerializeField] private RectTransform _enemyHandContainer;
         [SerializeField] private CardView      _cardPrefab;
         [SerializeField] private Canvas        _dragCanvas;
+<<<<<<< HEAD
 
         [Header("Arc Settings")]
         [SerializeField] private float _arcRadius  = 800f;
@@ -19,19 +19,32 @@ namespace ThroneOfTides.Systems
 
         [Header("Animation")]
         [SerializeField] private float _lerpSpeed = 8f;
+=======
+>>>>>>> parent of d5a8aee (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
 
         private readonly List<CardView> _playerCards = new List<CardView>();
         private readonly List<CardView> _enemyCards  = new List<CardView>();
 
         public void AddCardToPlayerHand(CardSO card)
         {
+<<<<<<< HEAD
             CardView view = SpawnCard(_playerHandAnchor);
+=======
+            CardView view = Instantiate(_cardPrefab, _playerHandContainer);
+>>>>>>> parent of d5a8aee (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
             view.Setup(card);
+
+            // Assign drag canvas reference to drag handler
+            var drag = view.GetComponent<CardDragHandler>();
+            if (drag != null)
+                drag.SetDragCanvas(_dragCanvas);
+
             _playerCards.Add(view);
         }
 
         public void AddCardToEnemyHand(CardSO card)
         {
+<<<<<<< HEAD
             _enemyCards.Add(SpawnCard(_enemyHandAnchor));
         }
 
@@ -52,59 +65,33 @@ namespace ThroneOfTides.Systems
 
         // Called directly when the CardView reference is already known
         public void RemoveCardFromPlayerHand(CardView card)
-        {
-            if (!_playerCards.Remove(card)) return;
-            Destroy(card.gameObject);
+=======
+            CardView view = Instantiate(_cardPrefab, _enemyHandContainer);
+            view.SetFaceDown();
+            _enemyCards.Add(view);
         }
 
-        private void Update()
+        public void RemoveCardFromPlayerHand(CardSO card)
+>>>>>>> parent of d5a8aee (Merge branch 'claude/lucid-williams-9bfc13' into Tests)
         {
-            LerpCardsToArc(_playerCards, mirrorRotation: false);
-            LerpCardsToArc(_enemyCards,  mirrorRotation: true);
+            CardView view = _playerCards.Find(v => v.CardData == card);
+            if (view == null) return;
+            _playerCards.Remove(view);
+            Destroy(view.gameObject);
         }
 
-        private void LerpCardsToArc(List<CardView> cards, bool mirrorRotation)
+        public void RemoveCardFromEnemyHand()
         {
-            int count = cards.Count;
-            if (count == 0) return;
-
-            float dt = Time.deltaTime * _lerpSpeed;
-
-            for (int i = 0; i < count; i++)
-            {
-                ComputeDestination(i, count, mirrorRotation,
-                    out Vector2 targetPos, out float targetZ);
-
-                RectTransform rt = cards[i].Rect;
-
-                rt.anchoredPosition = Vector2.Lerp(rt.anchoredPosition, targetPos, dt);
-
-                // Normalize current angle to -180..180 so lerp always takes the short path
-                float currentZ = rt.localEulerAngles.z;
-                if (currentZ > 180f) currentZ -= 360f;
-
-                rt.localEulerAngles = new Vector3(0f, 0f, Mathf.Lerp(currentZ, targetZ, dt));
-            }
+            if (_enemyCards.Count == 0) return;
+            CardView view = _enemyCards[0];
+            _enemyCards.Remove(view);
+            Destroy(view.gameObject);
         }
 
-        // Computes the anchoredPosition and z-rotation for card [index] in a hand of [total].
-        // The imaginary circle centre sits arcRadius below the anchor.
-        // At θ=0 (centre card) position is (0, 0); side cards dip naturally along the arc.
-        private void ComputeDestination(int index, int total, bool mirrorRotation,
-            out Vector2 position, out float zRotation)
+        public void ClearPlayerHand()
         {
-            float angle = total == 1
-                ? 0f
-                : Mathf.Lerp(-_totalAngle * 0.5f, _totalAngle * 0.5f, (float)index / (total - 1));
-
-            float rad = angle * Mathf.Deg2Rad;
-            position = new Vector2(
-                Mathf.Sin(rad) * _arcRadius,
-                _arcRadius * (Mathf.Cos(rad) - 1f)
-            );
-
-            // Cards tilt to follow the arc tangent; enemy hand mirrors the rotation
-            zRotation = mirrorRotation ? angle : -angle;
+            foreach (var card in _playerCards) Destroy(card.gameObject);
+            _playerCards.Clear();
         }
     }
 }
