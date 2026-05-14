@@ -1,5 +1,4 @@
 using ThroneOfTides.Core;
-using ThroneOfTides.Data;
 using UnityEngine;
 
 namespace ThroneOfTides.Systems
@@ -17,14 +16,10 @@ namespace ThroneOfTides.Systems
 
         public void Enter()
         {
-            CardSO drawn = _gameState.EnemyDeck.Draw();
-            if (drawn != null)
-                _gameState.EnemyHand.AddCard(drawn, 5);
-
             _gameState.IsPlayerTurn = false;
             GameEventBus.FireTurnPhaseChanged(TurnPhase.EnemyDraw);
 
-            // Notify GameManager to run the coroutine
+            // Notify GameManager to run the coroutine - draw and damage handled there
             _gameState.NotifyEnemyTurnReady();
         }
 

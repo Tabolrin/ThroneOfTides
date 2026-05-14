@@ -23,6 +23,7 @@ MonoBehaviour:
   _dotDamagePerTurn: 0
   _dotDuration: 0
   _actionEffect: {fileID: 0}
-  _art: {fileID: 0}
+  _art: {fileID: 21300000, guid: d4ea8e8ad014cca46b5499999d7f8169, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
+  _isEligibleAsActionPair: 0

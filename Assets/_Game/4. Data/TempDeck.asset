@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fadf92975330a91458b4bc0c5e580c49, type: 3}
+  m_Name: TempDeck
+  m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.DeckDefinitionSO
+  Cards:
+  - Card: {fileID: 11400000, guid: d603a27bb8523524fb8f81b910e1a703, type: 2}
+    Count: 4
+  - Card: {fileID: 11400000, guid: 592ab224bc8beba4d952d7f6361e2d27, type: 2}
+    Count: 6
+  - Card: {fileID: 11400000, guid: 113e21d82ac278c4581bbabd9b16e962, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
+    Count: 1
+  - Card: {fileID: 11400000, guid: 2453aca1d0a07a04f96d6509f2418018, type: 2}
+    Count: 4
+  - Card: {fileID: 11400000, guid: 5a2adafa782e5134899cc821042294cb, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: 13836fc428319484a8d71e56c073ab25, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: 626df873eb0d28b4392e7cfd5ee85308, type: 2}
+    Count: 2

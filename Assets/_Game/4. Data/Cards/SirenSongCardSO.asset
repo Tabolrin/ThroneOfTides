@@ -25,3 +25,4 @@ MonoBehaviour:
   _art: {fileID: 0}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
+  _isEligibleAsActionPair: 1

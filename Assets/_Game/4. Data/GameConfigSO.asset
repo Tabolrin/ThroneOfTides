@@ -16,5 +16,5 @@ MonoBehaviour:
   MaxHandSize: 5
   LowDeckThreshold: 3
   CardSpacing: 1
-  EnemyThinkTimeMin: 0.8
-  EnemyThinkTimeMax: 2.2
+  EnemyThinkTimeMin: 1
+  EnemyThinkTimeMax: 1

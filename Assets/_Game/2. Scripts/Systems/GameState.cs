@@ -27,6 +27,10 @@ namespace ThroneOfTides.Systems
         public bool SirenSongActive    { get; private set; }
         public bool PendingUnblockable { get; private set; }
 
+        // Tracks cards played this turn - reset on each player turn start
+        public bool DamageCardPlayedThisTurn { get; private set; }
+        public bool ActionCardPlayedThisTurn { get; private set; }
+
         private readonly List<DotEffect> _dotEffects = new List<DotEffect>();
 
         // Internal timing signal - stays on GameState not on bus
@@ -94,6 +98,28 @@ namespace ThroneOfTides.Systems
             }
         }
 
+        public bool CanPlayCard(CardSO card)
+        {
+            if (card.CardType == CardType.Action)
+                return !ActionCardPlayedThisTurn && card.IsEligibleAsActionPair;
+            // Weapon, Combo, DOT all count as damage cards
+            return !DamageCardPlayedThisTurn;
+        }
+
+        public void RegisterCardPlayed(CardSO card)
+        {
+            if (card.CardType == CardType.Action)
+                ActionCardPlayedThisTurn = true;
+            else
+                DamageCardPlayedThisTurn = true;
+        }
+
+        public void ResetTurnCardPlays()
+        {
+            DamageCardPlayedThisTurn = false;
+            ActionCardPlayedThisTurn = false;
+        }
+
         public bool IsGameOver()
         {
             if (PlayerHP <= 0 || EnemyHP <= 0) return true;
@@ -111,7 +137,7 @@ namespace ThroneOfTides.Systems
 
         public void NotifyEnemyTurnReady() => OnEnemyTurnReady?.Invoke();
 
-        public void NotifyCardDrawn(CardSO card)       => GameEventBus.FireCardDrawn(card);
+        public void NotifyCardDrawn(CardSO card)        => GameEventBus.FireCardDrawn(card);
         public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
 
         public void IncrementCombo(CardSO card)

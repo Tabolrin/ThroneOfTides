@@ -24,6 +24,9 @@ namespace ThroneOfTides.Systems
 
         public void Enter()
         {
+            // Reset card play tracking for this turn
+            _gameState.ResetTurnCardPlays();
+
             if (_gameState.PlayerHand.Count < _config.MaxHandSize)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
