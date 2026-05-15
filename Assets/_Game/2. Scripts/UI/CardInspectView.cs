@@ -1,14 +1,13 @@
-using TMPro;
 using DG.Tweening;
+using TMPro;
+using ThroneOfTides.Core;
+using ThroneOfTides.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using ThroneOfTides.Data;
-using ThroneOfTides.Core;
 
 namespace ThroneOfTides.UI
 {
-    // Full screen card inspect overlay - opens on right click, closes on click outside
     public class CardInspectView : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private Image           _overlay;
@@ -24,10 +23,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private float _openDuration  = 0.25f;
         [SerializeField] private float _closeDuration = 0.18f;
 
-        private void Awake()
-        {
-            gameObject.SetActive(false);
-        }
+        private void Awake() => gameObject.SetActive(false);
 
         public void Show(CardSO card)
         {
@@ -40,6 +36,7 @@ namespace ThroneOfTides.UI
                              card.CardType == CardType.Combo ||
                              card.CardType == CardType.DOT;
             _damageBadge.SetActive(hasDamage);
+
             if (hasDamage)
                 _damageLabel.text = card.CardType == CardType.DOT
                     ? $"{card.DotDamagePerTurn}x{card.DotDuration}"
@@ -60,7 +57,6 @@ namespace ThroneOfTides.UI
                 };
             }
 
-            // DOTween - fade overlay in, scale card up
             _overlay.DOFade(0.75f, _openDuration).From(0f);
             _cardView.DOScale(Vector3.one, _openDuration)
                      .From(Vector3.one * 0.7f)
@@ -69,17 +65,13 @@ namespace ThroneOfTides.UI
 
         public void Hide()
         {
-            // DOTween - fade out then deactivate
             _overlay.DOFade(0f, _closeDuration);
             _cardView.DOScale(Vector3.one * 0.7f, _closeDuration)
                      .SetEase(Ease.InBack)
                      .OnComplete(() => gameObject.SetActive(false));
         }
 
-        // Click on the overlay background closes the inspect view
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            Hide();
-        }
+        // Click anywhere on overlay closes inspect
+        public void OnPointerClick(PointerEventData eventData) => Hide();
     }
 }

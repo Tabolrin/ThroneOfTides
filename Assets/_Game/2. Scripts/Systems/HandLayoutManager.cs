@@ -11,17 +11,10 @@ namespace ThroneOfTides.UI
         [SerializeField] private Canvas        _dragCanvas;
 
         [Header("Layout")]
-        // Negative value = cards overlap. 10-15% of card width (card is 120px wide so ~15-18px)
-        [SerializeField] private float _cardSpacing    = -18f;
-        [SerializeField] private float _maxYOffset     = 15f;
+        [SerializeField] private float _cardSpacing = -18f;
+        [SerializeField] private float _maxYOffset  = 15f;
 
         private readonly List<CardView> _playerCards = new List<CardView>();
-
-        private void Start()
-        {
-            // Register inspect view for right click - finds it in scene
-            CardView.InspectView = FindObjectOfType<CardInspectView>();
-        }
 
         public void AddCardToPlayerHand(CardSO card)
         {
@@ -65,16 +58,14 @@ namespace ThroneOfTides.UI
         {
             if (_playerCards.Count == 0) return;
 
-            float totalWidth  = (_playerCards.Count - 1) * _cardSpacing;
-            float startX      = -totalWidth / 2f;
+            float totalWidth = (_playerCards.Count - 1) * _cardSpacing;
+            float startX     = -totalWidth / 2f;
 
             for (int i = 0; i < _playerCards.Count; i++)
             {
                 var rect    = _playerCards[i].GetComponent<RectTransform>();
                 var current = rect.anchoredPosition;
-                // Preserve Y offset set on spawn, only update X
                 rect.anchoredPosition = new Vector2(startX + i * _cardSpacing, current.y);
-                // Later cards render on top
                 _playerCards[i].transform.SetSiblingIndex(i);
             }
         }

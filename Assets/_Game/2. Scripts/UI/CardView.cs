@@ -19,9 +19,6 @@ namespace ThroneOfTides.UI
         [SerializeField] private GameObject      _cardFront;
         [SerializeField] private Animator        _animator;
 
-        // Assigned by HandLayoutManager - opens inspect overlay on right click
-        public static CardInspectView InspectView;
-
         public CardSO CardData { get; private set; }
 
         public void Setup(CardSO card)
@@ -47,7 +44,6 @@ namespace ThroneOfTides.UI
             if (card.Art != null)
                 _cardArt.sprite = card.Art;
 
-            // Frame color represents card type
             if (_cardFrame != null)
             {
                 _cardFrame.color = card.CardType switch
@@ -71,12 +67,12 @@ namespace ThroneOfTides.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // Right click opens inspect view - only for face-up player cards
+            // Right click opens inspect - only face-up player cards
             if (eventData.button == PointerEventData.InputButton.Right
                 && CardData != null
-                && InspectView != null)
+                && CardInspectController.Instance != null)
             {
-                InspectView.Show(CardData);
+                CardInspectController.Instance.Show(this);
             }
         }
     }

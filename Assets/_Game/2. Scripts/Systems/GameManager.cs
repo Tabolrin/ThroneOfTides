@@ -175,6 +175,14 @@ namespace ThroneOfTides.Systems
         {
             float delay = Random.Range(_config.EnemyThinkTimeMin, _config.EnemyThinkTimeMax);
             yield return new WaitForSeconds(delay);
+            
+            // Draw enemy card into logical hand - no visual spawn
+            if (_gameState.EnemyHand.Count < _config.MaxHandSize)
+            {
+                CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
+                if (enemyDrawn != null)
+                    _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
+            }
 
             // TODO - replace with real AI card selection when combat system is built
             if (_gameState.EnemyHand.Count > 0)
