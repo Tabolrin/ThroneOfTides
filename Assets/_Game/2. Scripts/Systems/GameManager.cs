@@ -63,14 +63,6 @@ namespace ThroneOfTides.Systems
                 _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
                 _handLayoutManager.AddCardToPlayerHand(card);
             }
-
-            for (int i = 0; i < _config.MaxHandSize; i++)
-            {
-                CardSO card = _gameState.EnemyDeck.Draw();
-                if (card == null) break;
-                _gameState.EnemyHand.AddCard(card, _config.MaxHandSize);
-                _handLayoutManager.AddCardToEnemyHand(card);
-            }
         }
 
         private void Update() => _stateMachine?.Tick();
@@ -81,7 +73,7 @@ namespace ThroneOfTides.Systems
             _gameState.PlayerHand.OnHandStateChanged += OnPlayerHandStateChanged;
             _gameState.EnemyDeck.OnDeckStateChanged  += OnEnemyDeckStateChanged;
             _gameState.OnEnemyTurnReady              += OnEnemyTurnReady;
-            
+
             GameEventBus.OnCardPlayed        += OnCardPlayed;
             GameEventBus.OnPlayerCardRemoved += OnPlayerCardRemoved;
             GameEventBus.OnMatchWin          += OnMatchWin;
@@ -102,7 +94,7 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.IsPlayerTurn) return;
 
-            // Break combo if no combo card was played this turn
+            // Break combo if no combo card played this turn
             if (_gameState.ComboStackCount > 0 && !_gameState.DamageCardPlayedThisTurn)
                 _gameState.ResetCombo();
 
@@ -123,6 +115,7 @@ namespace ThroneOfTides.Systems
             _gameState.RegisterCardPlayed(cardSO);
             _gameState.PlayerHand.RemoveCard(cardSO);
             _gameState.NotifyPlayerCardRemoved(cardSO);
+            _gameState.DiscardPlayerCard(cardSO);
 
             int damage = ResolveDamage(cardSO);
             if (damage > 0)
@@ -144,21 +137,20 @@ namespace ThroneOfTides.Systems
             switch (card.CardType)
             {
                 case CardType.Combo:
-                    // ComboStackBonus > 0 = initiator (Gunpowder) - prime the combo
+                    // ComboStackBonus > 0 = initiator (Gunpowder)
                     if (card.ComboStackBonus > 0)
                     {
                         _gameState.IncrementCombo(card);
                         Debug.Log($"Gunpowder primed - stack: {_gameState.ComboStackCount}");
                         return 0;
                     }
-                    // Torch - resolve if combo is active
+                    // Torch - resolve if combo active
                     if (_gameState.ComboStackCount > 0 && _gameState.ActiveComboCard != null)
                     {
                         int comboDamage = _gameState.ResolveCombo();
                         Debug.Log($"Combo resolved - damage: {comboDamage}");
                         return comboDamage;
                     }
-                    // Torch with no active combo - base damage only
                     Debug.Log("Torch with no active Gunpowder - base damage only");
                     return card.Damage;
 
@@ -184,29 +176,17 @@ namespace ThroneOfTides.Systems
             float delay = Random.Range(_config.EnemyThinkTimeMin, _config.EnemyThinkTimeMax);
             yield return new WaitForSeconds(delay);
 
-            // Draw enemy card if hand not full
-            if (_gameState.EnemyHand.Count < _config.MaxHandSize)
-            {
-                CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
-                if (enemyDrawn != null)
-                {
-                    _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
-                    _handLayoutManager.AddCardToEnemyHand(enemyDrawn);
-                }
-            }
-
             // TODO - replace with real AI card selection when combat system is built
-            // Enemy plays first card in hand
             if (_gameState.EnemyHand.Count > 0)
             {
                 CardSO playedCard = _gameState.EnemyHand.CardsSO[0];
                 _gameState.EnemyHand.RemoveCard(playedCard);
-                _handLayoutManager.RemoveCardFromEnemyHand();
+                _gameState.DiscardEnemyCard(playedCard);
                 _gameState.ApplyDamage(DamageTarget.Player, playedCard.Damage);
                 Debug.Log($"Enemy played: {playedCard.Name} - damage: {playedCard.Damage}");
             }
 
-            // Process DOT effects at start of enemy turn
+            // Process player DOT effects after enemy acts
             _gameState.ProcessDotEffects();
 
             RefreshHUD();

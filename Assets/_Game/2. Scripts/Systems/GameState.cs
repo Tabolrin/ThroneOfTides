@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
@@ -27,11 +28,15 @@ namespace ThroneOfTides.Systems
         public bool SirenSongActive    { get; private set; }
         public bool PendingUnblockable { get; private set; }
 
-        // Tracks cards played this turn - reset on each player turn start
         public bool DamageCardPlayedThisTurn { get; private set; }
         public bool ActionCardPlayedThisTurn { get; private set; }
 
-        private readonly List<DotEffect> _dotEffects = new List<DotEffect>();
+        private readonly List<CardSO>   _playerDiscard = new List<CardSO>();
+        private readonly List<CardSO>   _enemyDiscard  = new List<CardSO>();
+        private readonly List<DotEffect> _dotEffects   = new List<DotEffect>();
+
+        public IReadOnlyList<CardSO> PlayerDiscard => _playerDiscard.AsReadOnly();
+        public IReadOnlyList<CardSO> EnemyDiscard  => _enemyDiscard.AsReadOnly();
 
         // Internal timing signal - stays on GameState not on bus
         public Action OnEnemyTurnReady;
@@ -102,7 +107,6 @@ namespace ThroneOfTides.Systems
         {
             if (card.CardType == CardType.Action)
                 return !ActionCardPlayedThisTurn && card.IsEligibleAsActionPair;
-            // Weapon, Combo, DOT all count as damage cards
             return !DamageCardPlayedThisTurn;
         }
 
@@ -135,8 +139,7 @@ namespace ThroneOfTides.Systems
             return Winner.None;
         }
 
-        public void NotifyEnemyTurnReady() => OnEnemyTurnReady?.Invoke();
-
+        public void NotifyEnemyTurnReady()              => OnEnemyTurnReady?.Invoke();
         public void NotifyCardDrawn(CardSO card)        => GameEventBus.FireCardDrawn(card);
         public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
 
@@ -161,6 +164,25 @@ namespace ThroneOfTides.Systems
             ComboStackCount = 0;
             ActiveComboCard = null;
             GameEventBus.FireComboStackChanged(0);
+        }
+
+        public void DiscardPlayerCard(CardSO card) => _playerDiscard.Add(card);
+        public void DiscardEnemyCard(CardSO card)  => _enemyDiscard.Add(card);
+
+        // Returns up to count random cards from discard excluding Kraken
+        public List<CardSO> RetrieveFromPlayerDiscard(int count)
+        {
+            var eligible  = _playerDiscard.Where(c => c.Name != "The Kraken").ToList();
+            var retrieved = new List<CardSO>();
+
+            for (int i = 0; i < count && eligible.Count > 0; i++)
+            {
+                int index = UnityEngine.Random.Range(0, eligible.Count);
+                retrieved.Add(eligible[index]);
+                _playerDiscard.Remove(eligible[index]);
+                eligible.RemoveAt(index);
+            }
+            return retrieved;
         }
     }
 }
