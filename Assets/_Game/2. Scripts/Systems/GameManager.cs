@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ThroneOfTides.Core;
@@ -21,6 +22,8 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameHUD               _gameHUD;
         [SerializeField] private HandLayoutManager     _handLayoutManager;
         [SerializeField] private UnityEngine.UI.Button _endTurnButton;
+        [SerializeField] private RectTransform         _playZone;
+        [SerializeField] private DeadMansTurnPrompt    _deadMansTurnPrompt;
 
         private GameState                 _gameState;
         private TurnStateMachine          _stateMachine;
@@ -63,6 +66,14 @@ namespace ThroneOfTides.Systems
                 _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
                 _handLayoutManager.AddCardToPlayerHand(card);
             }
+
+            for (int i = 0; i < _config.MaxHandSize; i++)
+            {
+                CardSO card = _gameState.EnemyDeck.Draw();
+                if (card == null) break;
+                _gameState.EnemyHand.AddCard(card, _config.MaxHandSize);
+                _handLayoutManager.AddCardToEnemyHand(card);
+            }
         }
 
         private void Update() => _stateMachine?.Tick();
@@ -94,9 +105,11 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.IsPlayerTurn) return;
 
-            // Break combo if no combo card played this turn
             if (_gameState.ComboStackCount > 0 && !_gameState.DamageCardPlayedThisTurn)
                 _gameState.ResetCombo();
+
+            if (_gameState.SirenSongActive && !_gameState.DamageCardPlayedThisTurn)
+                _gameState.ClearSiren();
 
             _stateMachine.TransitionTo(_stateMachine.EnemyTurn);
         }
@@ -137,14 +150,12 @@ namespace ThroneOfTides.Systems
             switch (card.CardType)
             {
                 case CardType.Combo:
-                    // ComboStackBonus > 0 = initiator (Gunpowder)
                     if (card.ComboStackBonus > 0)
                     {
                         _gameState.IncrementCombo(card);
                         Debug.Log($"Gunpowder primed - stack: {_gameState.ComboStackCount}");
                         return 0;
                     }
-                    // Torch - resolve if combo active
                     if (_gameState.ComboStackCount > 0 && _gameState.ActiveComboCard != null)
                     {
                         int comboDamage = _gameState.ResolveCombo();
@@ -160,9 +171,27 @@ namespace ThroneOfTides.Systems
                     return 0;
 
                 case CardType.Action:
-                    // TODO - route to action effect system
-                    Debug.Log($"Action card played: {card.Name}");
+                    if (card.ActionEffect != null)
+                    {
+                        var context = new CardEffectContext(_gameState, _handLayoutManager);
+                        card.ActionEffect.Execute(context);
+                    }
+                    else
+                        Debug.LogWarning($"Action card {card.Name} has no ActionEffect assigned");
                     return 0;
+
+                case CardType.Weapon:
+                    if (card.Name == "Boarding Party")
+                    {
+                        _gameState.ApplyDamage(DamageTarget.Player, 2);
+                        Debug.Log("Boarding Party - sacrificed 2 HP");
+                    }
+                    if (card.Name == "Tidal Wave" && _gameState.ComboStackCount > 0)
+                    {
+                        _gameState.ResetCombo();
+                        Debug.Log("Tidal Wave - combo broken");
+                    }
+                    return card.Damage;
 
                 default:
                     return card.Damage;
@@ -175,28 +204,90 @@ namespace ThroneOfTides.Systems
         {
             float delay = Random.Range(_config.EnemyThinkTimeMin, _config.EnemyThinkTimeMax);
             yield return new WaitForSeconds(delay);
-            
-            // Draw enemy card into logical hand - no visual spawn
+
+            // Draw enemy card into logical and visual hand
             if (_gameState.EnemyHand.Count < _config.MaxHandSize)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
                 if (enemyDrawn != null)
+                {
                     _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
+                    _handLayoutManager.AddCardToEnemyHand(enemyDrawn);
+                }
             }
 
             // TODO - replace with real AI card selection when combat system is built
-            if (_gameState.EnemyHand.Count > 0)
+            if (_gameState.EnemyHand.Count == 0) yield break;
+
+            CardSO playedCard = _gameState.EnemyHand.CardsSO[0];
+            _gameState.EnemyHand.RemoveCard(playedCard);
+            _gameState.DiscardEnemyCard(playedCard);
+
+            // Animate enemy card to play zone and reveal it
+            bool animationDone = false;
+            yield return StartCoroutine(
+                _handLayoutManager.PlayEnemyCardAnimation(
+                    playedCard, _playZone, () => animationDone = true));
+            yield return new WaitUntil(() => animationDone);
+
+            // Check if attack is blockable
+            bool isKraken     = playedCard.Name == "The Kraken";
+            bool playerHasDMT = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "Dead Man's Turn");
+            bool playerHasKraken = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "The Kraken");
+            bool isAttackCard = playedCard.CardType == CardType.Weapon ||
+                                playedCard.CardType == CardType.Combo  ||
+                                playedCard.CardType == CardType.DOT;
+
+            bool canBlock = isAttackCard && !_gameState.SirenSongActive &&
+                            ((isKraken && playerHasKraken) || (!isKraken && playerHasDMT));
+
+            if (canBlock)
             {
-                CardSO playedCard = _gameState.EnemyHand.CardsSO[0];
-                _gameState.EnemyHand.RemoveCard(playedCard);
-                _gameState.DiscardEnemyCard(playedCard);
+                string blockCost   = isKraken ? "The Kraken (3 HP + 33% materials)" : "Dead Man's Turn";
+                bool   wasNegated  = false;
+                bool   playerChose = false;
+
+                _deadMansTurnPrompt.Show(
+                    playedCard,
+                    playedCard.Damage,
+                    blockCost,
+                    onNegate:   () => { wasNegated = true;  playerChose = true; },
+                    onTakeHit:  () => { wasNegated = false; playerChose = true; }
+                );
+
+                yield return new WaitUntil(() => playerChose);
+
+                if (wasNegated)
+                {
+                    string blockCardName = isKraken ? "The Kraken" : "Dead Man's Turn";
+                    CardSO blockCard = _gameState.PlayerHand.CardsSO
+                        .FirstOrDefault(c => c.Name == blockCardName);
+
+                    if (blockCard != null)
+                    {
+                        _gameState.PlayerHand.RemoveCard(blockCard);
+                        _gameState.NotifyPlayerCardRemoved(blockCard);
+                        _gameState.DiscardPlayerCard(blockCard);
+
+                        // TODO - deduct 33% materials when material system is built
+                        if (isKraken)
+                            _gameState.ApplyDamage(DamageTarget.Player, 3);
+                    }
+                    Debug.Log($"Attack negated - {playedCard.Name} blocked");
+                }
+                else
+                {
+                    _gameState.ApplyDamage(DamageTarget.Player, playedCard.Damage);
+                    Debug.Log($"Took hit from {playedCard.Name} - damage: {playedCard.Damage}");
+                }
+            }
+            else if (isAttackCard)
+            {
                 _gameState.ApplyDamage(DamageTarget.Player, playedCard.Damage);
                 Debug.Log($"Enemy played: {playedCard.Name} - damage: {playedCard.Damage}");
             }
 
-            // Process player DOT effects after enemy acts
             _gameState.ProcessDotEffects();
-
             RefreshHUD();
 
             if (_gameState.IsGameOver())

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
+  m_Name: LockersReturnCardSO
+  m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
+  _name: Locker's Return
+  _cardType: 2
+  _description: Davy Jones collects debts, not weapons. Recover 3 random cards from
+    your discard pile. Cannot recover The Kraken
+  _damage: 0
+  _comboDamage: 0
+  _comboStackBonus: 0
+  _comboPartner: {fileID: 0}
+  _dotDamagePerTurn: 0
+  _dotDuration: 0
+  _actionEffect: {fileID: 11400000, guid: 7aa77dce0777cdc419148fc3bac2a55a, type: 2}
+  _art: {fileID: 21300000, guid: d2adf4be30da08641a986dc1a035cbfe, type: 3}
+  _cardTypeSymbol: {fileID: 0}
+  _cardArtAnimator: {fileID: 0}
+  _isEligibleAsActionPair: 1

@@ -8,9 +8,10 @@ namespace ThroneOfTides.Data
     {
         public override void Execute(ICardEffectContext context)
         {
-            // Must be played before the damage card this turn
-            // Cleared if no attack card is played before turn ends
+            // Marks next attack this turn as unblockable
+            // Cleared at end of turn if no attack played
             context.SetSirenActive();
+            Debug.Log("Siren Song - next attack is unblockable");
         }
     }
 }

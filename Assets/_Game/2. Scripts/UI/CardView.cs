@@ -7,8 +7,7 @@ using ThroneOfTides.Data;
 
 namespace ThroneOfTides.UI
 {
-    public class CardView : MonoBehaviour,
-        IPointerClickHandler
+    public class CardView : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private Image           _cardArt;
         [SerializeField] private Image           _cardBack;
@@ -57,9 +56,10 @@ namespace ThroneOfTides.UI
             }
         }
 
-        public void SetFaceDown()
+        // SetFaceDown stores card data for logic but shows only the back
+        public void SetFaceDown(CardSO card)
         {
-            CardData = null;
+            CardData = card;
             _cardFront.SetActive(false);
             if (_cardBack != null)
                 _cardBack.gameObject.SetActive(true);
@@ -67,7 +67,6 @@ namespace ThroneOfTides.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // Right click opens inspect - only face-up player cards
             if (eventData.button == PointerEventData.InputButton.Right
                 && CardData != null
                 && CardInspectController.Instance != null)

@@ -15,7 +15,6 @@ namespace ThroneOfTides.Systems
         public int       Count => _cards.Count;
         public DeckState State => _currentState;
 
-        // Fires only on state transition, not every draw
         public Action<DeckState> OnDeckStateChanged;
 
         public Deck(List<CardSO> cardList, int lowThreshold = 3)
@@ -34,9 +33,15 @@ namespace ThroneOfTides.Systems
             return drawn;
         }
 
+        // Returns a card to the bottom of the deck - used by Locker's Return
+        public void ReturnCard(CardSO card)
+        {
+            _cards.Add(card);
+            CheckDeckState();
+        }
+
         private void Shuffle()
         {
-            // Fisher-Yates - guarantees equal probability for all orderings
             for (int i = _cards.Count - 1; i > 0; i--)
             {
                 int randomIndex = UnityEngine.Random.Range(0, i + 1);

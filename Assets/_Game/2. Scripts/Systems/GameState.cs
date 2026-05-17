@@ -40,6 +40,11 @@ namespace ThroneOfTides.Systems
 
         // Internal timing signal - stays on GameState not on bus
         public Action OnEnemyTurnReady;
+        
+        public bool DeadMansTurnActive { get; private set; }
+
+        public void SetDeadMansTurnActive() => DeadMansTurnActive = true;
+        public void ClearDeadMansTurn()     => DeadMansTurnActive = false;
 
         public GameState(int startingHP, Deck playerDeck, Deck enemyDeck)
         {

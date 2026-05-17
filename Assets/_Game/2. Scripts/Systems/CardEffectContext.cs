@@ -1,24 +1,24 @@
 using System.Collections.Generic;
-using System.Linq;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using ThroneOfTides.UI;
 
 namespace ThroneOfTides.Systems
 {
-    // Implements ICardEffectContext - wraps GameState
-    // Keeps GameState internals protected from ActionEffectSO subclasses
     public class CardEffectContext : ICardEffectContext
     {
-        private readonly GameState _gameState;
+        private readonly GameState         _gameState;
+        private readonly HandLayoutManager _handLayout;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
         public int PlayerDeckCount => _gameState.PlayerDeck.Count;
         public int EnemyDeckCount  => _gameState.EnemyDeck.Count;
 
-        public CardEffectContext(GameState gameState)
+        public CardEffectContext(GameState gameState, HandLayoutManager handLayout)
         {
-            _gameState = gameState;
+            _gameState  = gameState;
+            _handLayout = handLayout;
         }
 
         public void ApplyDamage(DamageTarget target, int amount) =>
@@ -32,12 +32,42 @@ namespace ThroneOfTides.Systems
 
         public void ApplyDot(DamageTarget target, int damagePerTurn, int turns) =>
             _gameState.AddDotEffect(new DotEffect(target, damagePerTurn, turns));
+        
+        public void SetDeadMansTurnActive() =>
+            _gameState.SetDeadMansTurnActive();
 
-        // Cast to ICard - Hand stores CardSO which implements ICard
-        public IReadOnlyList<ICard> GetEnemyHand() =>
-            _gameState.EnemyHand.Cards;
+        public void AddCardToPlayerHand(ICard card)
+        {
+            var cardSO = card as CardSO;
+            if (cardSO == null) return;
+            _gameState.PlayerHand.AddCard(cardSO, _gameState.PlayerDeck.Count);
+            _handLayout.AddCardToPlayerHand(cardSO);
+            GameEventBus.FireCardDrawn(cardSO);
+        }
 
-        public IReadOnlyList<ICard> GetPlayerHand() =>
-            _gameState.PlayerHand.Cards;
+        public void StealFromEnemyHand()
+        {
+            var enemyHand = _gameState.EnemyHand.CardsSO;
+            if (enemyHand.Count == 0) return;
+
+            int    index = UnityEngine.Random.Range(0, enemyHand.Count);
+            CardSO card  = enemyHand[index];
+            _gameState.EnemyHand.RemoveCard(card);
+
+            // Re-parent visual and add to player hand
+            _handLayout.StealCardFromEnemyHand(card);
+            _gameState.PlayerHand.AddCard(card, _gameState.PlayerDeck.Count);
+            GameEventBus.FireCardDrawn(card);
+        }
+
+        public void RetrieveFromDiscard(int count)
+        {
+            var retrieved = _gameState.RetrieveFromPlayerDiscard(count);
+            foreach (var card in retrieved)
+                _gameState.PlayerDeck.ReturnCard(card);
+        }
+
+        public IReadOnlyList<ICard> GetEnemyHand() => _gameState.EnemyHand.Cards;
+        public IReadOnlyList<ICard> GetPlayerHand() => _gameState.PlayerHand.Cards;
     }
 }

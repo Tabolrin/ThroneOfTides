@@ -67,7 +67,7 @@ namespace ThroneOfTides.UI
 
             // Fade overlay in
             _overlay.color = new Color(0f, 0f, 0f, 0f);
-            _overlay.DOFade(0.75f, _openDuration);
+            _overlay.DOFade(0.8f, _openDuration);
 
             // Description fades in slightly after card arrives
             _descriptionCanvasGroup.alpha = 0f;

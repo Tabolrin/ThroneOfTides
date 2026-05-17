@@ -10,9 +10,12 @@ namespace ThroneOfTides.Data
 
         public override void Execute(ICardEffectContext context)
         {
-            // UI layer subscribes to display revealed cards - wired in future step
-            var enemyHand = context.GetEnemyHand();
-            Debug.Log($"Recon Parrot - enemy has {enemyHand.Count} cards");
+            var enemyHand   = context.GetEnemyHand();
+            int revealCount = Mathf.Min(_cardsToReveal, enemyHand.Count);
+
+            // TODO - wire ReconParrot reveal UI when inspect system is extended
+            for (int i = 0; i < revealCount; i++)
+                Debug.Log($"Recon Parrot revealed: {enemyHand[i].Name}");
         }
     }
 }
