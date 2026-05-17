@@ -20,14 +20,19 @@ namespace ThroneOfTides.Systems
 
         [Header("References")]
         [SerializeField] private GameHUD               _gameHUD;
+        [SerializeField] private ResultsPanel _resultsPanel;
         [SerializeField] private HandLayoutManager     _handLayoutManager;
         [SerializeField] private UnityEngine.UI.Button _endTurnButton;
         [SerializeField] private RectTransform         _playZone;
         [SerializeField] private DeadMansTurnPrompt    _deadMansTurnPrompt;
 
+        [Header("Captain")]
+        [SerializeField] private CaptainSO _enemyCaptain;
+
         private GameState                 _gameState;
         private TurnStateMachine          _stateMachine;
         private ThroneOfTidesInputActions _inputActions;
+        private EnemyAI                   _enemyAI;
 
         private void Awake()
         {
@@ -44,6 +49,7 @@ namespace ThroneOfTides.Systems
             var enemyDeck  = new Deck(_enemyDeckDefinition.BuildDeck(),  _config.LowDeckThreshold);
 
             _gameState = new GameState(_config.StartingHP, playerDeck, enemyDeck);
+            _enemyAI   = new EnemyAI(_enemyCaptain);
 
             SubscribeToEvents();
             DealOpeningHand();
@@ -216,10 +222,19 @@ namespace ThroneOfTides.Systems
                 }
             }
 
-            // TODO - replace with real AI card selection when combat system is built
-            if (_gameState.EnemyHand.Count == 0) yield break;
+            // AI picks card based on captain weights
+            CardSO playedCard = _enemyAI.PickCard(
+                _gameState.EnemyHand.CardsSO,
+                damageCardPlayed: false,
+                actionCardPlayed: false);
 
-            CardSO playedCard = _gameState.EnemyHand.CardsSO[0];
+            if (playedCard == null)
+            {
+                Debug.Log("Enemy has no valid card to play - skipping turn");
+                _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
+                yield break;
+            }
+
             _gameState.EnemyHand.RemoveCard(playedCard);
             _gameState.DiscardEnemyCard(playedCard);
 
@@ -231,12 +246,12 @@ namespace ThroneOfTides.Systems
             yield return new WaitUntil(() => animationDone);
 
             // Check if attack is blockable
-            bool isKraken     = playedCard.Name == "The Kraken";
-            bool playerHasDMT = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "Dead Man's Turn");
+            bool isKraken        = playedCard.Name == "The Kraken";
+            bool playerHasDMT    = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "Dead Man's Turn");
             bool playerHasKraken = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "The Kraken");
-            bool isAttackCard = playedCard.CardType == CardType.Weapon ||
-                                playedCard.CardType == CardType.Combo  ||
-                                playedCard.CardType == CardType.DOT;
+            bool isAttackCard    = playedCard.CardType == CardType.Weapon ||
+                                   playedCard.CardType == CardType.Combo  ||
+                                   playedCard.CardType == CardType.DOT;
 
             bool canBlock = isAttackCard && !_gameState.SirenSongActive &&
                             ((isKraken && playerHasKraken) || (!isKraken && playerHasDMT));
@@ -251,8 +266,8 @@ namespace ThroneOfTides.Systems
                     playedCard,
                     playedCard.Damage,
                     blockCost,
-                    onNegate:   () => { wasNegated = true;  playerChose = true; },
-                    onTakeHit:  () => { wasNegated = false; playerChose = true; }
+                    onNegate:  () => { wasNegated = true;  playerChose = true; },
+                    onTakeHit: () => { wasNegated = false; playerChose = true; }
                 );
 
                 yield return new WaitUntil(() => playerChose);
@@ -316,8 +331,17 @@ namespace ThroneOfTides.Systems
         private void OnPlayerCardRemoved(ICard card) =>
             _handLayoutManager.RemoveCardFromPlayerHand(card as CardSO);
 
-        private void OnMatchWin()  => Debug.Log("Match Won");
-        private void OnMatchLoss() => Debug.Log("Match Lost");
+        private void OnMatchWin()
+        {
+            _endTurnButton.interactable = false;
+            _resultsPanel.ShowWin(_enemyCaptain.LevelReward, _gameState.PlayerHP);
+        }
+
+        private void OnMatchLoss()
+        {
+            _endTurnButton.interactable = false;
+            _resultsPanel.ShowLoss(_enemyCaptain.LevelReward, _gameState.PlayerHP);
+        }
 
         private void OnPlayerDeckStateChanged(DeckState state) =>
             Debug.Log($"Player deck: {state}");
