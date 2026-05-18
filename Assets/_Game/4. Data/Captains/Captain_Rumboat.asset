@@ -18,16 +18,16 @@ MonoBehaviour:
   _hp: 30
   _deckDefinition: {fileID: 11400000, guid: 2fee30197b346b940abfe6b466e03c4f, type: 2}
   _levelReward: {fileID: 11400000, guid: 21b767cc524ebbf4eb4f4024bb083197, type: 2}
-  _weightHighDamageWeapon: 0
-  _weightLowDamageWeapon: 0
-  _weightBlockHoldForDefense: 0
-  _weightComboInitiator: 0
-  _weightComboFollowUp: 0
-  _weightActionIntel: 0
-  _weightActionDisrupt: 0
-  _weightActionDraw: 0
-  _weightActionHeal: 0
-  _weightActionDefense: 0
-  _weightKraken: 0
-  _weightBoardingParty: 0
-  _weightDOT: 0
+  _weightHighDamageWeapon: 2
+  _weightLowDamageWeapon: 0.8
+  _weightBlockHoldForDefense: 0.2
+  _weightComboInitiator: 0.6
+  _weightComboFollowUp: 1.5
+  _weightActionIntel: 0.3
+  _weightActionDisrupt: 1.2
+  _weightActionDraw: 0.4
+  _weightActionHeal: 0.3
+  _weightActionDefense: 0.2
+  _weightKraken: 1.8
+  _weightBoardingParty: 1.5
+  _weightDOT: 0.6
