@@ -18,7 +18,29 @@ namespace ThroneOfTides.UI
         [SerializeField] private GameObject      _cardFront;
         [SerializeField] private Animator        _animator;
 
-        public CardSO CardData { get; private set; }
+        public CardSO CardData      { get; private set; }
+        public bool   WasPlayed     { get; set; }
+        public bool   IsBeingPlayed { get; set; }
+
+        private void OnEnable()
+        {
+            GameEventBus.OnCardPlayAccepted += OnCardPlayAccepted;
+        }
+
+        private void OnDisable()
+        {
+            GameEventBus.OnCardPlayAccepted -= OnCardPlayAccepted;
+        }
+
+        private void OnCardPlayAccepted(ICard card)
+        {
+            // Only mark this instance if it is the one being played
+            if (card as CardSO == CardData && IsBeingPlayed)
+            {
+                WasPlayed      = true;
+                IsBeingPlayed  = false;
+            }
+        }
 
         public void Setup(CardSO card)
         {
@@ -56,7 +78,6 @@ namespace ThroneOfTides.UI
             }
         }
 
-        // SetFaceDown stores card data for logic but shows only the back
         public void SetFaceDown(CardSO card)
         {
             CardData = card;

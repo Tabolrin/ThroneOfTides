@@ -5,15 +5,12 @@ namespace ThroneOfTides.UI
 {
     public class MainMenuManager : MonoBehaviour
     {
-        public void OnPlayPressed()
-        {
-            // TODO - replace with level select scene when built
-            SceneManager.LoadScene("CanvasBasedGameScene");
-        }
+        public void OnPlayPressed() =>
+            SceneManager.LoadScene("LevelSelect");
 
         public void OnPortPressed()
         {
-            // TODO - replace with port scene when built
+            // TODO - load Port scene when built
             Debug.Log("Port - not yet implemented");
         }
 
@@ -26,7 +23,6 @@ namespace ThroneOfTides.UI
         public void OnQuitPressed()
         {
             Application.Quit();
-            // Editor only - stops play mode
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #endif

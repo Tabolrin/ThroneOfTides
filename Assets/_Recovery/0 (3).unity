@@ -537,7 +537,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ThroneOfTides.App::ThroneOfTides.App.GameBootstrapper
   _config: {fileID: 11400000, guid: 9e980ee082354a844bf0a1ee974b4207, type: 2}
-  _playerDeckDefinition: {fileID: 11400000, guid: 7ef767e6c78c5d04d9e887407a611c41, type: 2}
+  _playerDeckDefinition: {fileID: 11400000, guid: 2fee30197b346b940abfe6b466e03c4f, type: 2}
   _gameHUD: {fileID: 117015950}
   _handLayoutManager: {fileID: 71163913}
   _endTurnButton: {fileID: 1723053811}
@@ -2690,10 +2690,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
+    x: -1.5
+    y: -1.125
+    width: 3
+    height: 2.25
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60

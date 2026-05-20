@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
-using UnityEngine;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using UnityEngine;
 
 namespace ThroneOfTides.UI
 {
-    public class HandLayoutManager : MonoBehaviour
+    public class HandLayoutManager : MonoBehaviour, IHandLayoutManager
     {
         [SerializeField] private RectTransform _playerHandContainer;
         [SerializeField] private RectTransform _enemyHandContainer;
@@ -21,12 +22,23 @@ namespace ThroneOfTides.UI
         [SerializeField] private float _enemyCardSpacing = -12f;
 
         [Header("Enemy Card Play")]
-        [SerializeField] private float _cardMoveDuration   = 0.4f;
-        [SerializeField] private float _cardFadeDuration   = 0.2f;
+        [SerializeField] private float _cardMoveDuration    = 0.4f;
+        [SerializeField] private float _cardFadeDuration    = 0.2f;
         [SerializeField] private float _cardDisplayDuration = 1.5f;
 
         private readonly List<CardView> _playerCards = new List<CardView>();
         private readonly List<CardView> _enemyCards  = new List<CardView>();
+
+        // --- IHandLayoutManager interface ---
+
+        void IHandLayoutManager.AddCardToPlayerHand(ICard card) =>
+            AddCardToPlayerHand(card as CardSO);
+
+        void IHandLayoutManager.RemoveCardFromPlayerHand(ICard card) =>
+            RemoveCardFromPlayerHand(card as CardSO);
+
+        void IHandLayoutManager.StealCardFromEnemyHand(ICard card) =>
+            StealCardFromEnemyHand(card as CardSO);
 
         // --- Player Hand ---
 
@@ -51,10 +63,16 @@ namespace ThroneOfTides.UI
             RefreshPlayerLayout();
         }
 
+        // Only used for non-drag removals e.g. Dead Man's Turn block, Monkey Grab
         public void RemoveCardFromPlayerHand(CardSO card)
         {
-            CardView view = _playerCards.Find(v => v.CardData == card);
-            if (view == null) return;
+            CardView view = _playerCards.Find(v => v != null && v.CardData == card);
+            if (view == null)
+            {
+                _playerCards.RemoveAll(v => v == null);
+                RefreshPlayerLayout();
+                return;
+            }
             _playerCards.Remove(view);
             Destroy(view.gameObject);
             RefreshPlayerLayout();
@@ -62,12 +80,14 @@ namespace ThroneOfTides.UI
 
         public void ClearPlayerHand()
         {
-            foreach (var card in _playerCards) Destroy(card.gameObject);
+            foreach (var c in _playerCards)
+                if (c != null) Destroy(c.gameObject);
             _playerCards.Clear();
         }
 
         private void RefreshPlayerLayout()
         {
+            _playerCards.RemoveAll(v => v == null);
             if (_playerCards.Count == 0) return;
 
             float totalWidth = (_playerCards.Count - 1) * _cardSpacing;
@@ -88,32 +108,29 @@ namespace ThroneOfTides.UI
         {
             CardView view = Instantiate(_cardPrefab, _enemyHandContainer);
             view.SetFaceDown(card);
-
             _enemyCards.Add(view);
             RefreshEnemyLayout();
         }
 
         public void RemoveCardFromEnemyHand(CardSO card)
         {
-            CardView view = _enemyCards.Find(v => v.CardData == card);
+            CardView view = _enemyCards.Find(v => v != null && v.CardData == card);
             if (view == null) return;
             _enemyCards.Remove(view);
             Destroy(view.gameObject);
             RefreshEnemyLayout();
         }
 
-        // Recon Parrot - reveal enemy card face up
         public void RevealEnemyCard(CardSO card)
         {
-            CardView view = _enemyCards.Find(v => v.CardData == card);
+            CardView view = _enemyCards.Find(v => v != null && v.CardData == card);
             if (view == null) return;
             view.Setup(card);
         }
 
-        // Monkey Grab - re-parent enemy card to player hand
         public void StealCardFromEnemyHand(CardSO card)
         {
-            CardView view = _enemyCards.Find(v => v.CardData == card);
+            CardView view = _enemyCards.Find(v => v != null && v.CardData == card);
             if (view == null) return;
 
             _enemyCards.Remove(view);
@@ -140,6 +157,7 @@ namespace ThroneOfTides.UI
 
         private void RefreshEnemyLayout()
         {
+            _enemyCards.RemoveAll(v => v == null);
             if (_enemyCards.Count == 0) return;
 
             float totalWidth = (_enemyCards.Count - 1) * _enemyCardSpacing;
@@ -154,10 +172,10 @@ namespace ThroneOfTides.UI
             }
         }
 
-        // Enemy card play animation - moves card to play zone, reveals it, waits, then destroys
-        public IEnumerator PlayEnemyCardAnimation(CardSO card, RectTransform playZone, System.Action onComplete)
+        public IEnumerator PlayEnemyCardAnimation(CardSO card, RectTransform playZone,
+                                                   System.Action onComplete)
         {
-            CardView view = _enemyCards.Find(v => v.CardData == card);
+            CardView view = _enemyCards.Find(v => v != null && v.CardData == card);
             if (view == null)
             {
                 onComplete?.Invoke();
@@ -167,17 +185,14 @@ namespace ThroneOfTides.UI
             _enemyCards.Remove(view);
             RefreshEnemyLayout();
 
-            // Re-parent to drag canvas so it renders above everything during animation
             var rect = view.GetComponent<RectTransform>();
             view.transform.SetParent(_dragCanvas.transform, true);
             view.transform.SetAsLastSibling();
 
-            // Move to play zone center
             rect.DOAnchorPos(playZone.anchoredPosition, _cardMoveDuration)
                 .SetEase(Ease.OutCubic);
             yield return new WaitForSeconds(_cardMoveDuration);
 
-            // Fade back out to reveal card front
             var canvasGroup = view.GetComponent<CanvasGroup>();
             if (canvasGroup == null)
                 canvasGroup = view.gameObject.AddComponent<CanvasGroup>();

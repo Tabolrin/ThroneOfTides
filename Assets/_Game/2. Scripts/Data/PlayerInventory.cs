@@ -12,7 +12,7 @@ namespace ThroneOfTides.Data
     }
 
     // Runtime persistent inventory - lives as a ScriptableObject asset
-    // Note: persists between editor sessions but resets in builds - save system needed post-playtest
+    // Persists between editor sessions - resets in builds until save system is added
     [CreateAssetMenu(menuName = "ThroneOfTides/Data/PlayerInventory")]
     public class PlayerInventory : ScriptableObject
     {
@@ -30,12 +30,12 @@ namespace ThroneOfTides.Data
         [SerializeField] private int _hullReinforcementLevel;
         [SerializeField] private int _expandedCargoHoldLevel;
 
-        public IReadOnlyList<CardSO>      Collection               => _collection.AsReadOnly();
-        public int                         Rum                      => _rum;
-        public int                         Shipwrecks               => _shipwrecks;
-        public IReadOnlyList<PowerUpEntry> PowerUps                 => _powerUps.AsReadOnly();
-        public int                         HullReinforcementLevel   => _hullReinforcementLevel;
-        public int                         ExpandedCargoHoldLevel   => _expandedCargoHoldLevel;
+        public IReadOnlyList<CardSO>      Collection             => _collection.AsReadOnly();
+        public int                         Rum                    => _rum;
+        public int                         Shipwrecks             => _shipwrecks;
+        public IReadOnlyList<PowerUpEntry> PowerUps               => _powerUps.AsReadOnly();
+        public int                         HullReinforcementLevel => _hullReinforcementLevel;
+        public int                         ExpandedCargoHoldLevel => _expandedCargoHoldLevel;
 
         public void AddCards(List<CardSO> cards)
         {
@@ -65,15 +65,14 @@ namespace ThroneOfTides.Data
             return true;
         }
 
-        // For testing - resets all inventory data
         public void Reset()
         {
             _collection.Clear();
             _powerUps.Clear();
-            _rum                     = 0;
-            _shipwrecks              = 0;
-            _hullReinforcementLevel  = 0;
-            _expandedCargoHoldLevel  = 0;
+            _rum                    = 0;
+            _shipwrecks             = 0;
+            _hullReinforcementLevel = 0;
+            _expandedCargoHoldLevel = 0;
         }
     }
 }

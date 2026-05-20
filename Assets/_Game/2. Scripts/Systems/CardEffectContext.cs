@@ -1,21 +1,20 @@
 using System.Collections.Generic;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
-using ThroneOfTides.UI;
 
 namespace ThroneOfTides.Systems
 {
     public class CardEffectContext : ICardEffectContext
     {
-        private readonly GameState         _gameState;
-        private readonly HandLayoutManager _handLayout;
+        private readonly GameState          _gameState;
+        private readonly IHandLayoutManager _handLayout;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
         public int PlayerDeckCount => _gameState.PlayerDeck.Count;
         public int EnemyDeckCount  => _gameState.EnemyDeck.Count;
 
-        public CardEffectContext(GameState gameState, HandLayoutManager handLayout)
+        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout)
         {
             _gameState  = gameState;
             _handLayout = handLayout;
@@ -30,19 +29,19 @@ namespace ThroneOfTides.Systems
         public void SetSirenActive() =>
             _gameState.SetSirenActive();
 
-        public void ApplyDot(DamageTarget target, int damagePerTurn, int turns) =>
-            _gameState.AddDotEffect(new DotEffect(target, damagePerTurn, turns));
-        
         public void SetDeadMansTurnActive() =>
             _gameState.SetDeadMansTurnActive();
+
+        public void ApplyDot(DamageTarget target, int damagePerTurn, int turns) =>
+            _gameState.AddDotEffect(new DotEffect(target, damagePerTurn, turns));
 
         public void AddCardToPlayerHand(ICard card)
         {
             var cardSO = card as CardSO;
             if (cardSO == null) return;
             _gameState.PlayerHand.AddCard(cardSO, _gameState.PlayerDeck.Count);
-            _handLayout.AddCardToPlayerHand(cardSO);
-            GameEventBus.FireCardDrawn(cardSO);
+            _handLayout.AddCardToPlayerHand(card);
+            GameEventBus.FireCardDrawn(card);
         }
 
         public void StealFromEnemyHand()
@@ -53,10 +52,8 @@ namespace ThroneOfTides.Systems
             int    index = UnityEngine.Random.Range(0, enemyHand.Count);
             CardSO card  = enemyHand[index];
             _gameState.EnemyHand.RemoveCard(card);
-
-            // Re-parent visual and add to player hand
-            _handLayout.StealCardFromEnemyHand(card);
             _gameState.PlayerHand.AddCard(card, _gameState.PlayerDeck.Count);
+            _handLayout.StealCardFromEnemyHand(card);
             GameEventBus.FireCardDrawn(card);
         }
 

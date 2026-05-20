@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using ThroneOfTides.Systems;
 using ThroneOfTides.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,12 +12,13 @@ namespace ThroneOfTides.UI
     {
         [Header("References")]
         [SerializeField] private PlayerInventory _playerInventory;
+        [SerializeField] private ProgressionSO   _progression;
 
         [Header("UI")]
         [SerializeField] private TextMeshProUGUI _titleLabel;
         [SerializeField] private TextMeshProUGUI _materialRewardLabel;
         [SerializeField] private Transform       _rewardCardsContainer;
-        [SerializeField] private TextMeshProUGUI _rewardCardPrefab;
+        [SerializeField] private TextMeshProUGUI _rewardCardNamePrefab;
 
         [Header("Buttons")]
         [SerializeField] private Button _retryButton;
@@ -39,24 +41,26 @@ namespace ThroneOfTides.UI
             gameObject.SetActive(true);
             _titleLabel.text = "Victory!";
 
-            // Grant reward cards to inventory
+            // Mark level beaten in progression
+            _progression.SetLevelBeaten(GameSession.SelectedLevelIndex);
+
+            // Grant reward cards
             var rewardCards = new List<CardSO>(reward.RewardCards);
             _playerInventory.AddCards(rewardCards);
 
-            // Get material reward based on HP tier
+            // Grant materials based on HP tier
             MaterialReward materials = reward.GetMaterialReward(playerHP, isWin: true);
             _playerInventory.AddMaterials(materials.Rum, materials.Shipwrecks);
 
-            // Display material reward
             _materialRewardLabel.text = $"Rum: +{materials.Rum}    Shipwrecks: +{materials.Shipwrecks}";
 
-            // Display reward cards
+            // Display reward card names
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);
 
             foreach (var card in rewardCards)
             {
-                var label = Instantiate(_rewardCardPrefab, _rewardCardsContainer);
+                var label = Instantiate(_rewardCardNamePrefab, _rewardCardsContainer);
                 label.text = card.Name;
             }
         }
@@ -72,7 +76,6 @@ namespace ThroneOfTides.UI
 
             _materialRewardLabel.text = $"Rum: +{materials.Rum}    Shipwrecks: +{materials.Shipwrecks}";
 
-            // Clear reward cards container - no cards on loss
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);
         }
@@ -92,10 +95,7 @@ namespace ThroneOfTides.UI
             Debug.Log("Port - not yet implemented");
         }
 
-        private void OnLevelSelectPressed()
-        {
-            // TODO - load Level Select scene when built
-            Debug.Log("Level Select - not yet implemented");
-        }
+        private void OnLevelSelectPressed() =>
+            SceneManager.LoadScene("LevelSelect");
     }
 }
