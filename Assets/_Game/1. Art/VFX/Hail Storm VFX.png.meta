@@ -220,7 +220,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -258,7 +258,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -312,12 +312,12 @@ TextureImporter:
       name: Hail Storm VFX_0
       rect:
         serializedVersion: 2
-        x: 68
-        y: 272
-        width: 449
-        height: 503
+        x: 0
+        y: 0
+        width: 512
+        height: 1024
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -334,12 +334,12 @@ TextureImporter:
       name: Hail Storm VFX_1
       rect:
         serializedVersion: 2
-        x: 542
-        y: 264
-        width: 478
-        height: 571
+        x: 512
+        y: 0
+        width: 512
+        height: 1024
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -356,12 +356,12 @@ TextureImporter:
       name: Hail Storm VFX_2
       rect:
         serializedVersion: 2
-        x: 1042
-        y: 255
-        width: 481
-        height: 575
+        x: 1024
+        y: 0
+        width: 512
+        height: 1024
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -386,70 +386,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":3.0,"y":1.0},"gridSpriteSize":{"x":512.0,"y":1024.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Hail Storm VFX_0: -5381673365230956443
       Hail Storm VFX_1: 6557832023838235820
-      Hail Storm VFX_10: 3153852701148046889
-      Hail Storm VFX_11: 6918002844665932317
-      Hail Storm VFX_12: 4065366197169381884
-      Hail Storm VFX_13: 513842904496324805
-      Hail Storm VFX_14: 5646308277622503919
-      Hail Storm VFX_15: -3903610253746081497
-      Hail Storm VFX_16: 8515974065442407586
-      Hail Storm VFX_17: -6084324392221862407
-      Hail Storm VFX_18: 5502218265361174129
-      Hail Storm VFX_19: -8190994004982540648
       Hail Storm VFX_2: 2745843731549567225
-      Hail Storm VFX_20: -2452688512044162166
-      Hail Storm VFX_21: -4525235591682678384
-      Hail Storm VFX_22: -2011197177460244346
-      Hail Storm VFX_23: -8335166094604727987
-      Hail Storm VFX_24: 1237577706481355666
-      Hail Storm VFX_25: -6571274367301197599
-      Hail Storm VFX_26: 2396991116404106258
-      Hail Storm VFX_27: -5682002764702222910
-      Hail Storm VFX_28: 400285360174152864
-      Hail Storm VFX_29: 4458193006630523704
-      Hail Storm VFX_3: 1048953706967567722
-      Hail Storm VFX_30: -8975394257095094606
-      Hail Storm VFX_31: 3794688698072088829
-      Hail Storm VFX_32: 226547575157883938
-      Hail Storm VFX_33: -3680959248029501922
-      Hail Storm VFX_34: -835577818377548053
-      Hail Storm VFX_35: -2194936265687694701
-      Hail Storm VFX_36: 6202263028510038409
-      Hail Storm VFX_37: 4959310963866041661
-      Hail Storm VFX_38: 3615540495787012745
-      Hail Storm VFX_39: 7987666646988687622
-      Hail Storm VFX_4: -1249617931982452402
-      Hail Storm VFX_40: 6399113320654004187
-      Hail Storm VFX_41: 3477251869591283443
-      Hail Storm VFX_42: -8856058145537498169
-      Hail Storm VFX_43: 6528459328340483982
-      Hail Storm VFX_44: 3593665043831982398
-      Hail Storm VFX_45: -6491139280123713575
-      Hail Storm VFX_46: -1181113482908647279
-      Hail Storm VFX_47: -7176301441166084960
-      Hail Storm VFX_48: -5519433304323209735
-      Hail Storm VFX_49: 2665907820058484774
-      Hail Storm VFX_5: 957708331668566261
-      Hail Storm VFX_50: -1159205008923985817
-      Hail Storm VFX_51: -3322976633680904749
-      Hail Storm VFX_52: 6225875686311519405
-      Hail Storm VFX_53: -6006698301439325163
-      Hail Storm VFX_54: 3711574266252347946
-      Hail Storm VFX_55: 5707977894200656640
-      Hail Storm VFX_56: 3148209721846399183
-      Hail Storm VFX_57: 6725599102146377519
-      Hail Storm VFX_58: -818847222613907537
-      Hail Storm VFX_59: 4109079641729043808
-      Hail Storm VFX_6: 7815988118715103034
-      Hail Storm VFX_60: -7438850813577527163
-      Hail Storm VFX_61: 6079022319791741039
-      Hail Storm VFX_7: -2095698711386540255
-      Hail Storm VFX_8: 4709304419124893074
-      Hail Storm VFX_9: 565982997250923111
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

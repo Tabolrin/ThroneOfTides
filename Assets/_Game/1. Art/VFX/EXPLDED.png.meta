@@ -175,7 +175,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -189,7 +189,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 500
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -213,7 +213,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -267,12 +267,12 @@ TextureImporter:
       name: EXPLDED_0
       rect:
         serializedVersion: 2
-        x: 376
-        y: 673
-        width: 171
-        height: 172
+        x: 324
+        y: 599
+        width: 275
+        height: 275
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -289,12 +289,12 @@ TextureImporter:
       name: EXPLDED_1
       rect:
         serializedVersion: 2
-        x: 123
-        y: 684
-        width: 93
-        height: 136
+        x: 32
+        y: 605
+        width: 275
+        height: 275
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -312,11 +312,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 32
-        y: 205
-        width: 292
+        y: 185
+        width: 275
         height: 299
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -333,12 +333,12 @@ TextureImporter:
       name: EXPLDED_3
       rect:
         serializedVersion: 2
-        x: 347
-        y: 217
-        width: 255
-        height: 273
+        x: 321
+        y: 193
+        width: 275
+        height: 275
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -355,12 +355,12 @@ TextureImporter:
       name: EXPLDED_4
       rect:
         serializedVersion: 2
-        x: 654
-        y: 212
-        width: 251
-        height: 279
+        x: 628
+        y: 195
+        width: 275
+        height: 275
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -377,10 +377,10 @@ TextureImporter:
       name: EXPLDED_23
       rect:
         serializedVersion: 2
-        x: 662
-        y: 651
-        width: 200
-        height: 177
+        x: 634
+        y: 605
+        width: 275
+        height: 275
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -399,10 +399,10 @@ TextureImporter:
       name: EXPLDED_34
       rect:
         serializedVersion: 2
-        x: 969
-        y: 618
-        width: 270
-        height: 249
+        x: 980
+        y: 607
+        width: 275
+        height: 275
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -421,10 +421,10 @@ TextureImporter:
       name: EXPLDED_35
       rect:
         serializedVersion: 2
-        x: 994
-        y: 269
-        width: 144
-        height: 140
+        x: 931
+        y: 193
+        width: 275
+        height: 275
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -443,12 +443,12 @@ TextureImporter:
       name: EXPLDED_40
       rect:
         serializedVersion: 2
-        x: 1297
-        y: 528
-        width: 233
-        height: 355
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 1282
+        y: 609
+        width: 254
+        height: 275
+      alignment: 9
+      pivot: {x: 0.5727183, y: 0.5000002}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -465,10 +465,10 @@ TextureImporter:
       name: EXPLDED_41
       rect:
         serializedVersion: 2
-        x: 1334
-        y: 267
-        width: 128
-        height: 121
+        x: 1255
+        y: 198
+        width: 275
+        height: 275
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
