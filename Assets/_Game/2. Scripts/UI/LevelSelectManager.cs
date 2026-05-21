@@ -56,7 +56,7 @@ namespace ThroneOfTides.Systems
         private void OnLevelSelected(CaptainSO captain, int levelIndex)
         {
             GameSession.SetLevel(captain, levelIndex);
-            SceneManager.LoadScene("Game_Canvas");
+            SceneManager.LoadScene("Match");
         }
 
         private void OnMainMenuPressed() =>
