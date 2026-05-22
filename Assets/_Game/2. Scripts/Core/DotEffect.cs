@@ -1,5 +1,6 @@
 namespace ThroneOfTides.Core
 {
+    [System.Serializable]
     public struct DotEffect
     {
         public DamageTarget Target;
