@@ -31,18 +31,19 @@ namespace ThroneOfTides.Systems
         public bool DamageCardPlayedThisTurn { get; private set; }
         public bool ActionCardPlayedThisTurn { get; private set; }
 
-        private readonly List<CardSO>   _playerDiscard = new List<CardSO>();
-        private readonly List<CardSO>   _enemyDiscard  = new List<CardSO>();
-        private readonly List<DotEffect> _dotEffects   = new List<DotEffect>();
+        // Manual draw tracking - reset each player turn
+        public bool HasDrawnThisTurn { get; private set; }
+
+        private readonly List<CardSO>    _playerDiscard = new List<CardSO>();
+        private readonly List<CardSO>    _enemyDiscard  = new List<CardSO>();
+        private readonly List<DotEffect> _dotEffects    = new List<DotEffect>();
 
         public IReadOnlyList<CardSO> PlayerDiscard => _playerDiscard.AsReadOnly();
         public IReadOnlyList<CardSO> EnemyDiscard  => _enemyDiscard.AsReadOnly();
 
-        // Internal timing signal - stays on GameState not on bus
         public Action OnEnemyTurnReady;
-        
-        public bool DeadMansTurnActive { get; private set; }
 
+        public bool DeadMansTurnActive { get; private set; }
         public void SetDeadMansTurnActive() => DeadMansTurnActive = true;
         public void ClearDeadMansTurn()     => DeadMansTurnActive = false;
 
@@ -92,7 +93,6 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireDOTApplied(effect);
         }
 
-        // Iterates backwards so removal does not skip entries
         public void ProcessDotEffects()
         {
             for (int i = _dotEffects.Count - 1; i >= 0; i--)
@@ -110,10 +110,18 @@ namespace ThroneOfTides.Systems
 
         public bool CanPlayCard(CardSO card)
         {
+            // Must draw before playing
+            if (!HasDrawnThisTurn) return false;
             if (card.CardType == CardType.Action)
                 return !ActionCardPlayedThisTurn && card.IsEligibleAsActionPair;
             return !DamageCardPlayedThisTurn;
         }
+
+        public bool CanDraw() =>
+            !HasDrawnThisTurn &&
+            IsPlayerTurn &&
+            PlayerHand.Count < 5 &&
+            PlayerDeck.Count > 0;
 
         public void RegisterCardPlayed(CardSO card)
         {
@@ -123,10 +131,13 @@ namespace ThroneOfTides.Systems
                 DamageCardPlayedThisTurn = true;
         }
 
+        public void SetHasDrawnThisTurn() => HasDrawnThisTurn = true;
+
         public void ResetTurnCardPlays()
         {
             DamageCardPlayedThisTurn = false;
             ActionCardPlayedThisTurn = false;
+            HasDrawnThisTurn         = false;
         }
 
         public bool IsGameOver()
@@ -144,8 +155,8 @@ namespace ThroneOfTides.Systems
             return Winner.None;
         }
 
-        public void NotifyEnemyTurnReady()              => OnEnemyTurnReady?.Invoke();
-        public void NotifyCardDrawn(CardSO card)        => GameEventBus.FireCardDrawn(card);
+        public void NotifyEnemyTurnReady()               => OnEnemyTurnReady?.Invoke();
+        public void NotifyCardDrawn(CardSO card)         => GameEventBus.FireCardDrawn(card);
         public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
 
         public void IncrementCombo(CardSO card)
@@ -174,7 +185,6 @@ namespace ThroneOfTides.Systems
         public void DiscardPlayerCard(CardSO card) => _playerDiscard.Add(card);
         public void DiscardEnemyCard(CardSO card)  => _enemyDiscard.Add(card);
 
-        // Returns up to count random cards from discard excluding Kraken
         public List<CardSO> RetrieveFromPlayerDiscard(int count)
         {
             var eligible  = _playerDiscard.Where(c => c.Name != "The Kraken").ToList();

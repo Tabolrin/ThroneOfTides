@@ -62,8 +62,8 @@ namespace ThroneOfTides.App
             _turnCoordinator.OnHPChanged              += RefreshHUD;
             _turnCoordinator.OnTurnChanged            += RefreshHUD;
             _turnCoordinator.OnShowDeadMansTurnPrompt += ShowDeadMansTurnPrompt;
+            _turnCoordinator.OnCardDrawn              += _handLayoutManager.AddCardToPlayerHand;
 
-            _stateMachine.SetOnCardDrawn(_handLayoutManager.AddCardToPlayerHand);
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
             SubscribeToEvents();
@@ -76,14 +76,7 @@ namespace ThroneOfTides.App
 
         private void DealOpeningHand()
         {
-            for (int i = 0; i < _config.MaxHandSize; i++)
-            {
-                CardSO card = _gameState.PlayerDeck.Draw();
-                if (card == null) break;
-                _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
-                _handLayoutManager.AddCardToPlayerHand(card);
-            }
-
+            // Enemy opening hand only - player draws manually
             for (int i = 0; i < _config.MaxHandSize; i++)
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
@@ -105,6 +98,9 @@ namespace ThroneOfTides.App
             GameEventBus.OnEnemyCardPlayed += OnEnemyCardPlayed;
             GameEventBus.OnMatchWin        += OnMatchWin;
             GameEventBus.OnMatchLoss       += OnMatchLoss;
+
+            // Deck click - player manual draw
+            DeckClickHandler.OnDeckClicked += OnDeckClicked;
         }
 
         private void OnDestroy()
@@ -112,11 +108,19 @@ namespace ThroneOfTides.App
             _inputActions.Gameplay.EndTurn.performed -= OnEndTurnPressed;
             _inputActions.Dispose();
             _endTurnButton.onClick.RemoveAllListeners();
+            DeckClickHandler.OnDeckClicked -= OnDeckClicked;
             GameEventBus.ClearAllListeners();
         }
 
         private void OnEndTurnPressed(InputAction.CallbackContext context) =>
             _turnCoordinator.EndTurn();
+
+        private void OnDeckClicked()
+        {
+            if (!_gameState.IsPlayerTurn) return;
+            _turnCoordinator.TryDrawCard();
+            RefreshHUD();
+        }
 
         private void OnCardPlayed(ICard card)
         {
@@ -157,7 +161,7 @@ namespace ThroneOfTides.App
                 _gameState.PlayerDeck.Count,
                 _gameState.IsPlayerTurn);
 
-            _endTurnButton.interactable = _gameState.IsPlayerTurn;
+            _endTurnButton.interactable = _gameState.IsPlayerTurn && _gameState.HasDrawnThisTurn;
         }
 
         private void OnMatchWin()

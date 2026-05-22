@@ -23,6 +23,9 @@ namespace ThroneOfTides.Systems
             System.Action onNegate, System.Action onTakeHit);
         public DeadMansTurnPromptHandler OnShowDeadMansTurnPrompt;
 
+        // Fired when a card is successfully drawn - App layer spawns the view
+        public System.Action<CardSO> OnCardDrawn;
+
         public bool IsPlayerTurn => _gameState?.IsPlayerTurn ?? false;
 
         public void Initialise(GameState gameState, TurnStateMachine stateMachine,
@@ -58,15 +61,35 @@ namespace ThroneOfTides.Systems
             _stateMachine.TransitionTo(_stateMachine.EnemyTurn);
         }
 
+        // Returns true if draw was successful
+        public bool TryDrawCard()
+        {
+            if (!_gameState.CanDraw()) return false;
+
+            CardSO drawn = _gameState.PlayerDeck.Draw();
+            if (drawn == null) return false;
+
+            _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
+            _gameState.SetHasDrawnThisTurn();
+            GameEventBus.FireCardDrawn(drawn);
+            OnCardDrawn?.Invoke(drawn);
+            return true;
+        }
+
+        public void Concede()
+        {
+            Debug.Log("Player conceded");
+            GameEventBus.FireMatchLoss();
+        }
+
         public void HandleCardPlayed(CardSO cardSO)
         {
             if (!_gameState.CanPlayCard(cardSO))
             {
-                Debug.Log($"Cannot play {cardSO.Name} - card play limit reached");
+                Debug.Log($"Cannot play {cardSO.Name} - card play limit reached or draw required");
                 return;
             }
 
-            // Notify UI this specific card instance was accepted
             GameEventBus.FireCardPlayAccepted(cardSO);
 
             _gameState.RegisterCardPlayed(cardSO);
@@ -99,7 +122,6 @@ namespace ThroneOfTides.Systems
             _gameState.ProcessDotEffects();
             OnHPChanged?.Invoke();
 
-            // Check if DOT ended the match
             if (_gameState.IsGameOver())
             {
                 if (_gameState.GetWinner() == Winner.Player)
@@ -117,7 +139,6 @@ namespace ThroneOfTides.Systems
                     _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
             }
 
-            // AI picks card
             CardSO playedCard = _enemyAI.PickCard(
                 _gameState.EnemyHand.CardsSO,
                 damageCardPlayed: false,
@@ -133,7 +154,6 @@ namespace ThroneOfTides.Systems
             _gameState.EnemyHand.RemoveCard(playedCard);
             _gameState.DiscardEnemyCard(playedCard);
 
-            // Subscribe BEFORE firing so callback is never missed
             bool animationDone = false;
             GameEventBus.OnEnemyCardAnimationComplete += () => animationDone = true;
             GameEventBus.FireEnemyCardPlayed(playedCard);
@@ -157,9 +177,7 @@ namespace ThroneOfTides.Systems
                 bool   playerChose = false;
 
                 OnShowDeadMansTurnPrompt?.Invoke(
-                    playedCard,
-                    playedCard.Damage,
-                    blockCost,
+                    playedCard, playedCard.Damage, blockCost,
                     () => { wasNegated = true;  playerChose = true; },
                     () => { wasNegated = false; playerChose = true; }
                 );

@@ -30,10 +30,6 @@ namespace ThroneOfTides.Systems
 
         public void Tick() => _currentState?.Tick();
 
-        // Passed in from GameManager so states can start coroutines without MonoBehaviour
         public void SetCoroutineRunner(Action<IEnumerator> runner) { }
-
-        public void SetOnCardDrawn(Action<CardSO> callback) =>
-            PlayerTurn.SetOnCardDrawn(callback);
     }
 }
