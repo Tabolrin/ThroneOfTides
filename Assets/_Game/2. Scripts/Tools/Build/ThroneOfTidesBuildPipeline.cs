@@ -9,7 +9,7 @@ using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Tools
 {
-    public class ThroneOfTidesBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuild
+    public class ThroneOfTidesBuildPipeline : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
         public int callbackOrder => 0;
 
@@ -60,7 +60,7 @@ namespace ThroneOfTides.Tools
 
         // ── IPostprocessBuild ───────────────────────────────────────────────────
 
-        public void OnPostprocessBuild(BuildTarget target, string path)
+        public void OnPostprocessBuild(BuildReport report)
         {
             var cards = CardAssetSearch.LoadAll<CardSO>();
             var decks = CardAssetSearch.LoadAll<DeckDefinitionSO>();
@@ -69,8 +69,9 @@ namespace ThroneOfTides.Tools
             foreach (var deck in decks) totalCards += deck.BuildDeck().Count;
 
             Debug.Log(
-                $"[ThroneOfTides] Build complete → {target}\n" +
-                $"  Output:           {path}\n" +
+                $"[ThroneOfTides] Build complete → {report.summary.platform}\n" +
+                $"  Output:           {report.summary.outputPath}\n" +
+                $"  Duration:         {report.summary.totalTime.TotalSeconds:F1}s\n" +
                 $"  Unique cards:     {cards.Count}\n" +
                 $"  Deck definitions: {decks.Count}\n" +
                 $"  Total deck cards: {totalCards}");

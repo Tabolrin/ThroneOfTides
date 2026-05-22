@@ -102,22 +102,24 @@ namespace ThroneOfTides.Tools
         [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h", true)]
         private static bool DealOpeningHandValidate() => Application.isPlaying;
 
+        // Validator — same path string, second parameter true, returns bool
+        [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h", true)]
+        private static bool LogOpeningHandValidate() => Application.isPlaying;
+
+// Action — same path string, no second parameter
         [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h")]
         public static void LogOpeningHand()
         {
-            // Loads the player deck SO and simulates a draw — purely informational
-            var decks = LoadAll<DeckDefinitionSO>();
+            var decks = CardAssetSearch.LoadAll<DeckDefinitionSO>();
             if (decks.Count == 0)
             {
                 Debug.LogWarning("No DeckDefinitionSO assets found.");
                 return;
             }
 
-            // Use first deck found named "PlayerDeck" if it exists, otherwise first
-            var deck = decks.Find(d => d.name.Contains("Player")) ?? decks[0];
+            var deck  = decks.Find(d => d.name.Contains("Player")) ?? decks[0];
             var built = deck.BuildDeck();
 
-            // Fisher-Yates shuffle preview
             for (int i = built.Count - 1; i > 0; i--)
             {
                 int j = Random.Range(0, i + 1);
@@ -127,7 +129,8 @@ namespace ThroneOfTides.Tools
             var hand = built.GetRange(0, Mathf.Min(5, built.Count));
             var sb   = new StringBuilder();
             sb.AppendLine($"Opening hand from [{deck.name}]:");
-            foreach (var c in hand) sb.AppendLine($"  • {c.Name} ({c.CardType}, {c.Damage} dmg)");
+            foreach (var c in hand)
+                sb.AppendLine($"  • {c.Name} ({c.CardType}, {c.Damage} dmg)");
             Debug.Log(sb.ToString());
         }
 

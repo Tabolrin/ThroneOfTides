@@ -3,7 +3,8 @@
     "rootNamespace": "ThroneOfTides.Tools",
     "references": [
         "GUID:5e07d9d5988b12f4e8e8626be9243ad4",
-        "GUID:5850c61d938abf74f86e574834efcfb7"
+        "GUID:5850c61d938abf74f86e574834efcfb7",
+        "GUID:4fdc6d8088fc0cf488f67b8cc59d7522"
     ],
     "includePlatforms": [
         "Editor"
