@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace ThroneOfTides.Core
 {
     public interface IHandLayoutManager
@@ -5,5 +7,6 @@ namespace ThroneOfTides.Core
         void AddCardToPlayerHand(ICard card);
         void RemoveCardFromPlayerHand(ICard card);
         void StealCardFromEnemyHand(ICard card);
+        IEnumerator AnimateManualDraw(ICard card);
     }
 }

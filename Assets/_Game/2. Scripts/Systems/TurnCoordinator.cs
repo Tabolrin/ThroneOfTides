@@ -23,7 +23,6 @@ namespace ThroneOfTides.Systems
             System.Action onNegate, System.Action onTakeHit);
         public DeadMansTurnPromptHandler OnShowDeadMansTurnPrompt;
 
-        // Fired when a card is successfully drawn - App layer spawns the view
         public System.Action<CardSO> OnCardDrawn;
 
         public bool IsPlayerTurn => _gameState?.IsPlayerTurn ?? false;
@@ -59,9 +58,9 @@ namespace ThroneOfTides.Systems
                 _gameState.ClearSiren();
 
             _stateMachine.TransitionTo(_stateMachine.EnemyTurn);
+            OnTurnChanged?.Invoke();
         }
 
-        // Returns true if draw was successful
         public bool TryDrawCard()
         {
             if (!_gameState.CanDraw()) return false;
@@ -73,6 +72,9 @@ namespace ThroneOfTides.Systems
             _gameState.SetHasDrawnThisTurn();
             GameEventBus.FireCardDrawn(drawn);
             OnCardDrawn?.Invoke(drawn);
+
+            // Start arc animation — non-blocking, game state already updated above
+            StartCoroutine(_handLayout.AnimateManualDraw(drawn));
             return true;
         }
 
@@ -118,7 +120,6 @@ namespace ThroneOfTides.Systems
             float delay = Random.Range(_config.EnemyThinkTimeMin, _config.EnemyThinkTimeMax);
             yield return new WaitForSeconds(delay);
 
-            // Process DOT effects at start of enemy turn per GDD
             _gameState.ProcessDotEffects();
             OnHPChanged?.Invoke();
 
@@ -131,7 +132,6 @@ namespace ThroneOfTides.Systems
                 yield break;
             }
 
-            // Draw enemy card into logical hand
             if (_gameState.EnemyHand.Count < _config.MaxHandSize)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
@@ -148,6 +148,7 @@ namespace ThroneOfTides.Systems
             {
                 Debug.Log("Enemy has no valid card - skipping turn");
                 _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
+                OnTurnChanged?.Invoke();
                 yield break;
             }
 
@@ -225,6 +226,7 @@ namespace ThroneOfTides.Systems
             }
 
             _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
+            OnTurnChanged?.Invoke();
         }
     }
 }

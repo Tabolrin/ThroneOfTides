@@ -98,19 +98,13 @@ namespace ThroneOfTides.Tools
         }
 
         // Only available in Play Mode — simulates dealing a starting hand to the Console
-        [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h")]  // Ctrl+Shift+H
-        [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h", true)]
-        private static bool DealOpeningHandValidate() => Application.isPlaying;
-
-        // Validator — same path string, second parameter true, returns bool
         [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h", true)]
         private static bool LogOpeningHandValidate() => Application.isPlaying;
 
-// Action — same path string, no second parameter
         [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h")]
         public static void LogOpeningHand()
         {
-            var decks = CardAssetSearch.LoadAll<DeckDefinitionSO>();
+            var decks = LoadAll<DeckDefinitionSO>();
             if (decks.Count == 0)
             {
                 Debug.LogWarning("No DeckDefinitionSO assets found.");

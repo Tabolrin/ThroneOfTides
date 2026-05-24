@@ -1,0 +1,663 @@
+fileFormatVersion: 2
+guid: 8bb76a364a341b742a6e6e10e8c57e22
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3622884942004381845
+    second: Tidal Wave (2)_0
+  - first:
+      213: -943674780780287853
+    second: Tidal Wave (2)_1
+  - first:
+      213: -2341796317538665958
+    second: Tidal Wave (2)_2
+  - first:
+      213: 7419316309314908017
+    second: Tidal Wave (2)_3
+  - first:
+      213: -2300444739787828914
+    second: Tidal Wave (2)_4
+  - first:
+      213: -3037005229846234863
+    second: Tidal Wave (2)_5
+  - first:
+      213: -8849787152087225832
+    second: Tidal Wave (2)_6
+  - first:
+      213: -2780008056331522932
+    second: Tidal Wave (2)_7
+  - first:
+      213: -6169557499442609722
+    second: Tidal Wave (2)_8
+  - first:
+      213: -1618499112884921161
+    second: Tidal Wave (2)_9
+  - first:
+      213: -3189825652006388955
+    second: Tidal Wave (2)_10
+  - first:
+      213: 6924212804901391592
+    second: Tidal Wave (2)_11
+  - first:
+      213: -4096869709378605485
+    second: Tidal Wave (2)_12
+  - first:
+      213: -6518745999847080502
+    second: Tidal Wave (2)_13
+  - first:
+      213: 5725296501581745230
+    second: Tidal Wave (2)_14
+  - first:
+      213: -8002333440449197216
+    second: Tidal Wave (2)_15
+  - first:
+      213: -5693825075824168575
+    second: Tidal Wave (2)_16
+  - first:
+      213: 873404873929909586
+    second: Tidal Wave (2)_17
+  - first:
+      213: -4777099843593592842
+    second: Tidal Wave (2)_18
+  - first:
+      213: 628212874281630886
+    second: Tidal Wave (2)_19
+  - first:
+      213: -6869045662284500461
+    second: Tidal Wave (2)_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tidal Wave (2)_0
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 0
+        width: 717
+        height: 1020
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 598684ee8a2174230800000000000000
+      internalID: 3622884942004381845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_1
+      rect:
+        serializedVersion: 2
+        x: 335
+        y: 473
+        width: 395
+        height: 175
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 398a81469c467e2f0800000000000000
+      internalID: -943674780780287853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_2
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 756
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1a3ac418a4408fd0800000000000000
+      internalID: -2341796317538665958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_3
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 732
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17f2af4cfd4b6f660800000000000000
+      internalID: 7419316309314908017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_4
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 636
+        width: 17
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e41d78b82bd2310e0800000000000000
+      internalID: -2300444739787828914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_5
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 637
+        width: 267
+        height: 387
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 119f20e85d36ad5d0800000000000000
+      internalID: -3037005229846234863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_6
+      rect:
+        serializedVersion: 2
+        x: 519
+        y: 637
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81a660e297d3f2580800000000000000
+      internalID: -8849787152087225832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_7
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 729
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8ca2a1e66d6b69d0800000000000000
+      internalID: -2780008056331522932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_8
+      rect:
+        serializedVersion: 2
+        x: 830
+        y: 530
+        width: 674
+        height: 494
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c140685424516aa0800000000000000
+      internalID: -6169557499442609722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_9
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 449
+        width: 352
+        height: 199
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7bc953bc1afe989e0800000000000000
+      internalID: -1618499112884921161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_10
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 758
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52bfabc48767bb3d0800000000000000
+      internalID: -3189825652006388955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_11
+      rect:
+        serializedVersion: 2
+        x: 993
+        y: 642
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8eccb592cdeb71060800000000000000
+      internalID: 6924212804901391592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_12
+      rect:
+        serializedVersion: 2
+        x: 649
+        y: 559
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35e2e6994bef427c0800000000000000
+      internalID: -4096869709378605485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_13
+      rect:
+        serializedVersion: 2
+        x: 839
+        y: 559
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acdbd1a0d03c885a0800000000000000
+      internalID: -6518745999847080502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_14
+      rect:
+        serializedVersion: 2
+        x: 650
+        y: 541
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4c019295d6547f40800000000000000
+      internalID: 5725296501581745230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_15
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 336
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06bcbc3522002f090800000000000000
+      internalID: -8002333440449197216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_16
+      rect:
+        serializedVersion: 2
+        x: 316
+        y: 227
+        width: 360
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 181f94eb2487bf0b0800000000000000
+      internalID: -5693825075824168575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_17
+      rect:
+        serializedVersion: 2
+        x: 669
+        y: 320
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 255efa7fa15fe1c00800000000000000
+      internalID: 873404873929909586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_18
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 1
+        width: 615
+        height: 445
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ff970e900554bdb0800000000000000
+      internalID: -4777099843593592842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_19
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 309
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac32eed74cd7b800800000000000000
+      internalID: 628212874281630886
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tidal Wave (2)_20
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 237
+        width: 66
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31238992d5f3ca0a0800000000000000
+      internalID: -6869045662284500461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Tidal Wave (2)_0: 3622884942004381845
+      Tidal Wave (2)_1: -943674780780287853
+      Tidal Wave (2)_10: -3189825652006388955
+      Tidal Wave (2)_11: 6924212804901391592
+      Tidal Wave (2)_12: -4096869709378605485
+      Tidal Wave (2)_13: -6518745999847080502
+      Tidal Wave (2)_14: 5725296501581745230
+      Tidal Wave (2)_15: -8002333440449197216
+      Tidal Wave (2)_16: -5693825075824168575
+      Tidal Wave (2)_17: 873404873929909586
+      Tidal Wave (2)_18: -4777099843593592842
+      Tidal Wave (2)_19: 628212874281630886
+      Tidal Wave (2)_2: -2341796317538665958
+      Tidal Wave (2)_20: -6869045662284500461
+      Tidal Wave (2)_3: 7419316309314908017
+      Tidal Wave (2)_4: -2300444739787828914
+      Tidal Wave (2)_5: -3037005229846234863
+      Tidal Wave (2)_6: -8849787152087225832
+      Tidal Wave (2)_7: -2780008056331522932
+      Tidal Wave (2)_8: -6169557499442609722
+      Tidal Wave (2)_9: -1618499112884921161
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using ThroneOfTides.Systems;
@@ -59,10 +60,9 @@ namespace ThroneOfTides.App
                 _gameState, _stateMachine, enemyAI,
                 _handLayoutManager, combatResolver, _config);
 
-            _turnCoordinator.OnHPChanged              += RefreshHUD;
-            _turnCoordinator.OnTurnChanged            += RefreshHUD;
+            _turnCoordinator.OnHPChanged  += RefreshHUD;
+            _turnCoordinator.OnTurnChanged += RefreshHUD;
             _turnCoordinator.OnShowDeadMansTurnPrompt += ShowDeadMansTurnPrompt;
-            _turnCoordinator.OnCardDrawn              += _handLayoutManager.AddCardToPlayerHand;
 
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
@@ -71,12 +71,13 @@ namespace ThroneOfTides.App
 
             _endTurnButton.onClick.AddListener(() => _turnCoordinator.EndTurn());
 
+            // Initial HUD refresh — turn indicator shows correct state from frame 1
             RefreshHUD();
         }
 
         private void DealOpeningHand()
         {
-            // Enemy opening hand only - player draws manually
+            // Enemy hand — instant, no animation needed
             for (int i = 0; i < _config.MaxHandSize; i++)
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
@@ -84,6 +85,34 @@ namespace ThroneOfTides.App
                 _gameState.EnemyHand.AddCard(card, _config.MaxHandSize);
                 _handLayoutManager.AddCardToEnemyHand(card);
             }
+
+            // Player hand — animated, input blocked until all cards land
+            StartCoroutine(DealPlayerOpeningHandRoutine());
+        }
+
+        private IEnumerator DealPlayerOpeningHandRoutine()
+        {
+            _endTurnButton.interactable = false;
+            DeckClickHandler.OnDeckClicked -= OnDeckClicked;
+
+            // All GameState interaction stays in App — UI assembly receives plain CardSO list
+            var cards = new List<CardSO>();
+            for (int i = 0; i < _config.MaxHandSize; i++)
+            {
+                CardSO card = _gameState.PlayerDeck.Draw();
+                if (card == null) break;
+                _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
+                cards.Add(card);
+            }
+
+            // Mark draw consumed so first player turn starts ready to play
+            _gameState.SetHasDrawnThisTurn();
+
+            yield return StartCoroutine(_handLayoutManager.DealOpeningHandAnimated(cards));
+
+            // Re-enable input only after all cards have landed
+            DeckClickHandler.OnDeckClicked += OnDeckClicked;
+            RefreshHUD();
         }
 
         private void Update() => _stateMachine?.Tick();
@@ -99,7 +128,6 @@ namespace ThroneOfTides.App
             GameEventBus.OnMatchWin        += OnMatchWin;
             GameEventBus.OnMatchLoss       += OnMatchLoss;
 
-            // Deck click - player manual draw
             DeckClickHandler.OnDeckClicked += OnDeckClicked;
         }
 
@@ -161,7 +189,9 @@ namespace ThroneOfTides.App
                 _gameState.PlayerDeck.Count,
                 _gameState.IsPlayerTurn);
 
-            _endTurnButton.interactable = _gameState.IsPlayerTurn && _gameState.HasDrawnThisTurn;
+            // End turn only available after drawing — opening deal sets HasDrawnThisTurn
+            // so button is active from turn 1 once animation completes
+            _endTurnButton.interactable = _gameState.IsPlayerTurn;
         }
 
         private void OnMatchWin()

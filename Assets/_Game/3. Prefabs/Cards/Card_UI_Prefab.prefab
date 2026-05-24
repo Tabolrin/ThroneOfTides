@@ -311,6 +311,8 @@ MonoBehaviour:
   _damageBadge: {fileID: 504611768498645393}
   _cardFront: {fileID: 3764492435537438155}
   _animator: {fileID: 3785891695213167514}
+  _palette: {fileID: 11400000, guid: 1b25a341b6287f44a8b1473c38e55b2b, type: 2}
+  HandYOffset: 0
 --- !u!114 &3190332569769903933
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5b4d3326b34ec904b9b967533193acec
+guid: 66adfe61e68c8e0429351d9a7339915a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2223402465563134779
-    second: pixellab-a-direct-top-down-look-on-a-gr-1778435119899_0
+      213: -842046878869426866
+    second: Untitled - May 24, 2026 at 17.57.05_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -49,8 +49,8 @@ TextureImporter:
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  alignment: 9
+  spritePivot: {x: 0.64866996, y: 0}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pixellab-a-direct-top-down-look-on-a-gr-1778435119899_0
+      name: Untitled - May 24, 2026 at 17.57.05_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 38
-        width: 108
-        height: 52
+        x: 87
+        y: 0
+        width: 279
+        height: 741
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5c4b167dc33e421e0800000000000000
-      internalID: -2223402465563134779
+      spriteID: e4de2c433d27054f0800000000000000
+      internalID: -842046878869426866
       vertices: []
       indices: 
       edges: []
@@ -126,7 +126,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 0
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      pixellab-a-direct-top-down-look-on-a-gr-1778435119899_0: -2223402465563134779
+      Untitled - May 24, 2026 at 17.57.05_0: -842046878869426866
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

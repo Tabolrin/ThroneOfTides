@@ -17,6 +17,11 @@ namespace ThroneOfTides.UI
         [SerializeField] private GameObject      _damageBadge;
         [SerializeField] private GameObject      _cardFront;
         [SerializeField] private Animator        _animator;
+        [SerializeField] private CardTypePaletteSO _palette;
+        
+        // Stores the randomised vertical offset for this card's hand position
+        // Set once on spawn, read by HandLayoutManager during layout refresh
+        [HideInInspector] public float HandYOffset;
 
         public CardSO CardData      { get; private set; }
         public bool   WasPlayed     { get; set; }
@@ -65,17 +70,8 @@ namespace ThroneOfTides.UI
             if (card.Art != null)
                 _cardArt.sprite = card.Art;
 
-            if (_cardFrame != null)
-            {
-                _cardFrame.color = card.CardType switch
-                {
-                    CardType.Weapon => new Color(0.3f, 0.5f, 1f),
-                    CardType.Combo  => new Color(1f, 0.85f, 0f),
-                    CardType.Action => new Color(0.3f, 0.8f, 0.4f),
-                    CardType.DOT    => new Color(0.8f, 0.3f, 0.3f),
-                    _               => Color.white
-                };
-            }
+            if (_cardFrame != null && _palette != null)
+                _cardFrame.color = _palette.GetColor(card.CardType);
         }
 
         public void SetFaceDown(CardSO card)
