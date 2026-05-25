@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DeadMansTurnTestDeck
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.DeckDefinitionSO
   Cards:
-  - Card: {fileID: 11400000, guid: c1db74e802e87e348a52b35bc55cfc88, type: 2}
-    Count: 8
   - Card: {fileID: 11400000, guid: 592ab224bc8beba4d952d7f6361e2d27, type: 2}
-    Count: 5
+    Count: 8
+  - Card: {fileID: 11400000, guid: 586d3281a4fb0424fabfc04b1a26a5f4, type: 2}
+    Count: 6

@@ -8,28 +8,28 @@ using UnityEngine.SceneManagement;
 
 namespace ThroneOfTides.Tools
 {
+    // Toolbar dropdown that lists every .unity file under the project's Scenes folder
+    // and switches to the chosen scene, prompting to save unsaved changes first.
     [InitializeOnLoad]
     public static class SceneSwitcherTool
     {
         private const string k_ElementPath = "ThroneOfTides/Scene Switcher";
         private static string[] _scenePaths = new string[0];
-        private static float    _lastScanTime;
 
         private static string ScenesFolder =>
             Path.Combine(Application.dataPath, "_Game", "7. Scenes");
 
         static SceneSwitcherTool()
         {
-            EditorApplication.update -= CheckForSceneChanges;
-            EditorApplication.update += CheckForSceneChanges;
             ScanScenes();
         }
 
-        private static void CheckForSceneChanges()
+        // Called by SceneAssetWatcher whenever .unity files are imported or deleted.
+        // Kept internal so the watcher can invoke it without exposing the full class surface.
+        internal static void OnSceneAssetsChanged()
         {
-            if (EditorApplication.timeSinceStartup - _lastScanTime < 2f) return;
-            _lastScanTime = (float)EditorApplication.timeSinceStartup;
             ScanScenes();
+            MainToolbar.Refresh(k_ElementPath);
         }
 
         private static void ScanScenes()
@@ -50,7 +50,8 @@ namespace ThroneOfTides.Tools
                 .OrderBy(p => p)
                 .ToArray();
 
-            // Only refresh toolbar if list actually changed
+            // Only refresh the toolbar element if the scene list actually changed,
+            // avoiding unnecessary UI rebuilds on unrelated asset imports.
             if (found.SequenceEqual(_scenePaths)) return;
             _scenePaths = found;
             MainToolbar.Refresh(k_ElementPath);
@@ -101,6 +102,28 @@ namespace ThroneOfTides.Tools
             }
 
             menu.DropDown(dropdownRect);
+        }
+    }
+
+    // Listens for asset changes via Unity's import pipeline and notifies SceneSwitcherTool
+    // only when a .unity file is involved. This replaces the previous polling approach
+    // (EditorApplication.update every 2 seconds) with a zero-cost event-driven alternative.
+    internal class SceneAssetWatcher : AssetPostprocessor
+    {
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths)
+        {
+            bool sceneListChanged =
+                importedAssets.Any(p => p.EndsWith(".unity"))  ||
+                deletedAssets.Any(p => p.EndsWith(".unity"))   ||
+                movedAssets.Any(p => p.EndsWith(".unity"))     ||
+                movedFromAssetPaths.Any(p => p.EndsWith(".unity"));
+
+            if (sceneListChanged)
+                SceneSwitcherTool.OnSceneAssetsChanged();
         }
     }
 }

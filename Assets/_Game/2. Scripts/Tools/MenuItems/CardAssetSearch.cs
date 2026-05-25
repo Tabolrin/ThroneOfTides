@@ -13,33 +13,10 @@ namespace ThroneOfTides.Tools
         [MenuItem("ThroneOfTides/Validate All Cards  %#v")]   // Ctrl+Shift+V
         public static void ValidateAllCards()
         {
-            var cards  = LoadAll<CardSO>();
-            var errors = new List<string>();
-            var warns  = new List<string>();
-
-            foreach (var card in cards)
-            {
-                if (string.IsNullOrWhiteSpace(card.Name))
-                    errors.Add($"[{card.name}] has no card name.");
-
-                if (card.Art == null)
-                    warns.Add($"[{card.Name}] is missing art.");
-
-                if (string.IsNullOrWhiteSpace(card.Description))
-                    warns.Add($"[{card.Name}] has no description.");
-
-                if (card.CardType == Core.CardType.Action && card.ActionEffect == null)
-                    errors.Add($"[{card.Name}] is an Action card with no Effect SO.");
-
-                if (card.CardType == Core.CardType.Combo && card.ComboPartner == null)
-                    errors.Add($"[{card.Name}] is a Combo card with no partner.");
-
-                if (card.CardType == Core.CardType.DOT &&
-                    (card.DotDamagePerTurn == 0 || card.DotDuration == 0))
-                    warns.Add($"[{card.Name}] is a DOT card with zero damage or duration.");
-            }
+            var (errors, warnings) = ValidateAllData();
 
             var sb = new StringBuilder();
+            var cards = LoadAll<CardSO>();
             sb.AppendLine($"Validated {cards.Count} cards.\n");
 
             if (errors.Count > 0)
@@ -47,12 +24,12 @@ namespace ThroneOfTides.Tools
                 sb.AppendLine($"── {errors.Count} ERROR(S) ──");
                 foreach (var e in errors) sb.AppendLine("  ✗ " + e);
             }
-            if (warns.Count > 0)
+            if (warnings.Count > 0)
             {
-                sb.AppendLine($"\n── {warns.Count} WARNING(S) ──");
-                foreach (var w in warns) sb.AppendLine("  ⚠ " + w);
+                sb.AppendLine($"\n── {warnings.Count} WARNING(S) ──");
+                foreach (var w in warnings) sb.AppendLine("  ⚠ " + w);
             }
-            if (errors.Count == 0 && warns.Count == 0)
+            if (errors.Count == 0 && warnings.Count == 0)
                 sb.AppendLine("✓ All cards passed validation.");
 
             Debug.Log(sb.ToString());
@@ -60,9 +37,9 @@ namespace ThroneOfTides.Tools
             // Show summary dialog so non-coders see it without opening Console
             string title   = errors.Count > 0 ? "Validation — Errors Found" : "Validation — Passed";
             string message = errors.Count > 0
-                ? $"{errors.Count} error(s) and {warns.Count} warning(s) found.\nSee Console for details."
-                : warns.Count > 0
-                    ? $"No errors, but {warns.Count} warning(s). See Console for details."
+                ? $"{errors.Count} error(s) and {warnings.Count} warning(s) found.\nSee Console for details."
+                : warnings.Count > 0
+                    ? $"No errors, but {warnings.Count} warning(s). See Console for details."
                     : "All cards passed validation. Ready to build.";
 
             EditorUtility.DisplayDialog(title, message, "OK");
@@ -87,7 +64,7 @@ namespace ThroneOfTides.Tools
 
             Debug.LogWarning(sb.ToString());
 
-            // Ping the first offender in the Project window so Eldar can find it fast
+            // Ping the first offender in the Project window so it can be located fast
             EditorGUIUtility.PingObject(missing[0]);
             Selection.objects = missing.ConvertAll(c => (Object)c).ToArray();
 
@@ -128,9 +105,64 @@ namespace ThroneOfTides.Tools
             Debug.Log(sb.ToString());
         }
 
+        // ── Canonical Validation ────────────────────────────────────────────────
+
+        // Single source of truth for all card and deck validation rules.
+        // Both the build pipeline and the menu-item validator delegate here, ensuring
+        // that adding a new card type or rule only requires a change in one place.
+        public static (List<string> errors, List<string> warnings) ValidateAllData()
+        {
+            var errors   = new List<string>();
+            var warnings = new List<string>();
+
+            ValidateCards(errors, warnings);
+            ValidateDecks(errors, warnings);
+
+            return (errors, warnings);
+        }
+
+        private static void ValidateCards(List<string> errors, List<string> warnings)
+        {
+            foreach (var card in LoadAll<CardSO>())
+            {
+                if (string.IsNullOrWhiteSpace(card.Name))
+                    errors.Add($"Card asset '{card.name}' has no name.");
+
+                if (card.CardType == Core.CardType.Action && card.ActionEffect == null)
+                    errors.Add($"'{card.Name}' is an Action card with no Effect SO.");
+
+                if (card.CardType == Core.CardType.Combo && card.ComboPartner == null)
+                    errors.Add($"'{card.Name}' is a Combo card with no partner.");
+
+                if (card.Art == null)
+                    warnings.Add($"'{card.Name}' has no art sprite.");
+
+                if (string.IsNullOrWhiteSpace(card.Description))
+                    warnings.Add($"'{card.Name}' has no description.");
+
+                if (card.CardType == Core.CardType.DOT &&
+                    (card.DotDamagePerTurn == 0 || card.DotDuration == 0))
+                    warnings.Add($"'{card.Name}' is a DOT card with zero damage or duration.");
+            }
+        }
+
+        private static void ValidateDecks(List<string> errors, List<string> warnings)
+        {
+            foreach (var deck in LoadAll<DeckDefinitionSO>())
+            {
+                foreach (var entry in deck.Cards)
+                    if (entry.Card == null)
+                        errors.Add($"Deck '{deck.name}' has a null card entry.");
+
+                int total = deck.BuildDeck().Count;
+                if (total == 0)       errors.Add($"Deck '{deck.name}' is empty.");
+                else if (total < 10)  warnings.Add($"Deck '{deck.name}' has only {total} cards.");
+            }
+        }
+
         // ── Reusable Search Utility ─────────────────────────────────────────────
 
-        // Returns all assets of type T in the project — used by inspectors and build pipeline too
+        // Returns all assets of type T in the project — used by inspectors and build pipeline
         public static List<T> LoadAll<T>() where T : ScriptableObject
         {
             var results = new List<T>();

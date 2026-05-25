@@ -10,17 +10,29 @@ namespace ThroneOfTides.Tools
         private const int MinViableDeckSize = 10;
         private SerializedProperty _cards;
 
+        // Cached style for the summary header label.
+        // GUIStyle construction allocates; creating it once in OnEnable and reusing it
+        // across repaints keeps the inspector repaint path allocation-free.
+        private GUIStyle _headerStyle;
+
         private void OnEnable()
         {
             _cards = serializedObject.FindProperty("Cards");
+
+            _headerStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                fontSize  = 13,
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold
+            };
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
-            int total      = CalculateTotalCount();
-            bool hasNulls  = HasNullEntries();
+            int total     = CalculateTotalCount();
+            bool hasNulls = HasNullEntries();
 
             DrawSummaryHeader(total, hasNulls);
             EditorGUILayout.Space(6);
@@ -34,20 +46,13 @@ namespace ThroneOfTides.Tools
 
         private void DrawSummaryHeader(int total, bool hasNulls)
         {
-            var style = new GUIStyle(EditorStyles.helpBox)
-            {
-                fontSize  = 13,
-                alignment = TextAnchor.MiddleCenter,
-                fontStyle = FontStyle.Bold
-            };
-
-            Color bgColor = hasNulls         ? new Color(0.6f, 0.1f, 0.1f, 0.3f)
-                          : total < MinViableDeckSize ? new Color(0.6f, 0.5f, 0.0f, 0.3f)
-                          : new Color(0.1f, 0.5f, 0.2f, 0.3f);
+            Color bgColor = hasNulls                   ? new Color(0.6f, 0.1f, 0.1f, 0.3f)
+                          : total < MinViableDeckSize  ? new Color(0.6f, 0.5f, 0.0f, 0.3f)
+                          :                              new Color(0.1f, 0.5f, 0.2f, 0.3f);
 
             var rect = EditorGUILayout.GetControlRect(false, 36);
             EditorGUI.DrawRect(rect, bgColor);
-            EditorGUI.LabelField(rect, $"Total Cards in Deck:  {total}", style);
+            EditorGUI.LabelField(rect, $"Total Cards in Deck:  {total}", _headerStyle);
         }
 
         private void DrawValidation(int total, bool hasNulls)

@@ -1,4 +1,3 @@
-// Assets/_Game/Scripts/Tools/Build/ThroneOfTidesBuildPipeline.cs
 using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
@@ -28,11 +27,7 @@ namespace ThroneOfTides.Tools
         // Runs automatically before every build triggered by any path
         public void OnPreprocessBuild(BuildReport report)
         {
-            var errors   = new List<string>();
-            var warnings = new List<string>();
-
-            ValidateCards(errors, warnings);
-            ValidateDecks(errors, warnings);
+            var (errors, warnings) = CardAssetSearch.ValidateAllData();
 
             if (warnings.Count > 0)
             {
@@ -143,6 +138,8 @@ namespace ThroneOfTides.Tools
         // Temporarily overrides GameConfigSO values before building, then restores them.
         // The SO is modified via SerializedObject so the change is tracked by Unity
         // and restored cleanly without leaving the asset dirty after the build.
+        // try/finally guarantees the restore executes even if BuildPlayer throws,
+        // preventing the asset from being left in the overridden state on disk.
 
         [MenuItem("ThroneOfTides/Build/Playtest Config Build (Windows)  %#3")]
         public static void BuildPlaytest()
@@ -179,18 +176,25 @@ namespace ThroneOfTides.Tools
 
             ApplyConfigOverride(config, PlaytestStartingHP, PlaytestMaxHandSize);
 
-            var options = new BuildPlayerOptions
+            BuildReport report;
+            try
             {
-                scenes           = Scenes,
-                locationPathName = path,
-                target           = BuildTarget.StandaloneWindows64,
-                options          = BuildOptions.Development | BuildOptions.ConnectWithProfiler
-            };
+                var options = new BuildPlayerOptions
+                {
+                    scenes           = Scenes,
+                    locationPathName = path,
+                    target           = BuildTarget.StandaloneWindows64,
+                    options          = BuildOptions.Development | BuildOptions.ConnectWithProfiler
+                };
 
-            var report = BuildPipeline.BuildPlayer(options);
-
-            // Restore runs regardless of build success or failure
-            ApplyConfigOverride(config, originalHP, originalHand);
+                report = BuildPipeline.BuildPlayer(options);
+            }
+            finally
+            {
+                // Restore executes regardless of whether the build succeeded, failed,
+                // or threw an exception — the asset will never be left dirty on disk.
+                ApplyConfigOverride(config, originalHP, originalHand);
+            }
 
             if (report.summary.result == BuildResult.Succeeded)
                 EditorUtility.DisplayDialog("Playtest Build Complete",
@@ -263,10 +267,7 @@ namespace ThroneOfTides.Tools
 
         private static bool RunValidationDialog()
         {
-            var errors = new List<string>();
-            var dummy  = new List<string>();
-            ValidateCards(errors, dummy);
-            ValidateDecks(errors, dummy);
+            var (errors, _) = CardAssetSearch.ValidateAllData();
 
             if (errors.Count == 0) return true;
 
@@ -284,40 +285,5 @@ namespace ThroneOfTides.Tools
 
         private static string PickOutputPath(string defaultName, string extension)
             => EditorUtility.SaveFilePanel("Choose Build Location", "", defaultName, extension);
-
-        private static void ValidateCards(List<string> errors, List<string> warnings)
-        {
-            foreach (var card in CardAssetSearch.LoadAll<CardSO>())
-            {
-                if (string.IsNullOrWhiteSpace(card.Name))
-                    errors.Add($"Card asset '{card.name}' has no name.");
-
-                if (card.CardType == Core.CardType.Action && card.ActionEffect == null)
-                    errors.Add($"'{card.Name}' is an Action card with no Effect SO.");
-
-                if (card.CardType == Core.CardType.Combo && card.ComboPartner == null)
-                    errors.Add($"'{card.Name}' is a Combo card with no partner.");
-
-                if (card.Art == null)
-                    warnings.Add($"'{card.Name}' has no art sprite.");
-
-                if (string.IsNullOrWhiteSpace(card.Description))
-                    warnings.Add($"'{card.Name}' has no description.");
-            }
-        }
-
-        private static void ValidateDecks(List<string> errors, List<string> warnings)
-        {
-            foreach (var deck in CardAssetSearch.LoadAll<DeckDefinitionSO>())
-            {
-                foreach (var entry in deck.Cards)
-                    if (entry.Card == null)
-                        errors.Add($"Deck '{deck.name}' has a null card entry.");
-
-                int total = deck.BuildDeck().Count;
-                if (total == 0)       errors.Add($"Deck '{deck.name}' is empty.");
-                else if (total < 10)  warnings.Add($"Deck '{deck.name}' has only {total} cards.");
-            }
-        }
     }
 }

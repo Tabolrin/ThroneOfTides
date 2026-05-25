@@ -1,4 +1,3 @@
-// Assets/_Game/Scripts/Tools/Windows/ShipOscillatorOverlay.cs
 using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEngine;
@@ -6,11 +5,17 @@ using ThroneOfTides.Systems;
 
 namespace ThroneOfTides.Tools
 {
-    // Scene view overlay — appears when a GameObject with ShipOscillator is selected
-    // Allows live tuning of oscillation values with immediate visual feedback in Play Mode
+    // Scene view overlay — appears when a GameObject with ShipOscillator is selected.
+    // Allows live tuning of oscillation values with immediate visual feedback in Play Mode.
     [Overlay(typeof(SceneView), "Ship Oscillator Tuner", true)]
     public class ShipOscillatorOverlay : IMGUIOverlay, ITransientOverlay
     {
+        // Cached target and its SerializedObject.
+        // SerializedObject creation is deferred and invalidated when the selection changes,
+        // preventing a fresh heap allocation on every Scene view repaint.
+        private ShipOscillator  _cachedOscillator;
+        private SerializedObject _cachedSO;
+
         // ITransientOverlay — only show when a ShipOscillator is selected
         public bool visible
         {
@@ -30,33 +35,40 @@ namespace ThroneOfTides.Tools
             var oscillator = Selection.activeGameObject.GetComponent<ShipOscillator>();
             if (oscillator == null) return;
 
-            var so = new SerializedObject(oscillator);
-            so.Update();
+            // Rebuild the SerializedObject only when the target has changed.
+            // Reusing the same instance avoids per-frame GC pressure during repaint.
+            if (oscillator != _cachedOscillator)
+            {
+                _cachedOscillator = oscillator;
+                _cachedSO         = new SerializedObject(oscillator);
+            }
+
+            _cachedSO.Update();
 
             EditorGUILayout.LabelField(
                 $"Tuning: {oscillator.gameObject.name}", EditorStyles.boldLabel);
             EditorGUILayout.Space(4);
 
-            DrawAxis(so,
+            DrawAxis(_cachedSO,
                 "Vertical Bob",
                 "_shouldDriftVert", "_yAmplitude", "_yDuration",
                 new Color(0.3f, 0.8f, 1.0f, 1f));
 
             EditorGUILayout.Space(4);
 
-            DrawAxis(so,
+            DrawAxis(_cachedSO,
                 "Horizontal Drift",
                 "_shouldDriftHoriz", "_xAmplitude", "_xDuration",
                 new Color(0.4f, 1.0f, 0.5f, 1f));
 
             EditorGUILayout.Space(4);
 
-            DrawAxis(so,
+            DrawAxis(_cachedSO,
                 "Rotation Sway",
                 "_shouldRotate", "_rotAmplitude", "_rotDuration",
                 new Color(1.0f, 0.8f, 0.3f, 1f));
 
-            bool changed = so.ApplyModifiedProperties();
+            bool changed = _cachedSO.ApplyModifiedProperties();
 
             EditorGUILayout.Space(6);
 
@@ -64,7 +76,7 @@ namespace ThroneOfTides.Tools
             {
                 // Restart tweens live so changes are visible immediately
                 if (changed || GUILayout.Button("Restart Oscillation"))
-                    RestartOscillation(oscillator);
+                    oscillator.RestartOscillation();
 
                 EditorGUILayout.LabelField(
                     "✓ Live — changes apply immediately",
@@ -124,21 +136,6 @@ namespace ThroneOfTides.Tools
             EditorGUILayout.EndHorizontal();
 
             GUI.enabled = true;
-        }
-
-        // ── Live tween restart ──────────────────────────────────────────────
-
-        // Kills all active DOTween tweens on the ship and restarts oscillation
-        // with current serialized values — only valid in Play Mode
-        private static void RestartOscillation(ShipOscillator oscillator)
-        {
-            // Kill existing tweens via DOTween
-            DG.Tweening.DOTween.Kill(oscillator.transform);
-
-            // Reset to start position before restarting so amplitude reads correctly
-            // We use SendMessage to call the private StartOscillation method
-            // TODO: expose a public Restart() method on ShipOscillator for a cleaner call
-            oscillator.SendMessage("StartOscillation", SendMessageOptions.DontRequireReceiver);
         }
     }
 }

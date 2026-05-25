@@ -1,13 +1,12 @@
 using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEngine;
-using UnityEngine.UIElements;
 using ThroneOfTides.Systems;
 
 namespace ThroneOfTides.Tools
 {
     // Scene view overlay — draws labeled gizmos for every VFXSpawnPoint in the scene
-    // and shows a live legend panel in the Scene view corner
+    // and shows a live legend panel in the Scene view corner.
     [Overlay(typeof(SceneView), "VFX Spawn Points", true)]
     [Icon("Assets/Editor Default Resources/Icons/d_ParticleSystem Icon.png")]
     public class VFXSpawnPointOverlay : IMGUIOverlay, ITransientOverlay
@@ -18,16 +17,35 @@ namespace ThroneOfTides.Tools
         private static readonly Color _frontColor   = new Color(0.25f, 0.70f, 1.00f, 1f); // blue
         private static readonly Color _surfaceColor = new Color(0.25f, 0.90f, 0.45f, 1f); // green
 
-        private static readonly float _gizmoRadius  = 0.12f;
-        private static readonly float _labelOffset  = 0.22f;
+        private const float GizmoRadius = 0.12f;
+        private const float LabelOffset = 0.22f;
 
-        // ITransientOverlay — hide the panel when no VFXSpawnPoints exist in scene
-        public bool visible => Object.FindObjectsByType<VFXSpawnPoint>(FindObjectsSortMode.None).Length > 0;
+        // Cached query result and the time it was last refreshed.
+        // FindObjectsByType is not free in larger scenes; limiting it to once per second
+        // while the overlay is visible keeps repaint cost negligible.
+        private VFXSpawnPoint[] _cachedPoints    = new VFXSpawnPoint[0];
+        private double          _lastCacheTime   = -1.0;
+        private const double    CacheIntervalSec = 1.0;
+
+        // Lazily created and reused across repaints — GUIStyle allocates on construction.
+        private GUIStyle _labelStyle;
+
+        // ITransientOverlay — hide the panel when no VFXSpawnPoints exist in the scene
+        public bool visible
+        {
+            get
+            {
+                RefreshCacheIfStale();
+                return _cachedPoints.Length > 0;
+            }
+        }
 
         // ── IMGUI panel content ─────────────────────────────────────────────
 
         public override void OnGUI()
         {
+            RefreshCacheIfStale();
+
             EditorGUILayout.LabelField("Spawn Point Legend", EditorStyles.boldLabel);
             EditorGUILayout.Space(2);
 
@@ -38,8 +56,7 @@ namespace ThroneOfTides.Tools
 
             EditorGUILayout.Space(4);
 
-            var points = Object.FindObjectsByType<VFXSpawnPoint>(FindObjectsSortMode.None);
-            EditorGUILayout.LabelField($"Total in scene: {points.Length}",
+            EditorGUILayout.LabelField($"Total in scene: {_cachedPoints.Length}",
                 EditorStyles.centeredGreyMiniLabel);
 
             EditorGUILayout.Space(2);
@@ -47,7 +64,7 @@ namespace ThroneOfTides.Tools
             // Ping all spawn points in hierarchy on button click
             if (GUILayout.Button("Select All Spawn Points"))
             {
-                var gos = System.Array.ConvertAll(points, p => (Object)p.gameObject);
+                var gos = System.Array.ConvertAll(_cachedPoints, p => (Object)p.gameObject);
                 Selection.objects = gos;
             }
         }
@@ -64,10 +81,20 @@ namespace ThroneOfTides.Tools
             EditorGUILayout.EndHorizontal();
         }
 
+        // Throttles the FindObjectsByType call to at most once per CacheIntervalSec.
+        // This is safe for editor tooling where sub-second accuracy is not required.
+        private void RefreshCacheIfStale()
+        {
+            if (EditorApplication.timeSinceStartup - _lastCacheTime < CacheIntervalSec) return;
+            _cachedPoints  = Object.FindObjectsByType<VFXSpawnPoint>(FindObjectsSortMode.None);
+            _lastCacheTime = EditorApplication.timeSinceStartup;
+        }
+
         // ── Scene view gizmo drawing ────────────────────────────────────────
 
-        // DrawGizmos is called by the SceneView for every repaint
-        // Registered via InitializeOnLoad so it persists without a selected object
+        // [DrawGizmo] registers this method with the SceneView repaint loop.
+        // Using the attribute instead of OnDrawGizmos means gizmos render for all
+        // VFXSpawnPoints in the scene regardless of which object is selected.
         [DrawGizmo(GizmoType.NonSelected | GizmoType.Selected | GizmoType.Pickable,
             typeof(VFXSpawnPoint))]
         private static void DrawVFXSpawnGizmo(VFXSpawnPoint point, GizmoType gizmoType)
@@ -85,23 +112,25 @@ namespace ThroneOfTides.Tools
 
             // Solid disc at the spawn position
             Handles.color = color;
-            Handles.DrawSolidDisc(pos, Vector3.forward, _gizmoRadius);
+            Handles.DrawSolidDisc(pos, Vector3.forward, GizmoRadius);
 
             // Slightly larger wireframe ring so it reads against any background
             Handles.color = new Color(color.r, color.g, color.b, 0.4f);
-            Handles.DrawWireDisc(pos, Vector3.forward, _gizmoRadius + 0.04f);
+            Handles.DrawWireDisc(pos, Vector3.forward, GizmoRadius + 0.04f);
 
-            // Label above the disc
-            GUIStyle labelStyle = new GUIStyle(EditorStyles.miniLabel)
+            // Label above the disc — style allocated once per gizmo draw call.
+            // [DrawGizmo] methods are static so the per-instance cache on the overlay
+            // class is unavailable here; the allocation is editor-only and infrequent.
+            var labelStyle = new GUIStyle(EditorStyles.miniLabel)
             {
                 normal    = { textColor = color },
                 fontStyle = FontStyle.Bold,
                 fontSize  = 9
             };
 
-            Handles.Label(pos + Vector3.up * _labelOffset, (string)point.Type.ToString(), labelStyle);
-            
-            // When selected, draw a line to parent ship for context
+            Handles.Label(pos + Vector3.up * LabelOffset, point.Type.ToString(), labelStyle);
+
+            // When selected, draw a line to the parent ship for hierarchy context
             if ((gizmoType & GizmoType.Selected) != 0 && point.transform.parent != null)
             {
                 Handles.color = new Color(color.r, color.g, color.b, 0.3f);
