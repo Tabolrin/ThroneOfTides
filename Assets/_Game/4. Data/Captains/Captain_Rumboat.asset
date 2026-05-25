@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Captain_Rumboat
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CaptainSO
   _captainName: Captain Rumboat
-  _portrait: {fileID: 21300000, guid: c0b09055af80a1d409a1e7562e12ba49, type: 3}
+  _portrait: {fileID: 21300000, guid: 43947ddf0877add42801427bf2ac310e, type: 3}
   _archetypeDescription: Aggressive
-  _hp: 30
-  _deckDefinition: {fileID: 11400000, guid: 2fee30197b346b940abfe6b466e03c4f, type: 2}
+  _hp: 40
+  _deckDefinition: {fileID: 11400000, guid: b77f1ac5e92b8fc459a08a48fc547e0c, type: 2}
   _levelReward: {fileID: 11400000, guid: 21b767cc524ebbf4eb4f4024bb083197, type: 2}
   _weightHighDamageWeapon: 2
   _weightLowDamageWeapon: 0.8

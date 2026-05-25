@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.LevelRewardSO
   _rewardCards: []
   _highHPReward:
-    Rum: 0
-    Shipwrecks: 0
+    Rum: 5
+    Shipwrecks: 5
   _midHPReward:
-    Rum: 0
-    Shipwrecks: 0
+    Rum: 3
+    Shipwrecks: 3
   _lowHPReward:
-    Rum: 0
-    Shipwrecks: 0
+    Rum: 2
+    Shipwrecks: 2
