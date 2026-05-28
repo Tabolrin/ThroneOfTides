@@ -4,26 +4,6 @@ using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Assembly: ThroneOfTides.Systems
-// Location: Scripts/Systems/VFX/SirenVFXController.cs
-// Attach to: SirenVFX prefab root (RectTransform)
-//
-// Prefab hierarchy:
-//   SirenVFX (root)          — this script + RectTransform
-//   ├── SirenBody            — UI.Image: ImageType = Filled, FillMethod = Vertical,
-//   │                          FillOrigin = Top, Preserve Aspect = ON
-//   └── MusicNoteParticles   — ParticleSystem, Play On Awake = OFF
-//
-// Note: MusicNoteParticles is detached from the Canvas hierarchy at runtime because
-//       ParticleSystem cannot render inside a Screen Space Overlay canvas. It is
-//       repositioned in world space to match the siren's screen position and
-//       destroyed separately when the sequence ends.
-//
-// Pattern: DOTween Sequence — mirrors KrakenVFXController.
-//          Siren descends into frame while filling top-to-bottom (FillOrigin = Top),
-//          then ascends while unfilling — giving the illusion of rising from water.
-//          _rootCanvasRect and _gameCamera injected at runtime by CardVFXHandler.
-
 namespace ThroneOfTides.Systems.VFX
 {
     public class SirenVFXController : MonoBehaviour
@@ -31,8 +11,8 @@ namespace ThroneOfTides.Systems.VFX
         // ── Inspector ─────────────────────────────────────────────────────────
 
         [Header("References")]
-        [SerializeField] private Image          _sirenImage;
-        [SerializeField] private ParticleSystem _musicNoteParticles;
+        [SerializeField] private Image         _sirenImage;
+        [SerializeField] private RectTransform _mouthAnchor; // child of SirenBody, positioned at the siren's mouth
 
         [Header("FEEL")]
         [SerializeField] private MMF_Player _feedbackSirenSong;
@@ -62,11 +42,12 @@ namespace ThroneOfTides.Systems.VFX
 
         // ── Private ───────────────────────────────────────────────────────────
 
-        private RectTransform _rectTransform;
-        private RectTransform _rootCanvasRect;
-        private Camera        _gameCamera;
-        private Vector2       _restPosition;
-        private Sequence      _seq;
+        private RectTransform  _rectTransform;
+        private RectTransform  _rootCanvasRect;
+        private Camera         _gameCamera;
+        private ParticleSystem _musicNoteParticles; // scene-level world-space object, injected
+        private Vector2        _restPosition;
+        private Sequence       _seq;
 
         // ── Unity ─────────────────────────────────────────────────────────────
 
@@ -77,13 +58,15 @@ namespace ThroneOfTides.Systems.VFX
         // ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Injected by CardVFXHandler after instantiation — these are scene objects
-        /// that cannot be serialized into the prefab.
+        /// Injected by CardVFXHandler after instantiation.
+        /// musicNoteParticles is a persistent scene-level world-space ParticleSystem —
+        /// sized once in the editor and repositioned each use. Never destroyed.
         /// </summary>
-        public void Inject(RectTransform canvasRect, Camera gameCamera)
+        public void Inject(RectTransform canvasRect, Camera gameCamera, ParticleSystem musicNoteParticles)
         {
-            _rootCanvasRect = canvasRect;
-            _gameCamera     = gameCamera;
+            _rootCanvasRect     = canvasRect;
+            _gameCamera         = gameCamera;
+            _musicNoteParticles = musicNoteParticles;
         }
 
         // Named StartSequence rather than Play to avoid conflict with DOTween's
@@ -92,8 +75,8 @@ namespace ThroneOfTides.Systems.VFX
         {
             PositionAtWorldPoint(worldPosition);
             _restPosition = _rectTransform.anchoredPosition;
+            PositionParticles();
             ResetVisuals();
-            DetachParticles();
             BuildSequence();
         }
 
@@ -103,38 +86,38 @@ namespace ThroneOfTides.Systems.VFX
         {
             Vector2 screenPoint = _gameCamera.WorldToScreenPoint(worldPosition);
 
-            // null camera converts correctly for Screen Space Overlay canvases
+            // null camera converts correctly for Screen Space Overlay canvases.
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _rootCanvasRect, screenPoint, null, out Vector2 localPoint);
 
             _rectTransform.anchoredPosition = localPoint + _canvasSpawnOffset;
         }
 
-        private void DetachParticles()
+        private void PositionParticles()
         {
-            // ParticleSystem cannot render inside a Screen Space Overlay canvas.
-            // Convert the siren's current screen position to a world position so
-            // particles appear at the correct location in the scene.
-            Vector3 screenPos  = RectTransformUtility.WorldToScreenPoint(null, _rectTransform.position);
-            screenPos.z        = _gameCamera.nearClipPlane + 1f;
-            Vector3 worldPos   = _gameCamera.ScreenToWorldPoint(screenPos);
+            // Convert MouthAnchor's screen position to world space so the particle
+            // system sits exactly at the siren's mouth regardless of canvas scale or
+            // resolution. null camera is correct for Screen Space Overlay.
+            // Z placed just in front of the game camera so particles are visible.
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(null, _mouthAnchor.position);
+            Vector3 worldPoint  = _gameCamera.ScreenToWorldPoint(
+                new Vector3(screenPoint.x, screenPoint.y, _gameCamera.nearClipPlane + 1f));
 
-            _musicNoteParticles.transform.SetParent(null);
-            _musicNoteParticles.transform.position = worldPos;
+            _musicNoteParticles.transform.position = worldPoint;
         }
 
         // ── Sequence ──────────────────────────────────────────────────────────
 
         private void BuildSequence()
         {
-            // Start above rest position — siren descends into frame while filling
-            // top-to-bottom, giving the illusion of emerging from the water surface.
-            // Image FillOrigin must be set to Top in the Inspector.
-            _rectTransform.anchoredPosition = _restPosition + new Vector2(0f, _riseDistance);
+            // Start below rest position — siren rises into frame while filling
+            // bottom-to-top, giving the illusion of emerging from the water.
+            // Image FillOrigin must be set to Bottom in the Inspector.
+            _rectTransform.anchoredPosition = _restPosition - new Vector2(0f, _riseDistance);
 
             _seq = DOTween.Sequence();
 
-            // Phase 1 — Surface: move downward to rest while filling 0→1.
+            // Phase 1 — Rise: move upward to rest while filling 0→1.
             // Explicit (float x) cast resolves DOTween.To overload ambiguity.
             _seq.Append(_rectTransform
                 .DOAnchorPosY(_restPosition.y, _riseDuration)
@@ -156,9 +139,9 @@ namespace ThroneOfTides.Systems.VFX
             // Phase 3 — Hold.
             _seq.AppendInterval(_holdDuration);
 
-            // Phase 4 — Sink: move upward while unfilling 1→0, reversing surface motion.
+            // Phase 4 — Sink: move downward while unfilling 1→0, reversing the rise.
             _seq.Append(_rectTransform
-                .DOAnchorPosY(_restPosition.y + _riseDistance, _sinkDuration)
+                .DOAnchorPosY(_restPosition.y - _riseDistance, _sinkDuration)
                 .SetEase(_sinkEase));
             _seq.Join(DOTween.To(
                     () => _sirenImage.fillAmount,
@@ -166,11 +149,10 @@ namespace ThroneOfTides.Systems.VFX
                     0f, _sinkDuration)
                 .SetEase(_sinkEase));
 
-            // Phase 5 — Gone: destroy detached particle object and notify caller.
+            // Phase 5 — Gone: stop particles (scene object — never destroyed) and notify caller.
             _seq.AppendCallback(() =>
             {
-                _musicNoteParticles.Stop();
-                Destroy(_musicNoteParticles.gameObject);
+                _musicNoteParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 OnSequenceEnd?.Invoke();
             });
         }
@@ -180,9 +162,7 @@ namespace ThroneOfTides.Systems.VFX
         private void ResetVisuals()
         {
             _sirenImage.fillAmount = 0f;
-
-            if (_musicNoteParticles != null)
-                _musicNoteParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _musicNoteParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
     }
 }

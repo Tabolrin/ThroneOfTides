@@ -23,7 +23,7 @@ namespace ThroneOfTides.Tools
         // Cached query result and the time it was last refreshed.
         // FindObjectsByType is not free in larger scenes; limiting it to once per second
         // while the overlay is visible keeps repaint cost negligible.
-        private VFXSpawnPoint[] _cachedPoints    = new VFXSpawnPoint[0];
+        private VFXSpawnPosition[] _cachedPoints    = new VFXSpawnPosition[0];
         private double          _lastCacheTime   = -1.0;
         private const double    CacheIntervalSec = 1.0;
 
@@ -86,7 +86,7 @@ namespace ThroneOfTides.Tools
         private void RefreshCacheIfStale()
         {
             if (EditorApplication.timeSinceStartup - _lastCacheTime < CacheIntervalSec) return;
-            _cachedPoints  = Object.FindObjectsByType<VFXSpawnPoint>(FindObjectsSortMode.None);
+            _cachedPoints  = Object.FindObjectsByType<VFXSpawnPosition>(FindObjectsSortMode.None);
             _lastCacheTime = EditorApplication.timeSinceStartup;
         }
 
@@ -96,15 +96,15 @@ namespace ThroneOfTides.Tools
         // Using the attribute instead of OnDrawGizmos means gizmos render for all
         // VFXSpawnPoints in the scene regardless of which object is selected.
         [DrawGizmo(GizmoType.NonSelected | GizmoType.Selected | GizmoType.Pickable,
-            typeof(VFXSpawnPoint))]
-        private static void DrawVFXSpawnGizmo(VFXSpawnPoint point, GizmoType gizmoType)
+            typeof(VFXSpawnPosition))]
+        private static void DrawVFXSpawnGizmo(VFXSpawnPosition point, GizmoType gizmoType)
         {
             Color color = point.Type switch
             {
-                VFXSpawnPoint.SpawnPointType.ShipHit    => _hitColor,
-                VFXSpawnPoint.SpawnPointType.ShipDeck   => _deckColor,
-                VFXSpawnPoint.SpawnPointType.ShipFront  => _frontColor,
-                VFXSpawnPoint.SpawnPointType.SeaSurface => _surfaceColor,
+                VFXSpawnPosition.SpawnPositionType.ShipHit    => _hitColor,
+                VFXSpawnPosition.SpawnPositionType.ShipDeck   => _deckColor,
+                VFXSpawnPosition.SpawnPositionType.ShipFront  => _frontColor,
+                VFXSpawnPosition.SpawnPositionType.SeaSurface => _surfaceColor,
                 _                                       => Color.white
             };
 

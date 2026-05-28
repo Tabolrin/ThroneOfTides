@@ -6,6 +6,18 @@ using ThroneOfTides.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Assembly: ThroneOfTides.Systems
+// Location: Scripts/Systems/VFX/CardVFXHandler.cs
+// Attach to: VFXManager GameObject in scene
+//
+// Subscribes to GameEventBus and drives all in-game VFX and FEEL feedbacks.
+// All prefabs and MMF_Players are assigned in the Inspector — no hardcoded asset names.
+//
+// Creature VFX (Kraken, Siren) are handled by dedicated controllers that own their
+// own sequence lifecycle. This class spawns them, injects scene dependencies, and
+// wires their events so game logic remains decoupled from animation timing.
+// Both creatures can target either ship — pass DamageTarget to select the hit point.
+
 namespace ThroneOfTides.Systems
 {
     public class CardVFXHandler : MonoBehaviour
@@ -15,6 +27,9 @@ namespace ThroneOfTides.Systems
         [Header("Canvas & Camera (injected into creature prefabs at runtime)")]
         [SerializeField] private RectTransform _gameCanvasRect;
         [SerializeField] private Camera        _gameCamera;
+        // Empty world-space GameObject outside any Canvas — particles reparent here
+        // so they render correctly under a Screen Space Overlay canvas.
+        [SerializeField] private ParticleSystem _musicNoteParticles;
 
         [Header("Spawn Points")]
         [SerializeField] private Transform _playerShipHitPoint;
@@ -255,7 +270,7 @@ namespace ThroneOfTides.Systems
                 var controller = instance.GetComponent<VFX.SirenVFXController>();
                 if (controller == null) return;
 
-                controller.Inject(_gameCanvasRect, _gameCamera);
+                controller.Inject(_gameCanvasRect, _gameCamera, _musicNoteParticles);
                 controller.OnSirenReady  += GameEventBus.FireSirenSongActive;
                 controller.OnSequenceEnd += () => Destroy(instance);
                 controller.StartSequence(worldPosition);

@@ -5,24 +5,24 @@ using ThroneOfTides.Systems;
 
 namespace ThroneOfTides.Tools
 {
-    // Scene view overlay — appears when a GameObject with ShipOscillator is selected.
+    // Scene view overlay — appears when a GameObject with Oscillator is selected.
     // Allows live tuning of oscillation values with immediate visual feedback in Play Mode.
-    [Overlay(typeof(SceneView), "Ship Oscillator Tuner", true)]
+    [Overlay(typeof(SceneView), "Oscillator Tuner", true)]
     public class ShipOscillatorOverlay : IMGUIOverlay, ITransientOverlay
     {
         // Cached target and its SerializedObject.
         // SerializedObject creation is deferred and invalidated when the selection changes,
         // preventing a fresh heap allocation on every Scene view repaint.
-        private ShipOscillator  _cachedOscillator;
+        private Oscillator  _cachedOscillator;
         private SerializedObject _cachedSO;
 
-        // ITransientOverlay — only show when a ShipOscillator is selected
+        // ITransientOverlay — only show when a Oscillator is selected
         public bool visible
         {
             get
             {
                 if (Selection.activeGameObject == null) return false;
-                return Selection.activeGameObject.GetComponent<ShipOscillator>() != null;
+                return Selection.activeGameObject.GetComponent<Oscillator>() != null;
             }
         }
 
@@ -32,7 +32,7 @@ namespace ThroneOfTides.Tools
         {
             if (Selection.activeGameObject == null) return;
 
-            var oscillator = Selection.activeGameObject.GetComponent<ShipOscillator>();
+            var oscillator = Selection.activeGameObject.GetComponent<Oscillator>();
             if (oscillator == null) return;
 
             // Rebuild the SerializedObject only when the target has changed.
