@@ -50,7 +50,13 @@ namespace ThroneOfTides.App
             var playerDeck = new Deck(_playerDeckDefinition.BuildDeck(), _config.LowDeckThreshold);
             var enemyDeck  = new Deck(_activeCaptain.DeckDefinition.BuildDeck(), _config.LowDeckThreshold);
 
-            _gameState    = new GameState(_activeCaptain.HP, playerDeck, enemyDeck);
+            var originalSnapshot = _playerDeckDefinition.BuildDeck();
+            _gameState = new GameState(
+                _config.StartingHP,
+                _config.StartingMaxMana,
+                playerDeck,
+                enemyDeck,
+                originalSnapshot);
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
             var combatResolver = new CombatResolver(_gameState);
@@ -62,7 +68,7 @@ namespace ThroneOfTides.App
 
             _turnCoordinator.OnHPChanged  += RefreshHUD;
             _turnCoordinator.OnTurnChanged += RefreshHUD;
-            _turnCoordinator.OnShowDeadMansTurnPrompt += ShowDeadMansTurnPrompt;
+            _turnCoordinator.OnShowReactionPrompt += ShowReactionPrompt;
 
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
@@ -131,15 +137,6 @@ namespace ThroneOfTides.App
             DeckClickHandler.OnDeckClicked += OnDeckClicked;
         }
 
-        private void OnDestroy()
-        {
-            _inputActions.Gameplay.EndTurn.performed -= OnEndTurnPressed;
-            _inputActions.Dispose();
-            _endTurnButton.onClick.RemoveAllListeners();
-            DeckClickHandler.OnDeckClicked -= OnDeckClicked;
-            GameEventBus.ClearAllListeners();
-        }
-
         private void OnEndTurnPressed(InputAction.CallbackContext context) =>
             _turnCoordinator.EndTurn();
 
@@ -175,8 +172,8 @@ namespace ThroneOfTides.App
                     }));
         }
 
-        private void ShowDeadMansTurnPrompt(CardSO card, int damage, string blockCost,
-                                            System.Action onNegate, System.Action onTakeHit)
+        private void ShowReactionPrompt(CardSO card, int damage, string blockCost,
+            System.Action onNegate, System.Action onTakeHit)
         {
             _deadMansTurnPrompt.Show(card, damage, blockCost, onNegate, onTakeHit);
         }
@@ -214,5 +211,35 @@ namespace ThroneOfTides.App
 
         private void OnEnemyDeckStateChanged(DeckState state) =>
             Debug.Log($"Enemy deck: {state}");
+        
+        private void OnDestroy()
+        {
+            // Input
+            _inputActions.Gameplay.EndTurn.performed -= OnEndTurnPressed;
+            _inputActions.Dispose();
+
+            // TurnCoordinator events — not covered by ClearAllListeners
+            if (_turnCoordinator != null)
+            {
+                _turnCoordinator.OnHPChanged          -= RefreshHUD;
+                _turnCoordinator.OnTurnChanged        -= RefreshHUD;
+                _turnCoordinator.OnShowReactionPrompt -= ShowReactionPrompt;
+            }
+
+            // GameState events — not covered by ClearAllListeners
+            if (_gameState != null)
+            {
+                _gameState.PlayerDeck.OnDeckStateChanged -= OnPlayerDeckStateChanged;
+                _gameState.PlayerHand.OnHandStateChanged -= OnPlayerHandStateChanged;
+                _gameState.EnemyDeck.OnDeckStateChanged  -= OnEnemyDeckStateChanged;
+            }
+
+            // UI
+            _endTurnButton.onClick.RemoveAllListeners();
+            DeckClickHandler.OnDeckClicked -= OnDeckClicked;
+
+            // GameEventBus — clears all static events in one call
+            GameEventBus.ClearAllListeners();
+        }
     }
 }

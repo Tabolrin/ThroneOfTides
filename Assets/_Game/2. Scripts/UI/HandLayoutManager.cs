@@ -382,5 +382,18 @@ namespace ThroneOfTides.UI
             Destroy(view.gameObject);
             onComplete?.Invoke();
         }
+        
+        // ICard parameter matches interface — cast to CardSO internally
+        IEnumerator IHandLayoutManager.AnimateReactionDraw(ICard card)
+        {
+            var cardSO = card as CardSO;
+            if (cardSO == null) yield break;
+
+            // TODO: animate card from deck to reaction charge slot
+            // Requires _reactionSlotTransform reference — add once effects bar exists
+            // For now fires the charge event so GameState stays correct
+            GameEventBus.FireCardDrawn(card);
+            yield return null;
+        }
     }
 }

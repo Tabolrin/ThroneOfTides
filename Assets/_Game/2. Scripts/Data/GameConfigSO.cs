@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/Data/GameConfigSO.cs
 using UnityEngine;
 
 namespace ThroneOfTides.Data
@@ -6,14 +7,17 @@ namespace ThroneOfTides.Data
     public class GameConfigSO : ScriptableObject
     {
         [Header("Player")]
-        public int   StartingHP       = 30;
-        public int   MaxHandSize      = 5;
+        public int   StartingHP        = 30;
+        public int   MaxHandSize       = 5;
+
+        [Header("Mana")]
+        public int   StartingMaxMana   = 3;
 
         [Header("Deck")]
-        public int   LowDeckThreshold = 3;
+        public int   LowDeckThreshold  = 3;
 
         [Header("Layout")]
-        public float CardSpacing      = 1.0f;
+        public float CardSpacing       = 1.0f;
 
         [Header("Enemy")]
         public float EnemyThinkTimeMin = 0.8f;
