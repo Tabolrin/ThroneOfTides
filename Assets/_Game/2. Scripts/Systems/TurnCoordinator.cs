@@ -15,8 +15,6 @@ namespace ThroneOfTides.Systems
         private IHandLayoutManager _handLayout;
         private CombatResolver     _combatResolver;
         private GameConfigSO       _config;
-        // Prevents auto-draw firing on the first turn — opening hand is dealt by GameBootstrapper
-        private bool _autoDrawEnabled = false;
 
         public System.Action OnTurnChanged;
         public System.Action OnHPChanged;
@@ -42,8 +40,6 @@ namespace ThroneOfTides.Systems
             _config         = config;
 
             _gameState.OnEnemyTurnReady += OnEnemyTurnReady;
-            // Auto-draw activates after the first enemy turn completes
-            _autoDrawEnabled = false;
         }
 
         private void OnDestroy()
@@ -51,6 +47,8 @@ namespace ThroneOfTides.Systems
             if (_gameState != null)
                 _gameState.OnEnemyTurnReady -= OnEnemyTurnReady;
         }
+
+        // ── Player Actions ────────────────────────────────────────────────────
 
         public void EndTurn()
         {
@@ -73,10 +71,9 @@ namespace ThroneOfTides.Systems
             CardSO drawn = _gameState.PlayerDeck.Draw();
             if (drawn == null) return false;
 
-            // Reaction cards charge the effects bar instead of entering the hand
             if (drawn.CardType == CardType.Reaction)
             {
-                ChargeReactionCard(drawn);
+                ChargeReaction(drawn);
                 _gameState.SetHasDrawnThisTurn();
                 OnCardDrawn?.Invoke(drawn);
                 StartCoroutine(_handLayout.AnimateReactionDraw(drawn));
@@ -91,7 +88,7 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
-        // Secondary draw — used by Treasure Chest. Does not consume HasDrawnThisTurn.
+        // Does not consume HasDrawnThisTurn — used by Treasure Chest secondary draw
         public bool TryDrawCardSecondary()
         {
             if (_gameState.PlayerDeck.Count == 0) return false;
@@ -102,7 +99,7 @@ namespace ThroneOfTides.Systems
 
             if (drawn.CardType == CardType.Reaction)
             {
-                ChargeReactionCard(drawn);
+                ChargeReaction(drawn);
                 StartCoroutine(_handLayout.AnimateReactionDraw(drawn));
                 return true;
             }
@@ -113,29 +110,14 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
-        private void ChargeReactionCard(CardSO card)
-        {
-            if (card.Name == "Dead Man's Turn")
-                _gameState.AddDeadMansTurnCharge();
-            else if (card.Name == "Blood for Blood")
-                _gameState.AddBloodForBloodCharge();
-        }
-
-        public void Concede()
-        {
-            Debug.Log("Player conceded");
-            GameEventBus.FireMatchLoss();
-        }
-
         public void HandleCardPlayed(CardSO cardSO)
         {
             if (!_gameState.CanPlayCard(cardSO))
             {
-                Debug.Log($"Cannot play {cardSO.Name} — limit reached, draw required, or insufficient mana");
+                Debug.Log($"Cannot play {cardSO.Name} — check draw, mana, or play limit");
                 return;
             }
 
-            // Spend mana before resolving
             if (!_gameState.SpendPlayerMana(cardSO.ManaCost))
             {
                 Debug.Log($"Cannot play {cardSO.Name} — insufficient mana");
@@ -147,17 +129,36 @@ namespace ThroneOfTides.Systems
             _gameState.PlayerHand.RemoveCard(cardSO);
             _gameState.DiscardPlayerCard(cardSO);
 
+            _combatResolver.SetSecondaryDrawCallback(TryDrawCardSecondary);
+
             int damage = _combatResolver.ResolvePlayerCard(cardSO, _handLayout);
             if (damage > 0)
                 _gameState.ApplyDamage(DamageTarget.Enemy, damage);
 
             OnHPChanged?.Invoke();
 
-            if (_gameState.IsGameOver())
-            {
-                FireMatchResult();
-            }
+            if (_gameState.IsGameOver()) FireMatchResult();
         }
+
+        public void Concede()
+        {
+            Debug.Log("Player conceded");
+            GameEventBus.FireMatchLoss();
+        }
+
+        // ── Auto Draw ─────────────────────────────────────────────────────────
+
+        // Called at the end of each enemy turn. Short delay lets the turn
+        // transition visual settle before the card animates in.
+        // Not called on turn 1 — GameBootstrapper handles the opening hand deal.
+        private IEnumerator AutoDrawRoutine()
+        {
+            yield return new WaitForSeconds(0.3f);
+            TryDrawCard();
+            OnHPChanged?.Invoke();
+        }
+
+        // ── Enemy Turn ────────────────────────────────────────────────────────
 
         private void OnEnemyTurnReady() => StartCoroutine(EnemyTurnRoutine());
 
@@ -171,7 +172,6 @@ namespace ThroneOfTides.Systems
 
             if (_gameState.IsGameOver()) { FireMatchResult(); yield break; }
 
-            // Reset enemy mana at start of enemy turn
             _gameState.ResetEnemyMana();
 
             if (_gameState.EnemyHand.Count < _config.MaxHandSize)
@@ -184,19 +184,19 @@ namespace ThroneOfTides.Systems
             CardSO playedCard = _enemyAI.PickCard(
                 _gameState.EnemyHand.CardsSO,
                 damageCardPlayed: false,
-                actionCardPlayed: false);
+                actionCardPlayed: false,
+                enemyMana: _gameState.EnemyMana);
 
             if (playedCard == null)
             {
-                Debug.Log("Enemy has no valid card — skipping turn");
+                Debug.Log("Enemy has no playable card — skipping turn");
                 _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
                 OnTurnChanged?.Invoke();
+                StartCoroutine(AutoDrawRoutine());
                 yield break;
             }
 
-            // Spend enemy mana
             _gameState.SpendEnemyMana(playedCard.ManaCost);
-
             _gameState.EnemyHand.RemoveCard(playedCard);
             _gameState.DiscardEnemyCard(playedCard);
 
@@ -218,112 +218,110 @@ namespace ThroneOfTides.Systems
 
             _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
             OnTurnChanged?.Invoke();
-            _autoDrawEnabled = true;
             StartCoroutine(AutoDrawRoutine());
         }
 
-        // Separated from EnemyTurnRoutine for clarity — handles all reaction logic
         private IEnumerator ResolveEnemyAttack(CardSO attackCard)
         {
-            bool isKraken     = attackCard.Name == "The Kraken";
+            bool isKraken      = attackCard.Name == "The Kraken";
             bool isUnblockable = _gameState.SirenSongActive || isKraken;
+            bool hasDMT        = _gameState.DeadMansTurnCharges > 0;
+            bool hasBFB        = _gameState.BloodForBloodCharges > 0;
 
-            // The Kraken is blockable only by another Kraken — handled separately
-            bool hasDMT = _gameState.DeadMansTurnCharges > 0;
-            bool hasBFB = _gameState.BloodForBloodCharges > 0;
-
-            // Kraken cannot be countered by DMT or BFB
-            bool canReact = !isKraken && !_gameState.SirenSongActive && (hasDMT || hasBFB);
-
-            // Kraken vs Kraken — separate prompt
             bool playerHasKraken = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "The Kraken");
             if (isKraken && playerHasKraken)
             {
-                bool wasNegated  = false;
-                bool playerChose = false;
-
-                OnShowReactionPrompt?.Invoke(
-                    attackCard, attackCard.Damage,
-                    "The Kraken (3 HP + 33% materials)",
-                    () => { wasNegated = true;  playerChose = true; },
-                    () => { wasNegated = false; playerChose = true; });
-
-                yield return new WaitUntil(() => playerChose);
-
-                if (wasNegated)
-                {
-                    CardSO krakenCard = _gameState.PlayerHand.CardsSO
-                        .FirstOrDefault(c => c.Name == "The Kraken");
-                    if (krakenCard != null)
-                    {
-                        _gameState.PlayerHand.RemoveCard(krakenCard);
-                        _gameState.NotifyPlayerCardRemoved(krakenCard);
-                        _gameState.DiscardPlayerCard(krakenCard);
-                        _gameState.ApplyDamage(DamageTarget.Player, 3);
-                        // TODO: deduct 33% materials when material system is built
-                    }
-                    Debug.Log("Kraken negated by player Kraken");
-                }
-                else
-                {
-                    _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
-                }
+                yield return StartCoroutine(KrakenVsKrakenPrompt(attackCard));
                 yield break;
             }
 
-            // Normal attack with possible reactions
+            bool canReact = !isUnblockable && (hasDMT || hasBFB);
+
             if (canReact)
+                yield return StartCoroutine(ReactionPrompt(attackCard, hasDMT, hasBFB));
+            else
             {
-                // Build prompt label from available reactions
-                string reactionLabel = hasDMT && hasBFB
-                    ? "Dead Man's Turn (negate) or Blood for Blood (reflect half)"
-                    : hasDMT ? "Dead Man's Turn" : "Blood for Blood";
+                _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
+                Debug.Log($"Enemy attack — {attackCard.Name}: {attackCard.Damage} dmg");
+            }
+        }
 
-                bool usedReaction = false;
-                bool playerChose  = false;
-                bool usedDMT      = false;
+        private IEnumerator KrakenVsKrakenPrompt(CardSO attackCard)
+        {
+            bool wasNegated  = false;
+            bool playerChose = false;
 
-                OnShowReactionPrompt?.Invoke(
-                    attackCard, attackCard.Damage,
-                    reactionLabel,
-                    () =>
-                    {
-                        // Player chose to react — prefer DMT if both available
-                        usedDMT      = hasDMT;
-                        usedReaction = true;
-                        playerChose  = true;
-                    },
-                    () => { playerChose = true; });
+            OnShowReactionPrompt?.Invoke(
+                attackCard, attackCard.Damage,
+                "The Kraken (3 HP + 33% materials)",
+                () => { wasNegated = true;  playerChose = true; },
+                () => { wasNegated = false; playerChose = true; });
 
-                yield return new WaitUntil(() => playerChose);
+            yield return new WaitUntil(() => playerChose);
 
-                if (usedReaction)
+            if (wasNegated)
+            {
+                CardSO krakenCard = _gameState.PlayerHand.CardsSO
+                    .FirstOrDefault(c => c.Name == "The Kraken");
+                if (krakenCard != null)
                 {
-                    if (usedDMT && _gameState.ConsumeDeadMansTurn())
-                    {
-                        Debug.Log("Dead Man's Turn — attack negated");
-                        // No damage applied
-                    }
-                    else if (_gameState.ConsumeBloodForBlood())
-                    {
-                        int reflected = _combatResolver.ResolveBloodForBlood(attackCard.Damage);
-                        _gameState.ApplyDamage(DamageTarget.Enemy, reflected);
-                        Debug.Log($"Blood for Blood — reflected {reflected} damage");
-                        // Player still takes full damage — cannot be cancelled
-                        _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
-                    }
+                    _gameState.PlayerHand.RemoveCard(krakenCard);
+                    _gameState.NotifyPlayerCardRemoved(krakenCard);
+                    _gameState.DiscardPlayerCard(krakenCard);
+                    _gameState.ApplyDamage(DamageTarget.Player, 3);
+                    // TODO: deduct 33% materials when material system is built
                 }
-                else
-                {
-                    _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
-                    Debug.Log($"No reaction — took {attackCard.Damage} damage");
-                }
+                Debug.Log("Kraken negated by player Kraken");
             }
             else
             {
                 _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
-                Debug.Log($"Enemy played: {attackCard.Name} — {attackCard.Damage} damage");
             }
+        }
+
+        private IEnumerator ReactionPrompt(CardSO attackCard, bool hasDMT, bool hasBFB)
+        {
+            string label = hasDMT && hasBFB
+                ? "Dead Man's Turn (negate) | Blood for Blood (reflect half)"
+                : hasDMT ? "Dead Man's Turn (negate)"
+                         : "Blood for Blood (reflect half)";
+
+            bool usedReaction = false;
+            bool usedDMT      = false;
+            bool playerChose  = false;
+
+            OnShowReactionPrompt?.Invoke(
+                attackCard, attackCard.Damage, label,
+                () => { usedReaction = true; usedDMT = hasDMT; playerChose = true; },
+                () => { playerChose = true; });
+
+            yield return new WaitUntil(() => playerChose);
+
+            if (!usedReaction)
+            {
+                _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
+                yield break;
+            }
+
+            if (usedDMT && _gameState.ConsumeDeadMansTurn())
+            {
+                Debug.Log("Dead Man's Turn fired — attack negated");
+            }
+            else if (_gameState.ConsumeBloodForBlood())
+            {
+                int reflected = _combatResolver.ResolveBloodForBlood(attackCard.Damage);
+                _gameState.ApplyDamage(DamageTarget.Enemy, reflected);
+                _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
+                Debug.Log($"Blood for Blood fired — reflected {reflected}, took {attackCard.Damage}");
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        private void ChargeReaction(CardSO card)
+        {
+            if (card.Name == "Dead Man's Turn")      _gameState.AddDeadMansTurnCharge();
+            else if (card.Name == "Blood for Blood") _gameState.AddBloodForBloodCharge();
         }
 
         private void FireMatchResult()
@@ -332,15 +330,6 @@ namespace ThroneOfTides.Systems
                 GameEventBus.FireMatchWin();
             else
                 GameEventBus.FireMatchLoss();
-        }
-        
-        // Draws one card automatically at the start of each player turn after turn 1.
-// Short delay lets the turn transition animation settle before the card flies in.
-        private IEnumerator AutoDrawRoutine()
-        {
-            yield return new WaitForSeconds(0.3f);
-            TryDrawCard();
-            OnHPChanged?.Invoke();
         }
     }
 }

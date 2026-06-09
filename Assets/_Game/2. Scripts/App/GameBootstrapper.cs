@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/App/GameBootstrapper.cs
 using System.Collections;
 using System.Collections.Generic;
 using ThroneOfTides.Core;
@@ -26,7 +27,7 @@ namespace ThroneOfTides.App
         [SerializeField] private ResultsPanel          _resultsPanel;
         [SerializeField] private TurnCoordinator       _turnCoordinator;
 
-        [Header("Captain - fallback for testing without level select")]
+        [Header("Captain — fallback for testing without level select")]
         [SerializeField] private CaptainSO _fallbackCaptain;
 
         private GameState                 _gameState;
@@ -47,16 +48,19 @@ namespace ThroneOfTides.App
         {
             _activeCaptain = GameSession.SelectedCaptain ?? _fallbackCaptain;
 
-            var playerDeck = new Deck(_playerDeckDefinition.BuildDeck(), _config.LowDeckThreshold);
-            var enemyDeck  = new Deck(_activeCaptain.DeckDefinition.BuildDeck(), _config.LowDeckThreshold);
-
+            // Snapshot before Deck constructor shuffles — Treasure Chest reads original order
             var originalSnapshot = _playerDeckDefinition.BuildDeck();
+            var playerDeck       = new Deck(originalSnapshot, _config.LowDeckThreshold);
+            var enemyDeck        = new Deck(
+                _activeCaptain.DeckDefinition.BuildDeck(), _config.LowDeckThreshold);
+
             _gameState = new GameState(
                 _config.StartingHP,
                 _config.StartingMaxMana,
                 playerDeck,
                 enemyDeck,
                 originalSnapshot);
+
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
             var combatResolver = new CombatResolver(_gameState);
@@ -66,8 +70,8 @@ namespace ThroneOfTides.App
                 _gameState, _stateMachine, enemyAI,
                 _handLayoutManager, combatResolver, _config);
 
-            _turnCoordinator.OnHPChanged  += RefreshHUD;
-            _turnCoordinator.OnTurnChanged += RefreshHUD;
+            _turnCoordinator.OnHPChanged          += RefreshHUD;
+            _turnCoordinator.OnTurnChanged        += RefreshHUD;
             _turnCoordinator.OnShowReactionPrompt += ShowReactionPrompt;
 
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
@@ -76,14 +80,11 @@ namespace ThroneOfTides.App
             DealOpeningHand();
 
             _endTurnButton.onClick.AddListener(() => _turnCoordinator.EndTurn());
-
-            // Initial HUD refresh — turn indicator shows correct state from frame 1
             RefreshHUD();
         }
 
         private void DealOpeningHand()
         {
-            // Enemy hand — instant, no animation needed
             for (int i = 0; i < _config.MaxHandSize; i++)
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
@@ -92,7 +93,6 @@ namespace ThroneOfTides.App
                 _handLayoutManager.AddCardToEnemyHand(card);
             }
 
-            // Player hand — animated, input blocked until all cards land
             StartCoroutine(DealPlayerOpeningHandRoutine());
         }
 
@@ -101,24 +101,44 @@ namespace ThroneOfTides.App
             _endTurnButton.interactable = false;
             DeckClickHandler.OnDeckClicked -= OnDeckClicked;
 
-            // All GameState interaction stays in App — UI assembly receives plain CardSO list
-            var cards = new List<CardSO>();
+            var normalCards    = new List<CardSO>();
+            var reactionCards  = new List<CardSO>();
+
             for (int i = 0; i < _config.MaxHandSize; i++)
             {
                 CardSO card = _gameState.PlayerDeck.Draw();
                 if (card == null) break;
-                _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
-                cards.Add(card);
+
+                if (card.CardType == CardType.Reaction)
+                    reactionCards.Add(card);
+                else
+                {
+                    _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
+                    normalCards.Add(card);
+                }
             }
 
-            // Mark draw consumed so first player turn starts ready to play
+            // Charge reactions into GameState before animation starts
+            foreach (var card in reactionCards)
+                ChargeReactionCard(card);
+
             _gameState.SetHasDrawnThisTurn();
 
-            yield return StartCoroutine(_handLayoutManager.DealOpeningHandAnimated(cards));
+            // Animate normal cards into hand
+            yield return StartCoroutine(_handLayoutManager.DealOpeningHandAnimated(normalCards));
 
-            // Re-enable input only after all cards have landed
+            // Animate reaction cards to charge slot after hand is dealt
+            foreach (var card in reactionCards)
+                yield return StartCoroutine(_handLayoutManager.AnimateReactionDraw(card));
+
             DeckClickHandler.OnDeckClicked += OnDeckClicked;
             RefreshHUD();
+        }
+
+        private void ChargeReactionCard(CardSO card)
+        {
+            if (card.Name == "Dead Man's Turn")      _gameState.AddDeadMansTurnCharge();
+            else if (card.Name == "Blood for Blood") _gameState.AddBloodForBloodCharge();
         }
 
         private void Update() => _stateMachine?.Tick();
@@ -135,6 +155,30 @@ namespace ThroneOfTides.App
             GameEventBus.OnMatchLoss       += OnMatchLoss;
 
             DeckClickHandler.OnDeckClicked += OnDeckClicked;
+        }
+
+        private void OnDestroy()
+        {
+            _inputActions.Gameplay.EndTurn.performed -= OnEndTurnPressed;
+            _inputActions.Dispose();
+
+            if (_turnCoordinator != null)
+            {
+                _turnCoordinator.OnHPChanged          -= RefreshHUD;
+                _turnCoordinator.OnTurnChanged        -= RefreshHUD;
+                _turnCoordinator.OnShowReactionPrompt -= ShowReactionPrompt;
+            }
+
+            if (_gameState != null)
+            {
+                _gameState.PlayerDeck.OnDeckStateChanged -= OnPlayerDeckStateChanged;
+                _gameState.PlayerHand.OnHandStateChanged -= OnPlayerHandStateChanged;
+                _gameState.EnemyDeck.OnDeckStateChanged  -= OnEnemyDeckStateChanged;
+            }
+
+            _endTurnButton.onClick.RemoveAllListeners();
+            DeckClickHandler.OnDeckClicked -= OnDeckClicked;
+            GameEventBus.ClearAllListeners();
         }
 
         private void OnEndTurnPressed(InputAction.CallbackContext context) =>
@@ -166,14 +210,12 @@ namespace ThroneOfTides.App
         {
             yield return StartCoroutine(
                 _handLayoutManager.PlayEnemyCardAnimation(
-                    card, _playZone, () =>
-                    {
-                        GameEventBus.OnEnemyCardAnimationComplete?.Invoke();
-                    }));
+                    card, _playZone,
+                    () => GameEventBus.OnEnemyCardAnimationComplete?.Invoke()));
         }
 
         private void ShowReactionPrompt(CardSO card, int damage, string blockCost,
-            System.Action onNegate, System.Action onTakeHit)
+                                        System.Action onNegate, System.Action onTakeHit)
         {
             _deadMansTurnPrompt.Show(card, damage, blockCost, onNegate, onTakeHit);
         }
@@ -181,13 +223,13 @@ namespace ThroneOfTides.App
         private void RefreshHUD()
         {
             _gameHUD.Refresh(
-                _gameState.PlayerHP, _config.StartingHP,
-                _gameState.EnemyHP,  _config.StartingHP,
+                _gameState.PlayerHP,    _config.StartingHP,
+                _gameState.EnemyHP,     _config.StartingHP,
                 _gameState.PlayerDeck.Count,
-                _gameState.IsPlayerTurn);
+                _gameState.IsPlayerTurn,
+                _gameState.PlayerMana,
+                _gameState.PlayerMaxMana);
 
-            // End turn only available after drawing — opening deal sets HasDrawnThisTurn
-            // so button is active from turn 1 once animation completes
             _endTurnButton.interactable = _gameState.IsPlayerTurn;
         }
 
@@ -211,35 +253,5 @@ namespace ThroneOfTides.App
 
         private void OnEnemyDeckStateChanged(DeckState state) =>
             Debug.Log($"Enemy deck: {state}");
-        
-        private void OnDestroy()
-        {
-            // Input
-            _inputActions.Gameplay.EndTurn.performed -= OnEndTurnPressed;
-            _inputActions.Dispose();
-
-            // TurnCoordinator events — not covered by ClearAllListeners
-            if (_turnCoordinator != null)
-            {
-                _turnCoordinator.OnHPChanged          -= RefreshHUD;
-                _turnCoordinator.OnTurnChanged        -= RefreshHUD;
-                _turnCoordinator.OnShowReactionPrompt -= ShowReactionPrompt;
-            }
-
-            // GameState events — not covered by ClearAllListeners
-            if (_gameState != null)
-            {
-                _gameState.PlayerDeck.OnDeckStateChanged -= OnPlayerDeckStateChanged;
-                _gameState.PlayerHand.OnHandStateChanged -= OnPlayerHandStateChanged;
-                _gameState.EnemyDeck.OnDeckStateChanged  -= OnEnemyDeckStateChanged;
-            }
-
-            // UI
-            _endTurnButton.onClick.RemoveAllListeners();
-            DeckClickHandler.OnDeckClicked -= OnDeckClicked;
-
-            // GameEventBus — clears all static events in one call
-            GameEventBus.ClearAllListeners();
-        }
     }
 }

@@ -383,15 +383,17 @@ namespace ThroneOfTides.UI
             onComplete?.Invoke();
         }
         
-        // ICard parameter matches interface — cast to CardSO internally
-        IEnumerator IHandLayoutManager.AnimateReactionDraw(ICard card)
-        {
-            var cardSO = card as CardSO;
-            if (cardSO == null) yield break;
+        // Explicit interface — ICard parameter, delegates to public CardSO method
+        IEnumerator IHandLayoutManager.AnimateReactionDraw(ICard card) =>
+            AnimateReactionDraw(card as CardSO);
 
-            // TODO: animate card from deck to reaction charge slot
-            // Requires _reactionSlotTransform reference — add once effects bar exists
-            // For now fires the charge event so GameState stays correct
+// Public method — accessible from concrete type references (GameBootstrapper)
+        public IEnumerator AnimateReactionDraw(CardSO card)
+        {
+            if (card == null) yield break;
+
+            // TODO: full shrink-to-slot animation once ReactionsBar exists in scene
+            // Requires _reactionSlotTransform to be wired in Inspector
             GameEventBus.FireCardDrawn(card);
             yield return null;
         }

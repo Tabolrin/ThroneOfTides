@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/UI/GameHUD.cs
 using TMPro;
 using UnityEngine;
 
@@ -9,15 +10,20 @@ namespace ThroneOfTides.UI
         [SerializeField] private TextMeshProUGUI _deckCountLabel;
         [SerializeField] private TextMeshProUGUI _playerHPLabel;
         [SerializeField] private TextMeshProUGUI _enemyHPLabel;
+        [SerializeField] private TextMeshProUGUI _playerManaLabel;
 
-        public void Refresh(int playerHP, int maxPlayerHP,
-            int enemyHP,  int maxEnemyHP,
-            int deckCount, bool isPlayerTurn)
+        public void Refresh(int playerHP,   int maxPlayerHP,
+            int enemyHP,    int maxEnemyHP,
+            int deckCount,  bool isPlayerTurn,
+            int playerMana, int playerMaxMana)
         {
             _playerHPLabel.text  = $"HP: {playerHP} / {maxPlayerHP}";
             _enemyHPLabel.text   = $"HP: {enemyHP} / {maxEnemyHP}";
             _deckCountLabel.text = $"Deck: {deckCount}";
             _turnIndicator.text  = isPlayerTurn ? "Your Turn" : "Enemy Turn";
+
+            if (_playerManaLabel != null)
+                _playerManaLabel.text = $"Mana: {playerMana} / {playerMaxMana}";
         }
     }
 }

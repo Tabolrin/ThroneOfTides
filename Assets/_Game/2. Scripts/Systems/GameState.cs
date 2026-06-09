@@ -23,7 +23,7 @@ namespace ThroneOfTides.Systems
 
         private readonly int _maxHP;
 
-        // ── Mana ─────────────────────────────────────────────────────────────
+        // ── Mana ──────────────────────────────────────────────────────────────
         public int PlayerMana    { get; private set; }
         public int PlayerMaxMana { get; private set; }
         public int EnemyMana     { get; private set; }
@@ -46,24 +46,17 @@ namespace ThroneOfTides.Systems
         public int DeadMansTurnCharges  { get; private set; }
         public int BloodForBloodCharges { get; private set; }
 
-        // ── Discard ───────────────────────────────────────────────────────────
-        private readonly List<CardSO>    _playerDiscard = new List<CardSO>();
-        private readonly List<CardSO>    _enemyDiscard  = new List<CardSO>();
-        private readonly List<DotEffect> _dotEffects    = new List<DotEffect>();
+        // ── Discard & Snapshot ────────────────────────────────────────────────
+        private readonly List<CardSO>    _playerDiscard       = new List<CardSO>();
+        private readonly List<CardSO>    _enemyDiscard        = new List<CardSO>();
+        private readonly List<DotEffect> _dotEffects          = new List<DotEffect>();
+        private readonly List<CardSO>    _originalDeckSnapshot;
 
-        // Snapshot of the player's deck as configured before the match starts.
-        // Used by Treasure Chest to return cards from the original configuration.
-        private readonly List<CardSO> _originalDeckSnapshot;
-
-        public IReadOnlyList<CardSO> PlayerDiscard      => _playerDiscard.AsReadOnly();
-        public IReadOnlyList<CardSO> EnemyDiscard       => _enemyDiscard.AsReadOnly();
+        public IReadOnlyList<CardSO> PlayerDiscard        => _playerDiscard.AsReadOnly();
+        public IReadOnlyList<CardSO> EnemyDiscard         => _enemyDiscard.AsReadOnly();
         public IReadOnlyList<CardSO> OriginalDeckSnapshot => _originalDeckSnapshot.AsReadOnly();
 
         public Action OnEnemyTurnReady;
-
-        public bool DeadMansTurnActive { get; private set; }
-        public void SetDeadMansTurnActive() => DeadMansTurnActive = true;
-        public void ClearDeadMansTurn()     => DeadMansTurnActive = false;
 
         public GameState(int startingHP, int startingMaxMana,
                          Deck playerDeck, Deck enemyDeck,
@@ -139,47 +132,36 @@ namespace ThroneOfTides.Systems
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
-        // Steals amount from enemy mana and adds to player mana this turn.
-        // Enemy mana floor is 1 — cannot be drained to 0.
+        // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind
         public void StealEnemyMana(int amount)
         {
-            int actualSteal = Mathf.Min(amount, EnemyMana - 1);
-            if (actualSteal <= 0) return;
-            EnemyMana  -= actualSteal;
-            PlayerMana += actualSteal;
+            int actual = Mathf.Min(amount, EnemyMana - 1);
+            if (actual <= 0) return;
+            EnemyMana  -= actual;
+            PlayerMana += actual;
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
         // ── Reactions ─────────────────────────────────────────────────────────
 
-        public void AddReactionCharge(CardType reactionType)
-        {
-            if (reactionType == CardType.Reaction)
-            {
-                // Generic — should not be called with base Reaction type
-                return;
-            }
-        }
-
-        // Named methods for each reaction type — cleaner than a generic switch
         public void AddDeadMansTurnCharge()
         {
             DeadMansTurnCharges++;
-            GameEventBus.FireReactionCharged(CardType.Reaction, DeadMansTurnCharges);
+            GameEventBus.FireReactionCharged(ReactionType.DeadMansTurn, DeadMansTurnCharges);
         }
 
         public void AddBloodForBloodCharge()
         {
             BloodForBloodCharges++;
-            GameEventBus.FireReactionCharged(CardType.Reaction, BloodForBloodCharges);
+            GameEventBus.FireReactionCharged(ReactionType.BloodForBlood, BloodForBloodCharges);
         }
 
         public bool ConsumeDeadMansTurn()
         {
             if (DeadMansTurnCharges <= 0) return false;
             DeadMansTurnCharges--;
-            GameEventBus.FireReactionFired(CardType.Reaction);
+            GameEventBus.FireReactionFired(ReactionType.DeadMansTurn);
             return true;
         }
 
@@ -187,7 +169,7 @@ namespace ThroneOfTides.Systems
         {
             if (BloodForBloodCharges <= 0) return false;
             BloodForBloodCharges--;
-            GameEventBus.FireReactionFired(CardType.Reaction);
+            GameEventBus.FireReactionFired(ReactionType.BloodForBlood);
             return true;
         }
 
@@ -235,12 +217,9 @@ namespace ThroneOfTides.Systems
 
         public bool CanPlayCard(CardSO card)
         {
-            if (!HasDrawnThisTurn) return false;
-
-            // Reaction cards are charged on draw — never played from hand normally
+            if (!HasDrawnThisTurn)                  return false;
             if (card.CardType == CardType.Reaction) return false;
-
-            if (PlayerMana < card.ManaCost) return false;
+            if (PlayerMana < card.ManaCost)          return false;
 
             if (card.CardType == CardType.Action)
                 return !ActionCardPlayedThisTurn && card.IsEligibleAsActionPair;
@@ -333,8 +312,6 @@ namespace ThroneOfTides.Systems
             return retrieved;
         }
 
-        // Returns N random cards from the original deck snapshot for Treasure Chest.
-        // Does not remove from snapshot — the snapshot is permanent reference data.
         public List<CardSO> GetRandomFromSnapshot(int count)
         {
             var pool   = new List<CardSO>(_originalDeckSnapshot);

@@ -9,6 +9,13 @@ namespace ThroneOfTides.Systems
     {
         private readonly GameState _gameState;
 
+        // Set by TurnCoordinator before each card resolution.
+        // Allows effect SOs to trigger secondary draws without assembly boundary issues.
+        private System.Func<bool> _secondaryDrawCallback;
+
+        public void SetSecondaryDrawCallback(System.Func<bool> callback)
+            => _secondaryDrawCallback = callback;
+
         public CombatResolver(GameState gameState)
         {
             _gameState = gameState;
@@ -16,31 +23,28 @@ namespace ThroneOfTides.Systems
 
         public int ResolvePlayerCard(CardSO card, IHandLayoutManager handLayout)
         {
-            // Pay HP cost before resolving — applies to Ram the Hull, Stolen Wind
             if (card.HPCost > 0)
             {
                 _gameState.ApplyDamage(DamageTarget.Player, card.HPCost);
-                Debug.Log($"{card.Name} — paid {card.HPCost} HP cost");
+                Debug.Log($"{card.Name} — paid {card.HPCost} HP");
             }
 
             switch (card.CardType)
             {
                 case CardType.Combo:    return ResolveCombo(card);
                 case CardType.DOT:      return ResolveDOT(card);
-                case CardType.Action:   return ResolveAction(card, handLayout);
-                case CardType.Reaction: return ResolveReaction(card, handLayout);
+                case CardType.Action:   return ResolveEffect(card, handLayout);
+                case CardType.Reaction: return ResolveEffect(card, handLayout);
                 case CardType.Weapon:   return ResolveWeapon(card);
                 default:                return card.Damage;
             }
         }
 
-        // Resolves Blood for Blood damage reflection — called by TurnCoordinator
-        // during enemy attack resolution, not via the normal card play path.
         public int ResolveBloodForBlood(int incomingDamage)
         {
-            int reflectedDamage = Mathf.FloorToInt(incomingDamage * 0.5f);
-            Debug.Log($"Blood for Blood — reflecting {reflectedDamage} damage");
-            return reflectedDamage;
+            int reflected = Mathf.FloorToInt(incomingDamage * 0.5f);
+            Debug.Log($"Blood for Blood — reflecting {reflected} damage");
+            return reflected;
         }
 
         // ── Private ───────────────────────────────────────────────────────────
@@ -55,11 +59,11 @@ namespace ThroneOfTides.Systems
             }
             if (_gameState.ComboStackCount > 0 && _gameState.ActiveComboCard != null)
             {
-                int comboDamage = _gameState.ResolveCombo();
-                Debug.Log($"Combo resolved — damage: {comboDamage}");
-                return comboDamage;
+                int damage = _gameState.ResolveCombo();
+                Debug.Log($"Combo resolved — damage: {damage}");
+                return damage;
             }
-            Debug.Log("Torch with no active Gunpowder — base damage only");
+            Debug.Log("Torch with no active combo — base damage only");
             return card.Damage;
         }
 
@@ -67,33 +71,19 @@ namespace ThroneOfTides.Systems
         {
             _gameState.AddDotEffect(
                 new DotEffect(DamageTarget.Enemy, card.DotDamagePerTurn, card.DotDuration));
-            Debug.Log($"DOT applied — {card.DotDamagePerTurn} dmg for {card.DotDuration} turns");
+            Debug.Log($"DOT applied — {card.DotDamagePerTurn} dmg × {card.DotDuration} turns");
             return 0;
         }
 
-        private int ResolveAction(CardSO card, IHandLayoutManager handLayout)
+        private int ResolveEffect(CardSO card, IHandLayoutManager handLayout)
         {
-            if (card.ActionEffect != null)
+            if (card.ActionEffect == null)
             {
-                var context = new CardEffectContext(_gameState, handLayout);
-                card.ActionEffect.Execute(context);
+                Debug.LogWarning($"{card.Name} has no ActionEffect assigned");
+                return 0;
             }
-            else
-                Debug.LogWarning($"Action card {card.Name} has no ActionEffect assigned");
-            return 0;
-        }
-
-        private int ResolveReaction(CardSO card, IHandLayoutManager handLayout)
-        {
-            // Reaction cards route through ActionEffect same as Action cards.
-            // The effect SO adds a charge to GameState rather than having an immediate effect.
-            if (card.ActionEffect != null)
-            {
-                var context = new CardEffectContext(_gameState, handLayout);
-                card.ActionEffect.Execute(context);
-            }
-            else
-                Debug.LogWarning($"Reaction card {card.Name} has no ActionEffect assigned");
+            var context = new CardEffectContext(_gameState, handLayout, _secondaryDrawCallback);
+            card.ActionEffect.Execute(context);
             return 0;
         }
 
@@ -102,16 +92,11 @@ namespace ThroneOfTides.Systems
             switch (card.Name)
             {
                 case "Ram the Hull":
-                    // HP cost already paid above — just log the shake TODO
-                    // TODO: fire ship shake VFX event when VFX system is wired
-                    Debug.Log("Ram the Hull — both ships shake on resolution");
+                    // HP cost deducted above — ship shake TODO when VFX event defined
                     break;
-
                 case "Chain Shot":
-                    // Discard 1 random card from enemy hand — player cannot see which
                     DiscardRandomEnemyCard();
                     break;
-
                 case "Tidal Wave":
                     if (_gameState.ComboStackCount > 0)
                     {
@@ -132,7 +117,7 @@ namespace ThroneOfTides.Systems
             CardSO card  = hand[index];
             _gameState.EnemyHand.RemoveCard(card);
             _gameState.DiscardEnemyCard(card);
-            Debug.Log("Chain Shot — discarded 1 enemy card (hidden from player)");
+            Debug.Log("Chain Shot — discarded 1 enemy card");
         }
     }
 }

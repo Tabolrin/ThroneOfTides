@@ -9,6 +9,7 @@ namespace ThroneOfTides.Systems
     {
         private readonly GameState          _gameState;
         private readonly IHandLayoutManager _handLayout;
+        private readonly System.Func<bool>  _secondaryDraw;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
@@ -18,10 +19,12 @@ namespace ThroneOfTides.Systems
         public int PlayerMaxMana   => _gameState.PlayerMaxMana;
         public int EnemyMana       => _gameState.EnemyMana;
 
-        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout)
+        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout,
+                                 System.Func<bool> secondaryDraw = null)
         {
-            _gameState  = gameState;
-            _handLayout = handLayout;
+            _gameState     = gameState;
+            _handLayout    = handLayout;
+            _secondaryDraw = secondaryDraw;
         }
 
         public void ApplyDamage(DamageTarget target, int amount) =>
@@ -32,9 +35,6 @@ namespace ThroneOfTides.Systems
 
         public void SetSirenActive() =>
             _gameState.SetSirenActive();
-
-        public void SetDeadMansTurnActive() =>
-            _gameState.SetDeadMansTurnActive();
 
         public void ApplyDot(DamageTarget target, int damagePerTurn, int turns) =>
             _gameState.AddDotEffect(new DotEffect(target, damagePerTurn, turns));
@@ -48,7 +48,6 @@ namespace ThroneOfTides.Systems
         public void StealEnemyMana(int amount) =>
             _gameState.StealEnemyMana(amount);
 
-        // These are on the interface so Data effect SOs never need to reference Systems
         public void AddDeadMansTurnCharge() =>
             _gameState.AddDeadMansTurnCharge();
 
@@ -61,6 +60,8 @@ namespace ThroneOfTides.Systems
             foreach (var card in cards)
                 _gameState.PlayerDeck.ReturnCard(card);
         }
+
+        public void DrawOneCard() => _secondaryDraw?.Invoke();
 
         public void AddCardToPlayerHand(ICard card)
         {

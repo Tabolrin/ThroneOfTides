@@ -16,7 +16,6 @@ namespace ThroneOfTides.Core
         void ApplyDamage(DamageTarget target, int amount);
         void HealPlayer(int amount);
         void SetSirenActive();
-        void SetDeadMansTurnActive();
         void ApplyDot(DamageTarget target, int damagePerTurn, int turns);
         void AddCardToPlayerHand(ICard card);
         void StealFromEnemyHand();
@@ -24,13 +23,10 @@ namespace ThroneOfTides.Core
         void SpendPlayerMana(int amount);
         void AddPlayerMaxMana(int amount);
         void StealEnemyMana(int amount);
-
-        // Reaction charges — on interface so Data effect SOs can call without casting
         void AddDeadMansTurnCharge();
         void AddBloodForBloodCharge();
-
-        // Treasure Chest — returns cards from original deck snapshot into runtime deck
         void ReturnFromSnapshot(int count);
+        void DrawOneCard();
 
         IReadOnlyList<ICard> GetEnemyHand();
         IReadOnlyList<ICard> GetPlayerHand();
