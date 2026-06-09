@@ -7,10 +7,12 @@ namespace ThroneOfTides.Data
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/HighSpirits")]
     public class HighSpiritsEffectSO : ActionEffectSO
     {
+        [SerializeField] private int _healAmount = 5;
+
         public override void Execute(ICardEffectContext context)
         {
-            context.AddPlayerMaxMana(1);
-            Debug.Log("High Spirits — +1 max mana this match");
+            context.HealPlayer(_healAmount);
+            Debug.Log($"High Spirits — healed {_healAmount} HP");
         }
     }
 }

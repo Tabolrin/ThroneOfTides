@@ -7,12 +7,12 @@ namespace ThroneOfTides.Data
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/Rum")]
     public class RumEffectSO : ActionEffectSO
     {
-        [SerializeField] private int _healAmount = 5;
+        [SerializeField] private int _manaToRestore = 2;
 
         public override void Execute(ICardEffectContext context)
         {
-            context.HealPlayer(_healAmount);
-            Debug.Log($"Rum — healed {_healAmount} HP");
+            context.RestorePlayerMana(_manaToRestore);
+            Debug.Log($"Rum — restored {_manaToRestore} mana");
         }
     }
 }

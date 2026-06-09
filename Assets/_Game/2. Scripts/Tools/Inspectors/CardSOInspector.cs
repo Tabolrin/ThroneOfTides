@@ -22,6 +22,10 @@ namespace ThroneOfTides.Tools
         private SerializedProperty _dotDuration;
         private SerializedProperty _cardTypeSymbol;
         private SerializedProperty _cardArtAnimator;
+        private SerializedProperty _manaCost;
+        private SerializedProperty _storageCost;
+        private SerializedProperty _hpCost;
+        private SerializedProperty _tags;
 
         private static readonly Color _weaponColor = new Color(0.22f, 0.38f, 0.62f, 0.18f);
         private static readonly Color _comboColor  = new Color(0.72f, 0.62f, 0.10f, 0.18f);
@@ -44,6 +48,10 @@ namespace ThroneOfTides.Tools
             _dotDuration           = serializedObject.FindProperty("_dotDuration");
             _cardTypeSymbol        = serializedObject.FindProperty("_cardTypeSymbol");
             _cardArtAnimator       = serializedObject.FindProperty("_cardArtAnimator");
+            _manaCost              = serializedObject.FindProperty("_manaCost");
+            _storageCost           = serializedObject.FindProperty("_storageCost");
+            _hpCost                = serializedObject.FindProperty("_hpCost");
+            _tags                  = serializedObject.FindProperty("_tags");
         }
 
         public override void OnInspectorGUI()
@@ -130,10 +138,20 @@ namespace ThroneOfTides.Tools
             EditorGUILayout.PropertyField(_cardType,    new GUIContent("Card Type"));
             EditorGUILayout.Space(6);
 
+            EditorGUILayout.LabelField("Cost", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_manaCost,    new GUIContent("Mana Cost"));
+            EditorGUILayout.PropertyField(_storageCost, new GUIContent("Storage Cost"));
+            if (_hpCost.intValue != 0)
+                EditorGUILayout.PropertyField(_hpCost,  new GUIContent("HP Cost"));
+            EditorGUILayout.Space(6);
+
             EditorGUILayout.LabelField("Visuals", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_art,             new GUIContent("Card Art"));
             EditorGUILayout.PropertyField(_cardTypeSymbol,  new GUIContent("Type Symbol"));
             EditorGUILayout.PropertyField(_cardArtAnimator, new GUIContent("Art Animator"));
+            EditorGUILayout.Space(6);
+
+            DrawTagsSection();
             EditorGUILayout.Space(6);
 
             switch (cardType)
@@ -157,6 +175,11 @@ namespace ThroneOfTides.Tools
                     EditorGUILayout.PropertyField(_isEligibleAsActionPair, new GUIContent("Can Pair With Damage Card"));
                     break;
 
+                case CardType.Reaction:
+                    EditorGUILayout.LabelField("Reaction", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(_actionEffect, new GUIContent("Effect"));
+                    break;
+
                 case CardType.DOT:
                     EditorGUILayout.LabelField("DOT (Damage Over Time)", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(_damage,           new GUIContent("Initial Hit Damage"));
@@ -164,6 +187,54 @@ namespace ThroneOfTides.Tools
                     EditorGUILayout.PropertyField(_dotDuration,      new GUIContent("Duration (turns)"));
                     break;
             }
+        }
+
+        private void DrawTagsSection()
+        {
+            EditorGUILayout.LabelField("Tags", EditorStyles.boldLabel);
+
+            int count = _tags.arraySize;
+            if (count == 0)
+            {
+                EditorGUILayout.LabelField("No tags assigned", EditorStyles.miniLabel);
+                EditorGUILayout.PropertyField(_tags, new GUIContent("Tags"), true);
+                return;
+            }
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            for (int i = 0; i < count; i++)
+            {
+                var tagProp = _tags.GetArrayElementAtIndex(i);
+                var tagSO   = tagProp.objectReferenceValue as ThroneOfTides.Data.CardTagSO;
+
+                EditorGUILayout.BeginHorizontal();
+
+                // Symbol preview thumbnail
+                if (tagSO != null && tagSO.Symbol != null)
+                {
+                    Texture2D thumb = AssetPreview.GetAssetPreview(tagSO.Symbol)
+                                   ?? AssetPreview.GetMiniThumbnail(tagSO.Symbol);
+                    if (thumb != null)
+                        GUILayout.Label(thumb, GUILayout.Width(20), GUILayout.Height(20));
+                }
+                else
+                {
+                    GUILayout.Space(24);
+                }
+
+                // Tag name and the object field on same row
+                string displayName = tagSO != null ? tagSO.name : "(none)";
+                EditorGUILayout.LabelField(displayName, GUILayout.MinWidth(80));
+                tagProp.objectReferenceValue = EditorGUILayout.ObjectField(
+                    tagProp.objectReferenceValue,
+                    typeof(ThroneOfTides.Data.CardTagSO), false);
+
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndVertical();
+
+            // Foldout array controls below the preview list
+            EditorGUILayout.PropertyField(_tags, new GUIContent("Edit Tags"), true);
         }
     }
 }

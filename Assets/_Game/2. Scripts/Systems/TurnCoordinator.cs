@@ -41,6 +41,7 @@ namespace ThroneOfTides.Systems
             _combatResolver = combatResolver;
             _config         = config;
 
+            _combatResolver.SecondaryDrawCallback = TryDrawCardSecondary;
             _gameState.OnEnemyTurnReady += OnEnemyTurnReady;
             // Auto-draw activates after the first enemy turn completes
             _autoDrawEnabled = false;
@@ -184,7 +185,8 @@ namespace ThroneOfTides.Systems
             CardSO playedCard = _enemyAI.PickCard(
                 _gameState.EnemyHand.CardsSO,
                 damageCardPlayed: false,
-                actionCardPlayed: false);
+                actionCardPlayed: false,
+                enemyMana: _gameState.EnemyMana);
 
             if (playedCard == null)
             {

@@ -17,7 +17,7 @@ namespace ThroneOfTides.Systems
         }
 
         // Picks one card from enemy hand weighted by CaptainSO weight table
-        public CardSO PickCard(IReadOnlyList<CardSO> hand, bool damageCardPlayed, bool actionCardPlayed)
+        public CardSO PickCard(IReadOnlyList<CardSO> hand, bool damageCardPlayed, bool actionCardPlayed, int enemyMana)
         {
             if (hand.Count == 0) return null;
 
@@ -32,6 +32,7 @@ namespace ThroneOfTides.Systems
 
                 if (isDamageCard && damageCardPlayed) continue;
                 if (isActionCard && (actionCardPlayed || !card.IsEligibleAsActionPair)) continue;
+                if (card.ManaCost > enemyMana) continue;
 
                 float weight = _captain.GetWeightForCard(card);
 

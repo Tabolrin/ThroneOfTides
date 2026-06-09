@@ -53,7 +53,7 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _torchPrefab;
         [SerializeField] private GameObject _torchComboResolvePrefab;
         [SerializeField] private GameObject _krakenPrefab;
-        [SerializeField] private GameObject _boardingPartyPrefab;
+        [SerializeField] private GameObject _ramTheHullPrefab;
 
         [Header("VFX Prefabs — Action")]
         [SerializeField] private GameObject _sirenSongPrefab;
@@ -62,6 +62,10 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _deadMansTurnPrefab;
         [SerializeField] private GameObject _lockerReturnPrefab;
         [SerializeField] private GameObject _monkeyGrabPrefab;
+        [SerializeField] private GameObject _bloodForBloodPrefab;
+        [SerializeField] private GameObject _stolenWindPrefab;
+        [SerializeField] private GameObject _rumPrefab;
+        [SerializeField] private GameObject _treasureChestPrefab;
 
         [Header("FEEL — Hit")]
         [SerializeField] private MMF_Player _feedbackLightHit;
@@ -80,6 +84,14 @@ namespace ThroneOfTides.Systems
         [SerializeField] private MMF_Player _feedbackEndTurnPulse;
         [SerializeField] private MMF_Player _feedbackComboStackIncrement;
         [SerializeField] private MMF_Player _feedbackPlayZoneGlow;
+
+        [Header("FEEL — Mana")]
+        [SerializeField] private MMF_Player _feedbackManaGain;
+        [SerializeField] private MMF_Player _feedbackManaSpend;
+
+        [Header("FEEL — Reactions")]
+        [SerializeField] private MMF_Player _feedbackReactionCharged;
+        [SerializeField] private MMF_Player _feedbackReactionFired;
 
         [Header("FEEL — Match")]
         [SerializeField] private MMF_Player _feedbackWin;
@@ -107,6 +119,9 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnMatchWin          += OnMatchWin;
             GameEventBus.OnMatchLoss         += OnMatchLoss;
             GameEventBus.OnTurnPhaseChanged  += OnTurnPhaseChanged;
+            GameEventBus.OnPlayerManaChanged += OnPlayerManaChanged;
+            GameEventBus.OnReactionCharged   += OnReactionCharged;
+            GameEventBus.OnReactionFired     += OnReactionFired;
         }
 
         private void OnDisable()
@@ -121,6 +136,9 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnMatchWin          -= OnMatchWin;
             GameEventBus.OnMatchLoss         -= OnMatchLoss;
             GameEventBus.OnTurnPhaseChanged  -= OnTurnPhaseChanged;
+            GameEventBus.OnPlayerManaChanged -= OnPlayerManaChanged;
+            GameEventBus.OnReactionCharged   -= OnReactionCharged;
+            GameEventBus.OnReactionFired     -= OnReactionFired;
         }
 
         // ── Event Handlers ────────────────────────────────────────────────────
@@ -169,6 +187,22 @@ namespace ThroneOfTides.Systems
             SpawnVFX(_hailStormPrefab, GetHitPoint(effect.Target).position);
             _feedbackDOTTick?.PlayFeedbacks();
         }
+
+        private void OnPlayerManaChanged(int current, int previousMax)
+        {
+            // Gain when current went up, spend when it went down — compare via last frame not tracked here,
+            // so fire gain feedback on any positive value and spend on any spend event from the bus.
+            if (current > 0)
+                _feedbackManaGain?.PlayFeedbacks();
+            else
+                _feedbackManaSpend?.PlayFeedbacks();
+        }
+
+        private void OnReactionCharged(CardType type, int charges) =>
+            _feedbackReactionCharged?.PlayFeedbacks();
+
+        private void OnReactionFired(CardType type) =>
+            _feedbackReactionFired?.PlayFeedbacks();
 
         private void OnCardPlayAccepted(ICard card)
         {
@@ -221,7 +255,7 @@ namespace ThroneOfTides.Systems
                     HandleCreatureVFX(_krakenPrefab, DamageTarget.Enemy);
                     break;
 
-                case "Boarding Party": SpawnVFX(_boardingPartyPrefab, target.position); break;
+                case "Ram the Hull": SpawnVFX(_ramTheHullPrefab, target.position); break;
 
                 case "Siren Song":
                     // Siren targets the enemy ship — the enchantment is cast upon them.
@@ -235,9 +269,13 @@ namespace ThroneOfTides.Systems
                     _feedbackHeal?.PlayFeedbacks();
                     break;
 
-                case "Dead Man's Turn": SpawnVFX(_deadMansTurnPrefab, source.position); break;
-                case "Locker's Return": SpawnVFX(_lockerReturnPrefab, source.position); break;
-                case "Monkey Grab":     SpawnVFX(_monkeyGrabPrefab,   target.position); break;
+                case "Blood for Blood": SpawnVFX(_bloodForBloodPrefab, source.position); break;
+                case "Stolen Wind":     SpawnVFX(_stolenWindPrefab,    source.position); break;
+                case "Rum":             SpawnVFX(_rumPrefab,           source.position); break;
+                case "Treasure Chest":  SpawnVFX(_treasureChestPrefab, source.position); break;
+                case "Dead Man's Turn": SpawnVFX(_deadMansTurnPrefab,  source.position); break;
+                case "Locker's Return": SpawnVFX(_lockerReturnPrefab,  source.position); break;
+                case "Monkey Grab":     SpawnVFX(_monkeyGrabPrefab,    target.position); break;
             }
         }
 

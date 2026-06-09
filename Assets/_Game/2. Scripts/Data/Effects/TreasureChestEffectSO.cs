@@ -7,29 +7,20 @@ namespace ThroneOfTides.Data
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/TreasureChest")]
     public class TreasureChestEffectSO : ActionEffectSO
     {
-        [SerializeField] private int _cardsToReturn = 3;
+        [SerializeField] private int _cardsToDraw = 3;
 
         public override void Execute(ICardEffectContext context)
         {
-            // Step 1 — return cards from original deck snapshot into runtime deck
-            context.ReturnFromSnapshot(_cardsToReturn);
-            Debug.Log($"Treasure Chest — returned {_cardsToReturn} cards from original deck");
-
-            // Step 2 — 50/50 chance of +1 max mana
-            if (UnityEngine.Random.value >= 0.5f)
+            // Draw 3 cards (secondary draws — do not consume the turn's normal draw allowance)
+            int drawn = 0;
+            for (int i = 0; i < _cardsToDraw; i++)
             {
-                context.AddPlayerMaxMana(1);
-                Debug.Log("Treasure Chest — coin toss won: +1 max mana");
+                if (context.DrawOneCard()) drawn++;
             }
-            else
-            {
-                Debug.Log("Treasure Chest — coin toss lost: no mana bonus");
-            }
+            Debug.Log($"Treasure Chest — drew {drawn} card(s)");
 
-            // Step 3 — draw 1 (secondary draw — does not consume turn draw)
-            // TODO: route through TurnCoordinator.TryDrawCardSecondary
-            // Needs an event or callback added to ICardEffectContext
-            Debug.Log("Treasure Chest — secondary draw pending wiring");
+            // TODO: prompt player to discard the same number of cards they drew
+            // Requires a discard-choice UI pass (player selects which cards to put back)
         }
     }
 }

@@ -9,6 +9,8 @@ namespace ThroneOfTides.Systems
     {
         private readonly GameState _gameState;
 
+        public System.Func<bool> SecondaryDrawCallback { get; set; }
+
         public CombatResolver(GameState gameState)
         {
             _gameState = gameState;
@@ -75,7 +77,7 @@ namespace ThroneOfTides.Systems
         {
             if (card.ActionEffect != null)
             {
-                var context = new CardEffectContext(_gameState, handLayout);
+                var context = new CardEffectContext(_gameState, handLayout, SecondaryDrawCallback);
                 card.ActionEffect.Execute(context);
             }
             else
@@ -89,7 +91,7 @@ namespace ThroneOfTides.Systems
             // The effect SO adds a charge to GameState rather than having an immediate effect.
             if (card.ActionEffect != null)
             {
-                var context = new CardEffectContext(_gameState, handLayout);
+                var context = new CardEffectContext(_gameState, handLayout, SecondaryDrawCallback);
                 card.ActionEffect.Execute(context);
             }
             else

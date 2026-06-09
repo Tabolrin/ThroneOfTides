@@ -25,4 +25,9 @@ MonoBehaviour:
   _art: {fileID: 21300000, guid: 0383aa2504857424e8884dc9e4de1ddd, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
+  _manaCost: 1
+  _storageCost: 1
+  _hpCost: 0
   _isEligibleAsActionPair: 0
+  _tags:
+  - {fileID: 11400000, guid: 7784d32e451df36479e1e4ea1df98ac2, type: 2}

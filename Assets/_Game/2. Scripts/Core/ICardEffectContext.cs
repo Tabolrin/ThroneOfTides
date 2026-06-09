@@ -22,6 +22,7 @@ namespace ThroneOfTides.Core
         void StealFromEnemyHand();
         void RetrieveFromDiscard(int count);
         void SpendPlayerMana(int amount);
+        void RestorePlayerMana(int amount);
         void AddPlayerMaxMana(int amount);
         void StealEnemyMana(int amount);
 
@@ -31,6 +32,9 @@ namespace ThroneOfTides.Core
 
         // Treasure Chest — returns cards from original deck snapshot into runtime deck
         void ReturnFromSnapshot(int count);
+
+        // Secondary draw — does not consume the turn's normal draw allowance
+        bool DrawOneCard();
 
         IReadOnlyList<ICard> GetEnemyHand();
         IReadOnlyList<ICard> GetPlayerHand();

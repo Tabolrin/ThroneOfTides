@@ -9,6 +9,7 @@ namespace ThroneOfTides.Systems
     {
         private readonly GameState          _gameState;
         private readonly IHandLayoutManager _handLayout;
+        private readonly System.Func<bool>  _secondaryDraw;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
@@ -18,10 +19,12 @@ namespace ThroneOfTides.Systems
         public int PlayerMaxMana   => _gameState.PlayerMaxMana;
         public int EnemyMana       => _gameState.EnemyMana;
 
-        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout)
+        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout,
+                                 System.Func<bool> secondaryDraw = null)
         {
-            _gameState  = gameState;
-            _handLayout = handLayout;
+            _gameState     = gameState;
+            _handLayout    = handLayout;
+            _secondaryDraw = secondaryDraw;
         }
 
         public void ApplyDamage(DamageTarget target, int amount) =>
@@ -42,6 +45,9 @@ namespace ThroneOfTides.Systems
         public void SpendPlayerMana(int amount) =>
             _gameState.SpendPlayerMana(amount);
 
+        public void RestorePlayerMana(int amount) =>
+            _gameState.RestorePlayerMana(amount);
+
         public void AddPlayerMaxMana(int amount) =>
             _gameState.AddPlayerMaxMana(amount);
 
@@ -61,6 +67,8 @@ namespace ThroneOfTides.Systems
             foreach (var card in cards)
                 _gameState.PlayerDeck.ReturnCard(card);
         }
+
+        public bool DrawOneCard() => _secondaryDraw?.Invoke() ?? false;
 
         public void AddCardToPlayerHand(ICard card)
         {

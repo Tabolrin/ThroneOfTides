@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -26,4 +26,9 @@ MonoBehaviour:
   _art: {fileID: 21300000, guid: d4ea8e8ad014cca46b5499999d7f8169, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
+  _manaCost: 2
+  _storageCost: 1
+  _hpCost: 0
   _isEligibleAsActionPair: 0
+  _tags:
+  - {fileID: 11400000, guid: 7784d32e451df36479e1e4ea1df98ac2, type: 2}

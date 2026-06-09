@@ -184,7 +184,8 @@ namespace ThroneOfTides.App
                 _gameState.PlayerHP, _config.StartingHP,
                 _gameState.EnemyHP,  _config.StartingHP,
                 _gameState.PlayerDeck.Count,
-                _gameState.IsPlayerTurn);
+                _gameState.IsPlayerTurn,
+                _gameState.PlayerMana, _gameState.PlayerMaxMana);
 
             // End turn only available after drawing — opening deal sets HasDrawnThisTurn
             // so button is active from turn 1 once animation completes

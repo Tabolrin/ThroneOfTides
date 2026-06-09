@@ -124,6 +124,12 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
+        public void RestorePlayerMana(int amount)
+        {
+            PlayerMana = Mathf.Min(PlayerMana + amount, PlayerMaxMana);
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
         public bool SpendEnemyMana(int amount)
         {
             if (EnemyMana < amount) return false;
