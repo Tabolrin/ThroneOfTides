@@ -3751,15 +3751,15 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -2273146209696275378, guid: 7e984f512e89b60468e829489e8883e3, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 12b5c8284ca5a534182844c3efa09324, type: 3}
+  m_Resource: {fileID: 8300000, guid: 10aaba9acd7f02a4f8b33da899a1ac0f, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.1
+  m_Volume: 0.346
   m_Pitch: 1
   Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 121
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500
@@ -4202,10 +4202,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
-    y: -0.48333332
-    width: 1
-    height: 1
+    x: -0.14962763
+    y: -0.079484425
+    width: 1.2999322
+    height: 1.160043
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
