@@ -727,8 +727,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07c60fc3ac245134382f5b5af0f38be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.CardVFXHandler
+  _gameCanvasRect: {fileID: 0}
+  _gameCamera: {fileID: 0}
+  _musicNoteParticles: {fileID: 0}
   _playerShipHitPoint: {fileID: 1477126999}
   _enemyShipHitPoint: {fileID: 928251795}
+  _playerShipSpawnPoint: {fileID: 0}
   _playerDeckPoint: {fileID: 949236105}
   _cannonballPrefab: {fileID: 0}
   _cannonballDuration: 0.4
@@ -742,14 +746,18 @@ MonoBehaviour:
   _gunpowderBarrelPrefab: {fileID: 0}
   _torchPrefab: {fileID: 0}
   _torchComboResolvePrefab: {fileID: 0}
+  _ramTheHullPrefab: {fileID: 0}
   _krakenPrefab: {fileID: 0}
-  _boardingPartyPrefab: {fileID: 0}
   _sirenSongPrefab: {fileID: 0}
   _reconParrotPrefab: {fileID: 0}
   _highSpiritsPrefab: {fileID: 0}
-  _deadMansTurnPrefab: {fileID: 0}
   _lockerReturnPrefab: {fileID: 0}
   _monkeyGrabPrefab: {fileID: 0}
+  _rumPrefab: {fileID: 0}
+  _treasureChestPrefab: {fileID: 0}
+  _stolenWindPrefab: {fileID: 0}
+  _deadMansTurnPrefab: {fileID: 0}
+  _bloodForBloodPrefab: {fileID: 0}
   _feedbackLightHit: {fileID: 0}
   _feedbackMediumHit: {fileID: 0}
   _feedbackHeavyHit: {fileID: 0}
@@ -762,6 +770,10 @@ MonoBehaviour:
   _feedbackEndTurnPulse: {fileID: 0}
   _feedbackComboStackIncrement: {fileID: 0}
   _feedbackPlayZoneGlow: {fileID: 0}
+  _feedbackManaSpent: {fileID: 0}
+  _feedbackManaGained: {fileID: 0}
+  _feedbackReactionCharged: {fileID: 0}
+  _feedbackReactionFired: {fileID: 0}
   _feedbackWin: {fileID: 0}
   _feedbackLoss: {fileID: 0}
   _feedbackDamageNumber: {fileID: 0}
@@ -1137,6 +1149,7 @@ MonoBehaviour:
   _deckCountLabel: {fileID: 464328238}
   _playerHPLabel: {fileID: 1260007965}
   _enemyHPLabel: {fileID: 1065873454}
+  _playerManaLabel: {fileID: 0}
 --- !u!1 &135199036
 GameObject:
   m_ObjectHideFlags: 0
@@ -4202,8 +4215,8 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: -0.3229167
-    y: -0.29259259
+    x: 0
+    y: 0
     width: 1
     height: 1
   near clip plane: 0.3
