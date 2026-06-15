@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 192.49997}
+  m_AnchoredPosition: {x: 0, y: 35}
   m_SizeDelta: {x: 120, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4642108034384274199
@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 3463782441327735969}
   - component: {fileID: 3785891695213167514}
   m_Layer: 5
-  m_Name: Card_UI_Prefab
+  m_Name: Card_UI_Prefab 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -935,8 +935,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 29.949097}
-  m_SizeDelta: {x: 135, y: 142.6518}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 135, y: 202.55}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8357833268380253818
 CanvasRenderer:
@@ -1106,8 +1106,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 48.584}
-  m_SizeDelta: {x: 135, y: 105.3819}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 135, y: 202.55}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8707638677681853100
 CanvasRenderer:
