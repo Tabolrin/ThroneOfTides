@@ -1,4 +1,6 @@
 // Assets/_Game/2. Scripts/App/GameBootstrapper.cs
+// Only the Start() method changes — applies upgrade modifiers to GameState init.
+// Full file included for completeness.
 using System.Collections;
 using System.Collections.Generic;
 using ThroneOfTides.Core;
@@ -17,6 +19,15 @@ namespace ThroneOfTides.App
 
         [Header("Decks")]
         [SerializeField] private DeckDefinitionSO _playerDeckDefinition;
+
+        [Header("Player")]
+        // Optional — when assigned, upgrade levels are applied to HP and Mana at match start.
+        // Falls back to config base values when null (useful for testing scenes).
+        [SerializeField] private PlayerInventory _playerInventory;
+
+        [Header("Upgrades")]
+        [SerializeField] private UpgradeSO _manaUpgrade;
+        [SerializeField] private UpgradeSO _hpUpgrade;
 
         [Header("References")]
         [SerializeField] private GameHUD               _gameHUD;
@@ -48,19 +59,36 @@ namespace ThroneOfTides.App
         {
             _activeCaptain = GameSession.SelectedCaptain ?? _fallbackCaptain;
 
-            // Snapshot before Deck constructor shuffles — Treasure Chest reads original order
-            var originalSnapshot = _playerDeckDefinition.BuildDeck();
+            // ── Apply upgrade modifiers ─────────────────────────────────────
+            // Base values from config, with optional per-upgrade level bonuses
+            int effectiveMaxHP   = _config.StartingHP;
+            int effectiveMaxMana = _config.StartingMaxMana;
+
+            if (_playerInventory != null)
+            {
+                if (_hpUpgrade   != null)
+                    effectiveMaxHP   += _hpUpgrade.GetValueAtLevel(
+                        _playerInventory.GetUpgradeLevel(UpgradeType.MaxHP));
+
+                if (_manaUpgrade != null)
+                    effectiveMaxMana += _manaUpgrade.GetValueAtLevel(
+                        _playerInventory.GetUpgradeLevel(UpgradeType.MaxMana));
+            }
+
+            // ── Deck resolution ─────────────────────────────────────────────
+            // Use the player's Port-configured deck if available, fall back to
+            // the serialized fallback deck definition for testing
+            DeckDefinitionSO deckToUse =
+                _playerInventory?.PlayerDeck ?? _playerDeckDefinition;
+
+            var originalSnapshot = deckToUse.BuildDeck();
             var playerDeck       = new Deck(originalSnapshot, _config.LowDeckThreshold);
             var enemyDeck        = new Deck(
                 _activeCaptain.DeckDefinition.BuildDeck(), _config.LowDeckThreshold);
 
-            _gameState = new GameState(
-                _config.StartingHP,
-                _config.StartingMaxMana,
-                playerDeck,
-                enemyDeck,
-                originalSnapshot);
-
+            // ── Construct game systems ──────────────────────────────────────
+            _gameState    = new GameState(effectiveMaxHP, effectiveMaxMana,
+                                          playerDeck, enemyDeck, originalSnapshot);
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
             var combatResolver = new CombatResolver(_gameState);
@@ -98,11 +126,11 @@ namespace ThroneOfTides.App
 
         private IEnumerator DealPlayerOpeningHandRoutine()
         {
-            _endTurnButton.interactable = false;
+            _endTurnButton.interactable    = false;
             DeckClickHandler.OnDeckClicked -= OnDeckClicked;
 
-            var normalCards    = new List<CardSO>();
-            var reactionCards  = new List<CardSO>();
+            var normalCards   = new List<CardSO>();
+            var reactionCards = new List<CardSO>();
 
             for (int i = 0; i < _config.MaxHandSize; i++)
             {
@@ -118,16 +146,13 @@ namespace ThroneOfTides.App
                 }
             }
 
-            // Charge reactions into GameState before animation starts
             foreach (var card in reactionCards)
                 ChargeReactionCard(card);
 
             _gameState.SetHasDrawnThisTurn();
 
-            // Animate normal cards into hand
             yield return StartCoroutine(_handLayoutManager.DealOpeningHandAnimated(normalCards));
 
-            // Animate reaction cards to charge slot after hand is dealt
             foreach (var card in reactionCards)
                 yield return StartCoroutine(_handLayoutManager.AnimateReactionDraw(card));
 
@@ -181,7 +206,7 @@ namespace ThroneOfTides.App
             GameEventBus.ClearAllListeners();
         }
 
-        private void OnEndTurnPressed(InputAction.CallbackContext context) =>
+        private void OnEndTurnPressed(InputAction.CallbackContext ctx) =>
             _turnCoordinator.EndTurn();
 
         private void OnDeckClicked()
@@ -245,13 +270,8 @@ namespace ThroneOfTides.App
             _resultsPanel.ShowLoss(_activeCaptain.LevelReward, _gameState.PlayerHP);
         }
 
-        private void OnPlayerDeckStateChanged(DeckState state) =>
-            Debug.Log($"Player deck: {state}");
-
-        private void OnPlayerHandStateChanged(HandState state) =>
-            Debug.Log($"Player hand: {state}");
-
-        private void OnEnemyDeckStateChanged(DeckState state) =>
-            Debug.Log($"Enemy deck: {state}");
+        private void OnPlayerDeckStateChanged(DeckState state) => Debug.Log($"Player deck: {state}");
+        private void OnPlayerHandStateChanged(HandState state) => Debug.Log($"Player hand: {state}");
+        private void OnEnemyDeckStateChanged(DeckState state)  => Debug.Log($"Enemy deck: {state}");
     }
 }

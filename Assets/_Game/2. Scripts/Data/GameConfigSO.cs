@@ -7,20 +7,22 @@ namespace ThroneOfTides.Data
     public class GameConfigSO : ScriptableObject
     {
         [Header("Player")]
-        public int   StartingHP        = 30;
-        public int   MaxHandSize       = 5;
+        public int   StartingHP          = 30;
+        public int   MaxHandSize         = 5;
 
         [Header("Mana")]
-        public int   StartingMaxMana   = 3;
+        public int   StartingMaxMana     = 3;
 
         [Header("Deck")]
-        public int   LowDeckThreshold  = 3;
+        public int   LowDeckThreshold   = 3;
+        // Base deck slot capacity before storage upgrades
+        public int   BaseStorageCapacity = 20;
 
         [Header("Layout")]
-        public float CardSpacing       = 1.0f;
+        public float CardSpacing         = 1.0f;
 
         [Header("Enemy")]
-        public float EnemyThinkTimeMin = 0.8f;
-        public float EnemyThinkTimeMax = 2.2f;
+        public float EnemyThinkTimeMin   = 0.8f;
+        public float EnemyThinkTimeMax   = 2.2f;
     }
 }
