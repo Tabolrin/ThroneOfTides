@@ -18,13 +18,13 @@ are a single shared resource. Let both run dry and your ship sinks.
 I am the lead designer and programmer on this project, working alongside 
 a producer/co-designer and an artist. Every system was designed and 
 documented before implementation, with a full GDD, HLD, and balance 
-spreadsheet maintained across six major versions.
+spreadsheet maintained across multiple versions.
 
 ---
 
 ## Design Documents
 📄 [Game Design Document (GDD) - v6](<https://docs.google.com/document/d/1MkV1CaZWJsu4zOP6ZjAu_O4Zo4t17NGckKYAUY4Jhxk/edit?usp=sharing>)  
-📄 [High-Level Design Document (HLD) - v7](<https://docs.google.com/document/d/133qzpSa4RO27y_zbFs6qLWrUmpmaZXtODrBtMcZaaso/edit?usp=sharing>)  
+📄 [High-Level Design Document (HLD) - v8](<https://docs.google.com/document/d/133qzpSa4RO27y_zbFs6qLWrUmpmaZXtODrBtMcZaaso/edit?usp=sharing>)  
 📊 [Balance Spreadsheet](<https://docs.google.com/spreadsheets/d/1qG3uNH2hfbM_wV13tYVdbw4M_pffa1z3ndoEvEb-3go/edit?usp=sharing>)  
 📋 [Master Asset List](<https://miro.com/app/board/uXjVHdt4P7U=/?moveToWidget=3458764669833709512&cot=14>)
 
@@ -67,9 +67,6 @@ spreadsheet maintained across six major versions.
 - Reaction cards create a sub-state inside the Defense Window: the game 
   pauses mid-enemy-attack, and the player chooses which reaction card to 
   use (if any) or takes the hit
-- Power-ups (Grab Some Grub, Calipso's Aid, Shiver Their Timbers) are 
-  declared during Main Phase - free actions, one of each type per turn, 
-  permanently consumed on use
 
 **AI Architecture**
 - Strategy pattern - each archetype implements IAIStrategy
@@ -100,11 +97,33 @@ spreadsheet maintained across six major versions.
 - Deck management in The Port: minimum 40 cards, base maximum 80 slots 
   (expandable), free card swaps between stages
 
+> **Scoped out of the current milestone:** Power-ups and the Spent Shot 
+> card are designed and documented but cut from this vertical slice 
+> build due to the production timeframe. Both remain on the roadmap.
+
+---
+
+## Art Direction
+
+Throne of Tides uses a **flat vector illustration style** - bold, 
+uniform outlines, minimal flat-color shading (2-3 tones per object), and 
+simplified geometric forms favoring smooth curves over rendered detail. 
+The palette leans toward muted, weathered tones - worn browns, slate 
+greys, deep teals - reinforcing the naval, aged-leather mood of the 
+world. This approach prioritizes fast, at-a-glance legibility (critical 
+for a card game) while remaining achievable for a small two-person art 
+team without requiring pixel-precise or painterly rendering per asset.
+
+*Note: the project's earlier pixel-art pipeline (Pixel Perfect Camera, 
+Point filtering) has been superseded by this vector approach - rendering 
+setup has been updated accordingly.*
+
 ---
 
 ## Technical Architecture
 
-- **Engine:** Unity 6, 2D URP - pixel art sprites, Pixel Perfect Camera
+- **Engine:** Unity 6, 2D URP - flat vector illustration sprites, 
+  SpriteRenderer
 - **Language:** C#
 - **Input:** Unity New Input System - touch and mouse share Pointer code path
 - **Card system:** Data-driven via ScriptableObjects (CardSO), with fields 
@@ -129,9 +148,10 @@ spreadsheet maintained across six major versions.
 ---
 
 ## Status
-Vertical slice in active development - v6.0 GDD, v7.0 HLD.  
+Vertical slice in active development - v6.0 GDD, v8.0 HLD.  
 Three captains, full 40-card starter deck, mana economy, combo system, 
-DOT system, meta-progression, and tutorial all designed and documented.  
+DOT system, and meta-progression all designed and documented. Power-ups 
+and Spent Shot are cut from this milestone for scope reasons.  
 Playable build in progress.
 
 ---
