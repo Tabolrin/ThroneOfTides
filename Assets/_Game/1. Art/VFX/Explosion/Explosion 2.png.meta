@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: a7215556c2a018d47ab68559ae6c1108
+guid: c116bc4147450f349a2bc8d30794d5f5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -193274730570232250
-    second: Project_20260527082826_0
+      213: -4201084188945519855
+    second: Explosion 2_0
+  - first:
+      213: -1892728172851191809
+    second: Explosion 2_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +49,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -100,13 +103,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Project_20260527082826_0
+      name: Explosion 2_0
       rect:
         serializedVersion: 2
-        x: 62
-        y: 96
-        width: 148
-        height: 201
+        x: 262
+        y: 281
+        width: 471
+        height: 467
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +118,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 64e4d4418a9515df0800000000000000
-      internalID: -193274730570232250
+      spriteID: 11b646e3030c2b5c0800000000000000
+      internalID: -4201084188945519855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Explosion 2_1
+      rect:
+        serializedVersion: 2
+        x: 675
+        y: 466
+        width: 92
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fff94d041cdabb5e0800000000000000
+      internalID: -1892728172851191809
       vertices: []
       indices: 
       edges: []
@@ -125,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Project_20260527082826_0: -193274730570232250
+      Explosion 2_0: -4201084188945519855
+      Explosion 2_1: -1892728172851191809
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

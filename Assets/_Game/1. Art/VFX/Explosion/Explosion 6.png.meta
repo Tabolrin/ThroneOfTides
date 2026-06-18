@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 49050d969465b8348927db8792be96a1
+guid: 827de81435d5dd14c9d1d4e71ecd2cde
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7422323913447961462
-    second: Untitled - May 24, 2026 at 02.11.49_0
+      213: 3238766723018027721
+    second: Explosion 6_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 300
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Untitled - May 24, 2026 at 02.11.49_0
+      name: Explosion 6_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 305
-        width: 952
-        height: 695
+        x: 83
+        y: 145
+        width: 904
+        height: 765
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8c0c03d9bb9ef890800000000000000
-      internalID: -7422323913447961462
+      spriteID: 9c278d3cc2962fc20800000000000000
+      internalID: 3238766723018027721
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Untitled - May 24, 2026 at 02.11.49_0: -7422323913447961462
+      Explosion 6_0: 3238766723018027721
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

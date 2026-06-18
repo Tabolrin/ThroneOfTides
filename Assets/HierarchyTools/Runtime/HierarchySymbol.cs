@@ -3,8 +3,10 @@ using UnityEngine;
 namespace HierarchyTools.Runtime
 {
     /// <summary>
-    /// Data container for assigning custom icons to GameObjects within the editor Hierarchy.
-    /// Safely strips itself during initialization to ensure zero runtime performance cost.
+    /// Editor-only metadata that links a GameObject to a custom Hierarchy icon. The scene
+    /// processor strips this component before builds and Play Mode, so it normally never runs.
+    /// The Awake fallback handles the remaining case: a symbol baked into a prefab that is
+    /// instantiated dynamically at runtime.
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("")]
@@ -14,7 +16,8 @@ namespace HierarchyTools.Runtime
 
         private void Awake()
         {
-            // Component is strictly editor-facing; destroy instance at runtime
+            // Strictly editor-facing data with no runtime purpose; remove the instance if it
+            // ever survives into a running build.
             Destroy(this);
         }
     }
