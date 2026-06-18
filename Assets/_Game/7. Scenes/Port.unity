@@ -700,7 +700,7 @@ GameObject:
   m_Layer: 5
   m_Name: TitleLabel
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2800000, guid: 66655e98ddb61c74c9cd21023330a1bc, type: 3}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1028,6 +1028,52 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &145523334
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 145523337}
+  - component: {fileID: 145523336}
+  m_Layer: 0
+  m_Name: New Folder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &145523336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 145523334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46db6f2dcac6b3249b9f3f7293f7631c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HierarchyTools.Runtime::HierarchyTools.Runtime.HierarchyFolder
+--- !u!4 &145523337
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 145523334}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 543503305}
+  - {fileID: 1523102480}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &169906637
 GameObject:
   m_ObjectHideFlags: 0
@@ -1792,12 +1838,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 543503304}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.40858, y: -7.95313, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 35.5, y: 1.78, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 145523337}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &543503306
 MonoBehaviour:
@@ -1811,18 +1857,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64cd402849b131c4b9f946658183c64f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ThroneOfTides.UI::ThroneOfTides.App.PortManager
-  _playerInventory: {fileID: 0}
-  _config: {fileID: 0}
-  _manaUpgrade: {fileID: 0}
-  _hpUpgrade: {fileID: 0}
-  _storageUpgrade: {fileID: 0}
-  _upgradePanel: {fileID: 0}
-  _deckEditor: {fileID: 0}
-  _inventoryView: {fileID: 0}
-  _rumLabel: {fileID: 0}
-  _shipwrecksLabel: {fileID: 0}
-  _mainMenuButton: {fileID: 0}
-  _levelSelectButton: {fileID: 0}
+  _playerInventory: {fileID: 11400000, guid: f0b136fd79297de4ca7bf4a3943080f5, type: 2}
+  _config: {fileID: 11400000, guid: 9e980ee082354a844bf0a1ee974b4207, type: 2}
+  _manaUpgrade: {fileID: 11400000, guid: eea805dc5f0c44743a85c498dea84157, type: 2}
+  _hpUpgrade: {fileID: 11400000, guid: 9d4eaf0e9d1cfae4cbbf2bed04f1c30b, type: 2}
+  _storageUpgrade: {fileID: 11400000, guid: fe6826728167e714a8a6a355ee55d062, type: 2}
+  _upgradePanel: {fileID: 497026835}
+  _deckEditor: {fileID: 817875957}
+  _inventoryView: {fileID: 2009767133}
+  _rumLabel: {fileID: 928100843}
+  _shipwrecksLabel: {fileID: 2106321317}
+  _mainMenuButton: {fileID: 1993419971}
+  _levelSelectButton: {fileID: 598554542}
 --- !u!1 &590521365
 GameObject:
   m_ObjectHideFlags: 0
@@ -3970,6 +4016,7 @@ GameObject:
   - component: {fileID: 1523102480}
   - component: {fileID: 1523102479}
   - component: {fileID: 1523102478}
+  - component: {fileID: 1523102481}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -4031,13 +4078,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1523102477}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6.15, y: -6.71, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 145523337}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1523102481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1523102477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b475c27aa4218864fa0a9fb819be0f6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HierarchyTools.Runtime::HierarchyTools.Runtime.HierarchySymbol
+  symbolKey: icon_area_damage
 --- !u!1 &1571467639
 GameObject:
   m_ObjectHideFlags: 0
@@ -4459,6 +4519,7 @@ GameObject:
   - component: {fileID: 1742075368}
   - component: {fileID: 1742075367}
   - component: {fileID: 1742075366}
+  - component: {fileID: 1742075369}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4540,6 +4601,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1742075369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1742075365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &1752347345
 GameObject:
   m_ObjectHideFlags: 0
@@ -6678,5 +6783,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 1742075368}
   - {fileID: 1923302981}
-  - {fileID: 1523102480}
-  - {fileID: 543503305}
+  - {fileID: 145523337}

@@ -1,0 +1,19 @@
+{
+  "name": "com.peer.hierarchytools",
+  "version": "1.0.0",
+  "displayName": "Hierarchy Folders & Symbols",
+  "description": "An ultra-optimized, component-driven editor utility to clean up scene hierarchy clutter with lightweight virtual organizational folders and custom graphic icon symbols.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Pe'er Malul",
+    "email": "your.email@example.com"
+  },
+  "category": "Utilities",
+  "keywords": [
+    "hierarchy",
+    "folders",
+    "symbols",
+    "organization",
+    "editor-extension"
+  ]
+}
