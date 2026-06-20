@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ThroneOfTides.Systems
 {
-    public class ShipOscillator : MonoBehaviour
+    public class Oscillator : MonoBehaviour
     {
         [Header("Vertical bob")]
         [SerializeField] private bool  _shouldDriftVert = true;

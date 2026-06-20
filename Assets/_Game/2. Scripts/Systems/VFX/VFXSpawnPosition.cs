@@ -4,9 +4,9 @@ namespace ThroneOfTides.Systems
 {
     // Marks a world-space position for VFX spawning
     // Place as child GameObjects on each ship
-    public class VFXSpawnPoint : MonoBehaviour
+    public class VFXSpawnPosition : MonoBehaviour
     {
-        public enum SpawnPointType
+        public enum SpawnPositionType
         {
             ShipHit,
             ShipDeck,
@@ -14,7 +14,7 @@ namespace ThroneOfTides.Systems
             SeaSurface
         }
 
-        [SerializeField] private SpawnPointType _type;
-        public SpawnPointType Type => _type;
+        [SerializeField] private SpawnPositionType _type;
+        public SpawnPositionType Type => _type;
     }
 }
