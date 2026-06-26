@@ -1,5 +1,4 @@
 // Assets/_Game/2. Scripts/Data/CardSO.cs
-using System.Collections.Generic;
 using ThroneOfTides.Core;
 using UnityEngine;
 
@@ -16,7 +15,7 @@ namespace ThroneOfTides.Data
         [Header("Cost")]
         [SerializeField] private int _manaCost;
         [SerializeField] private int _storageCost;
-        // HP paid on play — 0 on most cards
+        // Only non-zero on cards that sacrifice HP to play (Ram the Hull, Stolen Wind)
         [SerializeField] private int _hpCost;
 
         [Header("Combat")]
@@ -35,16 +34,12 @@ namespace ThroneOfTides.Data
         [SerializeField] private ActionEffectSO _actionEffect;
         [SerializeField] private bool           _isEligibleAsActionPair;
 
-        [Header("Tags")]
-        // CardTagSO stays in Data — not on ICard interface
-        [SerializeField] private List<CardTagSO> _tags = new List<CardTagSO>();
-
         [Header("Visuals")]
         [SerializeField] private Sprite                    _art;
-        [SerializeField] private Sprite                    _cardTypeSymbol;
+        // Art animator owned by Eldar — not used in code yet, reserved for future
         [SerializeField] private RuntimeAnimatorController _cardArtAnimator;
 
-        // ── ICard ────────────────────────────────────────────────────────────
+        // ── ICard ──────────────────────────────────────────────────────────────
         public string   Name             => _name;
         public CardType CardType         => _cardType;
         public string   Description      => _description;
@@ -58,12 +53,10 @@ namespace ThroneOfTides.Data
         public int      StorageCost      => _storageCost;
         public int      HPCost           => _hpCost;
 
-        // ── CardSO-only (not on ICard) ───────────────────────────────────────
-        public ActionEffectSO            ActionEffect        => _actionEffect;
+        // ── CardSO-only ────────────────────────────────────────────────────────
+        public ActionEffectSO            ActionEffect           => _actionEffect;
         public bool                      IsEligibleAsActionPair => _isEligibleAsActionPair;
-        public IReadOnlyList<CardTagSO>  Tags                => _tags.AsReadOnly();
-        public Sprite                    Art                 => _art;
-        public Sprite                    CardTypeSymbol      => _cardTypeSymbol;
-        public RuntimeAnimatorController CardArtAnimator     => _cardArtAnimator;
+        public Sprite                    Art                    => _art;
+        public RuntimeAnimatorController CardArtAnimator        => _cardArtAnimator;
     }
 }

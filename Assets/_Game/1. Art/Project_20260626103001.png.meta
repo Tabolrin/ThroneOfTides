@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9d154f23fa017e745a4e049225167cea
+guid: 4a1f1448b6675c942bfaf910df1449be
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 416455848596828656
-    second: card art background_0
+      213: -3606679363709013418
+    second: Project_20260626103001_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,13 +46,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 1
-  alignment: 9
-  spritePivot: {x: 0.53, y: 0.5}
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 22, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: card art background_0
+      name: Project_20260626103001_0
       rect:
         serializedVersion: 2
-        x: 128
-        y: 9
-        width: 799
-        height: 1007
-      alignment: 9
-      pivot: {x: 0.525, y: 0.5}
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0f17f38436c87c500800000000000000
-      internalID: 416455848596828656
+      spriteID: 652746b4a3082fdc0800000000000000
+      internalID: -3606679363709013418
       vertices: []
       indices: 
       edges: []
@@ -126,7 +126,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      card art background_0: 416455848596828656
+      Project_20260626103001_0: -3606679363709013418
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

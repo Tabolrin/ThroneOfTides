@@ -1,5 +1,4 @@
 // Assets/_Game/2. Scripts/UI/CardView.cs
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,41 +10,49 @@ namespace ThroneOfTides.UI
 {
     public class CardView : MonoBehaviour, IPointerClickHandler
     {
-        [Header("Core Visuals")]
-        [SerializeField] private Image           _cardArt;
-        [SerializeField] private Image           _cardBack;
-        [SerializeField] private Image           _cardFrame;
+        // ── Card structure ─────────────────────────────────────────────────────
+        [Header("Structure")]
+        [SerializeField] private GameObject _cardFront;
+        [SerializeField] private Image      _cardBack;
+
+        // ── Type banner (top strip) ────────────────────────────────────────────
+        [Header("Type Banner")]
+        [SerializeField] private Image _typeBannerBackground;
+        [SerializeField] private Image _typeSymbolIcon;
+
+        // ── Identity ───────────────────────────────────────────────────────────
+        [Header("Card Identity")]
         [SerializeField] private TextMeshProUGUI _nameLabel;
-        [SerializeField] private GameObject      _cardFront;
-        [SerializeField] private Animator        _animator;
-        [SerializeField] private CardTypePaletteSO _palette;
+        [SerializeField] private Image           _cardArt;
 
-        [Header("Combat Badge")]
-        [SerializeField] private GameObject      _damageBadge;
-        [SerializeField] private TextMeshProUGUI _damageLabel;
-
-        [Header("Mana Cost Badge")]
-        // Always visible — shows mana cost even when 0
+        // ── Cost banner badges (bottom strip) ──────────────────────────────────
+        // Mana: always visible — player must always see the mana cost
+        [Header("Cost Banner — Mana")]
         [SerializeField] private GameObject      _manaCostBadge;
         [SerializeField] private TextMeshProUGUI _manaCostLabel;
 
-        [Header("HP Cost Badge")]
-        // Only visible when HPCost > 0 (Ram the Hull, Stolen Wind)
+        // HP cost: hidden on most cards — only shown when HPCost > 0
+        [Header("Cost Banner — HP Cost")]
         [SerializeField] private GameObject      _hpCostBadge;
         [SerializeField] private TextMeshProUGUI _hpCostLabel;
 
-        [Header("Tags")]
-        // Parent container — child Images are spawned here at runtime
-        [SerializeField] private Transform       _tagsContainer;
-        [SerializeField] private Image           _tagIconPrefab;
+        // Damage: hidden on 0-damage non-DOT non-Combo cards
+        [Header("Cost Banner — Damage")]
+        [SerializeField] private GameObject      _damageBadge;
+        [SerializeField] private TextMeshProUGUI _damageLabel;
 
-        // Stores the randomised vertical offset for this card's hand position
-        // Set once on spawn, read by HandLayoutManager during layout refresh
+        // ── Data ───────────────────────────────────────────────────────────────
+        [Header("Data")]
+        [SerializeField] private CardTypePaletteSO _palette;
+
+        // Persists the random vertical hand offset across layout passes
         [HideInInspector] public float HandYOffset;
 
         public CardSO CardData      { get; private set; }
         public bool   WasPlayed     { get; set; }
         public bool   IsBeingPlayed { get; set; }
+
+        // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void OnEnable()  => GameEventBus.OnCardPlayAccepted += OnCardPlayAccepted;
         private void OnDisable() => GameEventBus.OnCardPlayAccepted -= OnCardPlayAccepted;
@@ -59,34 +66,29 @@ namespace ThroneOfTides.UI
             }
         }
 
+        // ── Public API ─────────────────────────────────────────────────────────
+
         public void Setup(CardSO card)
         {
             CardData = card;
 
             _cardFront.SetActive(true);
-            if (_cardBack != null)
-                _cardBack.gameObject.SetActive(false);
+            if (_cardBack != null) _cardBack.gameObject.SetActive(false);
 
             _nameLabel.text = card.Name;
 
-            SetupDamageBadge(card);
-            SetupManaBadge(card);
-            SetupHPCostBadge(card);
-            SetupTags(card);
-
-            if (card.Art != null)
+            if (_cardArt != null && card.Art != null)
                 _cardArt.sprite = card.Art;
 
-            if (_cardFrame != null && _palette != null)
-                _cardFrame.color = _palette.GetColor(card.CardType);
+            ApplyTypeVisuals(card);
+            SetupCostBanner(card);
         }
 
         public void SetFaceDown(CardSO card)
         {
             CardData = card;
             _cardFront.SetActive(false);
-            if (_cardBack != null)
-                _cardBack.gameObject.SetActive(true);
+            if (_cardBack != null) _cardBack.gameObject.SetActive(true);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -99,60 +101,50 @@ namespace ThroneOfTides.UI
             }
         }
 
-        // ── Badge Setup ─────────────────────────────────────────────────────
+        // ── Private setup ──────────────────────────────────────────────────────
 
-        private void SetupDamageBadge(CardSO card)
+        private void ApplyTypeVisuals(CardSO card)
         {
+            if (_palette == null) return;
+
+            var visuals = _palette.GetVisuals(card.CardType);
+
+            if (_typeBannerBackground != null)
+                _typeBannerBackground.color = visuals.BannerColor;
+
+            if (_typeSymbolIcon != null)
+            {
+                // Hide cleanly when no symbol is assigned yet — avoids a broken
+                // white square and lets the placeholder state look intentional
+                bool hasSymbol = visuals.TypeSymbol != null;
+                _typeSymbolIcon.gameObject.SetActive(hasSymbol);
+                if (hasSymbol) _typeSymbolIcon.sprite = visuals.TypeSymbol;
+            }
+        }
+
+        private void SetupCostBanner(CardSO card)
+        {
+            // ── Mana ──────────────────────────────────────────────────────────
+            if (_manaCostBadge != null) _manaCostBadge.SetActive(true);
+            if (_manaCostLabel != null) _manaCostLabel.text = card.ManaCost.ToString();
+
+            // ── HP cost ───────────────────────────────────────────────────────
+            bool hasHPCost = card.HPCost > 0;
+            if (_hpCostBadge != null) _hpCostBadge.SetActive(hasHPCost);
+            if (hasHPCost && _hpCostLabel != null)
+                _hpCostLabel.text = $"-{card.HPCost}";
+
+            // ── Damage ────────────────────────────────────────────────────────
+            // DOT cards show damage-per-turn × duration rather than flat damage
             bool hasDamage = card.Damage > 0         ||
                              card.CardType == CardType.Combo ||
                              card.CardType == CardType.DOT;
 
-            if (_damageBadge != null)
-                _damageBadge.SetActive(hasDamage);
-
+            if (_damageBadge != null) _damageBadge.SetActive(hasDamage);
             if (hasDamage && _damageLabel != null)
                 _damageLabel.text = card.CardType == CardType.DOT
-                    ? $"{card.DotDamagePerTurn}×{card.DotDuration}"
+                    ? $"{card.DotDamagePerTurn}\u00D7{card.DotDuration}"
                     : card.Damage.ToString();
-        }
-
-        private void SetupManaBadge(CardSO card)
-        {
-            if (_manaCostBadge == null) return;
-            _manaCostBadge.SetActive(true);
-            if (_manaCostLabel != null)
-                _manaCostLabel.text = card.ManaCost.ToString();
-        }
-
-        private void SetupHPCostBadge(CardSO card)
-        {
-            if (_hpCostBadge == null) return;
-            bool hasHPCost = card.HPCost > 0;
-            _hpCostBadge.SetActive(hasHPCost);
-            if (hasHPCost && _hpCostLabel != null)
-                _hpCostLabel.text = $"-{card.HPCost}";
-        }
-
-        private void SetupTags(CardSO card)
-        {
-            if (_tagsContainer == null || _tagIconPrefab == null) return;
-
-            // Clear existing tag icons
-            foreach (Transform child in _tagsContainer)
-                Destroy(child.gameObject);
-
-            // Spawn one icon per tag
-            foreach (var tag in card.Tags)
-            {
-                if (tag == null || tag.Symbol == null) continue;
-                var icon = Instantiate(_tagIconPrefab, _tagsContainer);
-                icon.sprite  = tag.Symbol;
-                icon.name    = tag.TagName;
-                // Tooltip on hover — wire when TooltipController is extended
-                var tooltipTrigger = icon.GetComponent<TagTooltipTrigger>();
-                if (tooltipTrigger != null)
-                    tooltipTrigger.Tag = tag;
-            }
         }
     }
 }
