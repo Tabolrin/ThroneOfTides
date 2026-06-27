@@ -20,7 +20,7 @@ MonoBehaviour:
   NextPlaylist: {fileID: 0}
   Songs:
   - Name: LevelSelectTemp
-    Clip: {fileID: 8300000, guid: 6343bbf62509f5a48b66982622a02757, type: 3}
+    Clip: {fileID: 8300000, guid: 48b82507c74ef734aaff9c8185494f35, type: 3}
     PlayCount: 0
     Options:
       Initialized: 1
