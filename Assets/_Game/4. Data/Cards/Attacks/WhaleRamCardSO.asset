@@ -15,6 +15,9 @@ MonoBehaviour:
   _name: Whale Ram
   _cardType: 0
   _description: The deep answers your call. Deal 6 damage.
+  _manaCost: 3
+  _storageCost: 3
+  _hpCost: 0
   _damage: 6
   _comboDamage: 0
   _comboStackBonus: 0
@@ -22,7 +25,8 @@ MonoBehaviour:
   _dotDamagePerTurn: 0
   _dotDuration: 0
   _actionEffect: {fileID: 0}
-  _art: {fileID: 21300000, guid: 85ac6b69287aed9459e172486dbd6389, type: 3}
+  _isEligibleAsActionPair: 0
+  _tags: []
+  _art: {fileID: 21300000, guid: c56832c6afc47d445a74df26b5f748ab, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
-  _isEligibleAsActionPair: 0

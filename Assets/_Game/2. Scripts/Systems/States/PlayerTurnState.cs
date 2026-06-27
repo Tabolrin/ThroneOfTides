@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/Systems/States/PlayerTurnState.cs
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
@@ -19,15 +20,14 @@ namespace ThroneOfTides.Systems
 
         public void Enter()
         {
-            // Reset turn tracking - no auto draw, player clicks deck
             _gameState.ResetTurnCardPlays();
+            _gameState.ResetPlayerMana();
             _gameState.IsPlayerTurn = true;
             GameEventBus.FireTurnPhaseChanged(TurnPhase.Draw);
-            Debug.Log($"Player Turn - HP: {_gameState.PlayerHP}, Combo: {_gameState.ComboStackCount}");
+            Debug.Log($"Player Turn — HP: {_gameState.PlayerHP}, Mana: {_gameState.PlayerMana}/{_gameState.PlayerMaxMana}");
         }
 
         public void Tick() { }
-
         public void Exit() => Debug.Log("Player Turn Ended");
     }
 }

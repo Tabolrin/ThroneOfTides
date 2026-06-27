@@ -15,14 +15,18 @@ MonoBehaviour:
   _name: Chain Shot
   _cardType: 0
   _description: Blood for blood. Sacrifice 2 HP. Deal 8 damage.
-  _damage: 8
+  _manaCost: 1
+  _storageCost: 2
+  _hpCost: 0
+  _damage: 3
   _comboDamage: 0
   _comboStackBonus: 0
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
   _actionEffect: {fileID: 0}
-  _art: {fileID: 21300000, guid: e11a4208f8b77244b8d78d05db150fb7, type: 3}
+  _isEligibleAsActionPair: 0
+  _tags: []
+  _art: {fileID: 21300000, guid: 7fe440f9afbcc364bac996d81af1f84e, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
-  _isEligibleAsActionPair: 0

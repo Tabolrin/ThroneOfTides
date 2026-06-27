@@ -1,34 +1,18 @@
+// Assets/_Game/2. Scripts/Systems/VFX/CardVFXHandler.cs
 using System.Collections;
 using DG.Tweening;
 using MoreMountains.Feedbacks;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
-using UnityEngine.UI;
-
-// Assembly: ThroneOfTides.Systems
-// Location: Scripts/Systems/VFX/CardVFXHandler.cs
-// Attach to: VFXManager GameObject in scene
-//
-// Subscribes to GameEventBus and drives all in-game VFX and FEEL feedbacks.
-// All prefabs and MMF_Players are assigned in the Inspector — no hardcoded asset names.
-//
-// Creature VFX (Kraken, Siren) are handled by dedicated controllers that own their
-// own sequence lifecycle. This class spawns them, injects scene dependencies, and
-// wires their events so game logic remains decoupled from animation timing.
-// Both creatures can target either ship — pass DamageTarget to select the hit point.
 
 namespace ThroneOfTides.Systems
 {
     public class CardVFXHandler : MonoBehaviour
     {
-        // ── Inspector ─────────────────────────────────────────────────────────
-
-        [Header("Canvas & Camera (injected into creature prefabs at runtime)")]
-        [SerializeField] private RectTransform _gameCanvasRect;
-        [SerializeField] private Camera        _gameCamera;
-        // Empty world-space GameObject outside any Canvas — particles reparent here
-        // so they render correctly under a Screen Space Overlay canvas.
+        [Header("Canvas & Camera")]
+        [SerializeField] private RectTransform  _gameCanvasRect;
+        [SerializeField] private Camera         _gameCamera;
         [SerializeField] private ParticleSystem _musicNoteParticles;
 
         [Header("Spawn Points")]
@@ -52,16 +36,22 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _gunpowderBarrelPrefab;
         [SerializeField] private GameObject _torchPrefab;
         [SerializeField] private GameObject _torchComboResolvePrefab;
+        [SerializeField] private GameObject _ramTheHullPrefab;
         [SerializeField] private GameObject _krakenPrefab;
-        [SerializeField] private GameObject _boardingPartyPrefab;
 
         [Header("VFX Prefabs — Action")]
         [SerializeField] private GameObject _sirenSongPrefab;
         [SerializeField] private GameObject _reconParrotPrefab;
         [SerializeField] private GameObject _highSpiritsPrefab;
-        [SerializeField] private GameObject _deadMansTurnPrefab;
         [SerializeField] private GameObject _lockerReturnPrefab;
         [SerializeField] private GameObject _monkeyGrabPrefab;
+        [SerializeField] private GameObject _rumPrefab;
+        [SerializeField] private GameObject _treasureChestPrefab;
+        [SerializeField] private GameObject _stolenWindPrefab;
+
+        [Header("VFX Prefabs — Reaction")]
+        [SerializeField] private GameObject _deadMansTurnPrefab;
+        [SerializeField] private GameObject _bloodForBloodPrefab;
 
         [Header("FEEL — Hit")]
         [SerializeField] private MMF_Player _feedbackLightHit;
@@ -81,6 +71,12 @@ namespace ThroneOfTides.Systems
         [SerializeField] private MMF_Player _feedbackComboStackIncrement;
         [SerializeField] private MMF_Player _feedbackPlayZoneGlow;
 
+        [Header("FEEL — Mana & Reactions")]
+        [SerializeField] private MMF_Player _feedbackManaSpent;
+        [SerializeField] private MMF_Player _feedbackManaGained;
+        [SerializeField] private MMF_Player _feedbackReactionCharged;
+        [SerializeField] private MMF_Player _feedbackReactionFired;
+
         [Header("FEEL — Match")]
         [SerializeField] private MMF_Player _feedbackWin;
         [SerializeField] private MMF_Player _feedbackLoss;
@@ -92,6 +88,10 @@ namespace ThroneOfTides.Systems
         [SerializeField] private float _vfxLifetime      = 2f;
         [SerializeField] private float _winSlowDuration  = 0.8f;
         [SerializeField] private float _lossSlowDuration = 0.5f;
+
+        // Tracks previous mana value so OnPlayerManaChanged can distinguish
+        // spend from gain without requiring additional event parameters.
+        private int _previousPlayerMana = -1;
 
         // ── Unity ─────────────────────────────────────────────────────────────
 
@@ -107,6 +107,9 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnMatchWin          += OnMatchWin;
             GameEventBus.OnMatchLoss         += OnMatchLoss;
             GameEventBus.OnTurnPhaseChanged  += OnTurnPhaseChanged;
+            GameEventBus.OnPlayerManaChanged += OnPlayerManaChanged;
+            GameEventBus.OnReactionCharged   += OnReactionCharged;
+            GameEventBus.OnReactionFired     += OnReactionFired;
         }
 
         private void OnDisable()
@@ -121,38 +124,28 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnMatchWin          -= OnMatchWin;
             GameEventBus.OnMatchLoss         -= OnMatchLoss;
             GameEventBus.OnTurnPhaseChanged  -= OnTurnPhaseChanged;
+            GameEventBus.OnPlayerManaChanged -= OnPlayerManaChanged;
+            GameEventBus.OnReactionCharged   -= OnReactionCharged;
+            GameEventBus.OnReactionFired     -= OnReactionFired;
         }
 
         // ── Event Handlers ────────────────────────────────────────────────────
 
         private void OnDamageDealt(DamageTarget target, int amount)
         {
-            Transform hitPoint = GetHitPoint(target);
+            Transform hit = GetHitPoint(target);
+            _feedbackDamageNumber?.PlayFeedbacks(hit.position, amount);
 
-            _feedbackDamageNumber?.PlayFeedbacks(hitPoint.position, amount);
-
-            if (amount >= 8)
-            {
-                SpawnVFX(_hitImpactExplosionPrefab, hitPoint.position);
-                _feedbackHeavyHit?.PlayFeedbacks();
-            }
-            else if (amount >= 4)
-            {
-                SpawnVFX(_hitImpactStandardPrefab, hitPoint.position);
-                _feedbackMediumHit?.PlayFeedbacks();
-            }
-            else if (amount > 0)
-            {
-                SpawnVFX(_hitImpactStandardPrefab, hitPoint.position);
-                _feedbackLightHit?.PlayFeedbacks();
-            }
+            if      (amount >= 8) { SpawnVFX(_hitImpactExplosionPrefab, hit.position); _feedbackHeavyHit?.PlayFeedbacks(); }
+            else if (amount >= 4) { SpawnVFX(_hitImpactStandardPrefab,  hit.position); _feedbackMediumHit?.PlayFeedbacks(); }
+            else if (amount > 0)  { SpawnVFX(_hitImpactStandardPrefab,  hit.position); _feedbackLightHit?.PlayFeedbacks(); }
         }
 
-        private void OnCardPlayed(ICard card)        => _feedbackCardPlay?.PlayFeedbacks();
-        private void OnCardDrawn(ICard card)          => _feedbackCardDraw?.PlayFeedbacks();
-        private void OnComboResolved()                => _feedbackComboResolve?.PlayFeedbacks();
-        private void OnMatchWin()                     => StartCoroutine(WinSequence());
-        private void OnMatchLoss()                    => StartCoroutine(LossSequence());
+        private void OnCardPlayed(ICard card)   => _feedbackCardPlay?.PlayFeedbacks();
+        private void OnCardDrawn(ICard card)     => _feedbackCardDraw?.PlayFeedbacks();
+        private void OnComboResolved()           => _feedbackComboResolve?.PlayFeedbacks();
+        private void OnMatchWin()                => StartCoroutine(WinSequence());
+        private void OnMatchLoss()               => StartCoroutine(LossSequence());
 
         private void OnComboStackChanged(int count)
         {
@@ -170,6 +163,21 @@ namespace ThroneOfTides.Systems
             _feedbackDOTTick?.PlayFeedbacks();
         }
 
+        private void OnPlayerManaChanged(int current, int max)
+        {
+            bool wasSpent = _previousPlayerMana >= 0 && current < _previousPlayerMana;
+            _previousPlayerMana = current;
+
+            if (wasSpent) _feedbackManaSpent?.PlayFeedbacks();
+            else          _feedbackManaGained?.PlayFeedbacks();
+        }
+
+        private void OnReactionCharged(ReactionType type, int charges) =>
+            _feedbackReactionCharged?.PlayFeedbacks();
+
+        private void OnReactionFired(ReactionType type) =>
+            _feedbackReactionFired?.PlayFeedbacks();
+
         private void OnCardPlayAccepted(ICard card)
         {
             var cardSO = card as CardSO;
@@ -186,94 +194,99 @@ namespace ThroneOfTides.Systems
 
             switch (card.Name)
             {
-                case "Cannonball":
-                case "Grape Shot":
                 case "Pistol":
-                case "Chain Shot":
-                case "Ballista":
-                case "Anchor Drag":
+                case "Canon Ball":
                 case "Whale Ram":
-                case "Mega Cannon":
+                case "Chain Shot":
+                case "Tidal Wave":
                     yield return StartCoroutine(FireCannonball(source.position, target.position));
                     break;
+
+                case "Ram the Hull":
+                    SpawnVFX(_ramTheHullPrefab != null
+                        ? _ramTheHullPrefab
+                        : _hitImpactExplosionPrefab, target.position);
+                    _feedbackHeavyHit?.PlayFeedbacks();
+                    break;
+
+                case "Hail Storm":  SpawnVFX(_hailStormPrefab,  target.position); break;
+                case "Whirlpool":   SpawnVFX(_whirlpoolPrefab,  target.position); break;
 
                 case "Lightning":
                     SpawnVFX(_lightningPrefab, target.position);
                     _feedbackLightningFlash?.PlayFeedbacks();
                     break;
 
-                case "Hail Storm":   SpawnVFX(_hailStormPrefab,       target.position); break;
-                case "Whirlpool":    SpawnVFX(_whirlpoolPrefab,        target.position); break;
-                case "Tidal Wave":   SpawnVFX(_tidalWavePrefab,        target.position); break;
-
                 case "Gunpowder Barrel":
-                    SpawnVFX(_gunpowderBarrelPrefab, target.position);
+                    SpawnVFX(_gunpowderBarrelPrefab, source.position);
                     break;
 
                 case "Torch":
-                    // Use combo-resolve variant when available; falls back to standard torch.
-                    SpawnVFX(_torchComboResolvePrefab != null ? _torchComboResolvePrefab : _torchPrefab,
-                             target.position);
+                    SpawnVFX(_torchComboResolvePrefab != null
+                        ? _torchComboResolvePrefab
+                        : _torchPrefab, target.position);
                     break;
 
                 case "The Kraken":
-                    // Kraken always targets the enemy ship.
                     HandleCreatureVFX(_krakenPrefab, DamageTarget.Enemy);
                     break;
 
-                case "Boarding Party": SpawnVFX(_boardingPartyPrefab, target.position); break;
-
                 case "Siren Song":
-                    // Siren targets the enemy ship — the enchantment is cast upon them.
                     HandleCreatureVFX(_sirenSongPrefab, DamageTarget.Enemy);
                     break;
 
-                case "Recon Parrot":    SpawnVFX(_reconParrotPrefab,  target.position); break;
+                case "Recon Parrot":    SpawnVFX(_reconParrotPrefab,   target.position); break;
+                case "Locker's Return": SpawnVFX(_lockerReturnPrefab,  source.position); break;
+                case "Monkey Grab":     SpawnVFX(_monkeyGrabPrefab,    target.position); break;
+                case "Treasure Chest":  SpawnVFX(_treasureChestPrefab, source.position); break;
 
                 case "High Spirits":
                     SpawnVFX(_highSpiritsPrefab, source.position);
+                    _feedbackManaGained?.PlayFeedbacks();
+                    break;
+
+                case "Rum":
+                    SpawnVFX(_rumPrefab, source.position);
                     _feedbackHeal?.PlayFeedbacks();
                     break;
 
-                case "Dead Man's Turn": SpawnVFX(_deadMansTurnPrefab, source.position); break;
-                case "Locker's Return": SpawnVFX(_lockerReturnPrefab, source.position); break;
-                case "Monkey Grab":     SpawnVFX(_monkeyGrabPrefab,   target.position); break;
+                case "Stolen Wind":
+                    SpawnVFX(_stolenWindPrefab, source.position);
+                    break;
+
+                // Reactions are charged on draw — OnReactionCharged/Fired handle their VFX
+                case "Dead Man's Turn":
+                case "Blood for Blood":
+                    break;
             }
         }
 
         // ── Creature VFX ──────────────────────────────────────────────────────
 
-        // Shared spawn, inject, and event-wire path for any creature VFX controller.
-        // Creature prefabs appear to the left of the target ship via _canvasSpawnOffset
-        // on the controller — adjust that field per prefab in the Inspector.
         private void HandleCreatureVFX(GameObject prefab, DamageTarget target)
         {
             if (prefab == null) return;
 
-            // Instantiate under the canvas so the RectTransform resolves correctly.
-            var instance = Instantiate(prefab, _gameCanvasRect);
-
-            Vector3 worldPosition = GetHitPoint(target).position;
+            var instance     = Instantiate(prefab, _gameCanvasRect);
+            Vector3 worldPos = GetHitPoint(target).position;
 
             if (prefab == _krakenPrefab)
             {
-                var controller = instance.GetComponent<VFX.KrakenVFXController>();
-                if (controller == null) return;
-
-                controller.Inject(_gameCanvasRect, _gameCamera);
-                controller.OnAttackMoment += GameEventBus.FireKrakenAttackMoment;
-                controller.OnSequenceEnd  += () => Destroy(instance);
-                controller.StartSequence(worldPosition);
+                var ctrl = instance.GetComponent<VFX.KrakenVFXController>();
+                if (ctrl == null) return;
+                ctrl.Inject(_gameCanvasRect, _gameCamera);
+                ctrl.OnAttackMoment += GameEventBus.FireKrakenAttackMoment;
+                ctrl.OnSequenceEnd  += () => Destroy(instance);
+                ctrl.StartSequence(worldPos);
             }
             else if (prefab == _sirenSongPrefab)
             {
-                var controller = instance.GetComponent<VFX.SirenVFXController>();
-                if (controller == null) return;
-
-                controller.Inject(_gameCanvasRect, _gameCamera, _musicNoteParticles);
-                controller.OnSirenReady  += GameEventBus.FireSirenSongActive;
-                controller.OnSequenceEnd += () => Destroy(instance);
-                controller.StartSequence(worldPosition);
+                var ctrl = instance.GetComponent<VFX.SirenVFXController>();
+                if (ctrl == null) return;
+                ctrl.Inject(_gameCanvasRect, _gameCamera, _musicNoteParticles);
+                ctrl.OnSirenReady  += GameEventBus.FireSirenSongActive;
+                ctrl.OnSequenceEnd += () => Destroy(instance);
+                ctrl.StartSequence(worldPos);
             }
         }
 
@@ -289,11 +302,10 @@ namespace ThroneOfTides.Systems
             float elapsed = 0f;
             while (elapsed < _cannonballDuration)
             {
-                elapsed                 += Time.deltaTime;
-                float   t                = Mathf.Clamp01(elapsed / _cannonballDuration);
-                Vector3 a                = Vector3.Lerp(from, mid, t);
-                Vector3 b                = Vector3.Lerp(mid,  to,  t);
-                ball.transform.position  = Vector3.Lerp(a, b, t);
+                elapsed                += Time.deltaTime;
+                float   t               = Mathf.Clamp01(elapsed / _cannonballDuration);
+                ball.transform.position = Vector3.Lerp(Vector3.Lerp(from, mid, t),
+                                                       Vector3.Lerp(mid,  to,  t), t);
                 yield return null;
             }
 

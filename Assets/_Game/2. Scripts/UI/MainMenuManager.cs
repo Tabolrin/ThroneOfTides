@@ -8,11 +8,8 @@ namespace ThroneOfTides.UI
         public void OnPlayPressed() =>
             SceneManager.LoadScene("LevelSelect");
 
-        public void OnPortPressed()
-        {
-            // TODO - load Port scene when built
-            Debug.Log("Port - not yet implemented");
-        }
+        public void OnPortPressed() =>
+            SceneManager.LoadScene("Port");
 
         public void OnOptionsPressed()
         {

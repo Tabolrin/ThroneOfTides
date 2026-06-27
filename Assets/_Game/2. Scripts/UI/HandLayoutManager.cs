@@ -382,5 +382,20 @@ namespace ThroneOfTides.UI
             Destroy(view.gameObject);
             onComplete?.Invoke();
         }
+        
+        // Explicit interface — ICard parameter, delegates to public CardSO method
+        IEnumerator IHandLayoutManager.AnimateReactionDraw(ICard card) =>
+            AnimateReactionDraw(card as CardSO);
+
+// Public method — accessible from concrete type references (GameBootstrapper)
+        public IEnumerator AnimateReactionDraw(CardSO card)
+        {
+            if (card == null) yield break;
+
+            // TODO: full shrink-to-slot animation once ReactionsBar exists in scene
+            // Requires _reactionSlotTransform to be wired in Inspector
+            GameEventBus.FireCardDrawn(card);
+            yield return null;
+        }
     }
 }

@@ -1,12 +1,13 @@
+// Assets/_Game/2. Scripts/Systems/EnemyAI.cs
 using System.Collections.Generic;
+using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
-using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Systems
 {
-    // Selects cards for the enemy using weight-based random selection
-    // Captain archetype and personality defined entirely by CaptainSO weights
+    // Selects cards for the enemy using weight-based random selection.
+    // Captain personality defined entirely by CaptainSO weight table.
     public class EnemyAI
     {
         private readonly CaptainSO _captain;
@@ -16,8 +17,8 @@ namespace ThroneOfTides.Systems
             _captain = captain;
         }
 
-        // Picks one card from enemy hand weighted by CaptainSO weight table
-        public CardSO PickCard(IReadOnlyList<CardSO> hand, bool damageCardPlayed, bool actionCardPlayed)
+        public CardSO PickCard(IReadOnlyList<CardSO> hand, bool damageCardPlayed,
+                               bool actionCardPlayed, int enemyMana)
         {
             if (hand.Count == 0) return null;
 
@@ -33,35 +34,35 @@ namespace ThroneOfTides.Systems
                 if (isDamageCard && damageCardPlayed) continue;
                 if (isActionCard && (actionCardPlayed || !card.IsEligibleAsActionPair)) continue;
 
-                float weight = _captain.GetWeightForCard(card);
+                // Reaction cards are never played from hand by the enemy —
+                // enemy AI doesn't hold reaction cards in normal gameplay
+                if (card.CardType == CardType.Reaction) continue;
 
-                // Zero weight means captain never plays this card
+                // Cannot play cards that cost more mana than currently available
+                if (card.ManaCost > enemyMana) continue;
+
+                float weight = _captain.GetWeightForCard(card);
                 if (weight <= 0f) continue;
 
                 candidates.Add((card, weight));
             }
 
-            if (candidates.Count == 0) return null;
-
-            return WeightedRandom(candidates);
+            return candidates.Count == 0 ? null : WeightedRandom(candidates);
         }
 
-        private CardSO WeightedRandom(List<(CardSO card, float weight)> candidates)
+        private static CardSO WeightedRandom(List<(CardSO card, float weight)> candidates)
         {
-            float totalWeight = 0f;
-            foreach (var c in candidates)
-                totalWeight += c.weight;
+            float total      = 0f;
+            foreach (var c in candidates) total += c.weight;
 
-            float roll       = Random.Range(0f, totalWeight);
+            float roll       = Random.Range(0f, total);
             float cumulative = 0f;
 
             foreach (var c in candidates)
             {
                 cumulative += c.weight;
-                if (roll <= cumulative)
-                    return c.card;
+                if (roll <= cumulative) return c.card;
             }
-
             return candidates[candidates.Count - 1].card;
         }
     }
