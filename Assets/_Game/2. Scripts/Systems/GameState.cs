@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/Systems/GameState.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,32 +23,44 @@ namespace ThroneOfTides.Systems
 
         private readonly int _maxHP;
 
+        // ── Mana ──────────────────────────────────────────────────────────────
+        public int PlayerMana    { get; private set; }
+        public int PlayerMaxMana { get; private set; }
+        public int EnemyMana     { get; private set; }
+        public int EnemyMaxMana  { get; private set; }
+
+        // ── Combo ─────────────────────────────────────────────────────────────
         public int    ComboStackCount { get; private set; }
         public CardSO ActiveComboCard { get; private set; }
 
+        // ── Status Effects ────────────────────────────────────────────────────
         public bool SirenSongActive    { get; private set; }
         public bool PendingUnblockable { get; private set; }
 
+        // ── Turn Tracking ─────────────────────────────────────────────────────
         public bool DamageCardPlayedThisTurn { get; private set; }
         public bool ActionCardPlayedThisTurn { get; private set; }
+        public bool HasDrawnThisTurn         { get; private set; }
 
-        // Manual draw tracking - reset each player turn
-        public bool HasDrawnThisTurn { get; private set; }
+        // ── Reaction Charges ──────────────────────────────────────────────────
+        public int DeadMansTurnCharges  { get; private set; }
+        public int BloodForBloodCharges { get; private set; }
 
-        private readonly List<CardSO>    _playerDiscard = new List<CardSO>();
-        private readonly List<CardSO>    _enemyDiscard  = new List<CardSO>();
-        private readonly List<DotEffect> _dotEffects    = new List<DotEffect>();
+        // ── Discard & Snapshot ────────────────────────────────────────────────
+        private readonly List<CardSO>    _playerDiscard       = new List<CardSO>();
+        private readonly List<CardSO>    _enemyDiscard        = new List<CardSO>();
+        private readonly List<DotEffect> _dotEffects          = new List<DotEffect>();
+        private readonly List<CardSO>    _originalDeckSnapshot;
 
-        public IReadOnlyList<CardSO> PlayerDiscard => _playerDiscard.AsReadOnly();
-        public IReadOnlyList<CardSO> EnemyDiscard  => _enemyDiscard.AsReadOnly();
+        public IReadOnlyList<CardSO> PlayerDiscard        => _playerDiscard.AsReadOnly();
+        public IReadOnlyList<CardSO> EnemyDiscard         => _enemyDiscard.AsReadOnly();
+        public IReadOnlyList<CardSO> OriginalDeckSnapshot => _originalDeckSnapshot.AsReadOnly();
 
         public Action OnEnemyTurnReady;
 
-        public bool DeadMansTurnActive { get; private set; }
-        public void SetDeadMansTurnActive() => DeadMansTurnActive = true;
-        public void ClearDeadMansTurn()     => DeadMansTurnActive = false;
-
-        public GameState(int startingHP, Deck playerDeck, Deck enemyDeck)
+        public GameState(int startingHP, int startingMaxMana,
+                         Deck playerDeck, Deck enemyDeck,
+                         List<CardSO> originalDeckSnapshot)
         {
             _maxHP     = startingHP;
             PlayerHP   = startingHP;
@@ -56,7 +69,14 @@ namespace ThroneOfTides.Systems
             EnemyDeck  = enemyDeck;
             PlayerHand = new Hand();
             EnemyHand  = new Hand();
+
+            PlayerMaxMana = startingMaxMana;
+            EnemyMaxMana  = startingMaxMana;
+
+            _originalDeckSnapshot = new List<CardSO>(originalDeckSnapshot);
         }
+
+        // ── HP ────────────────────────────────────────────────────────────────
 
         public void ApplyDamage(DamageTarget target, int amount)
         {
@@ -75,6 +95,89 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
+        // ── Mana ──────────────────────────────────────────────────────────────
+
+        public void ResetPlayerMana()
+        {
+            PlayerMana = PlayerMaxMana;
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
+        public void ResetEnemyMana()
+        {
+            EnemyMana = EnemyMaxMana;
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+        }
+
+        public bool SpendPlayerMana(int amount)
+        {
+            if (PlayerMana < amount) return false;
+            PlayerMana -= amount;
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+            return true;
+        }
+
+        public bool SpendEnemyMana(int amount)
+        {
+            if (EnemyMana < amount) return false;
+            EnemyMana -= amount;
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+            return true;
+        }
+
+        public void AddPlayerMaxMana(int amount)
+        {
+            PlayerMaxMana += amount;
+            PlayerMana    += amount;
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
+        // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind
+        public void StealEnemyMana(int amount)
+        {
+            int actual = Mathf.Min(amount, EnemyMana - 1);
+            if (actual <= 0) return;
+            EnemyMana  -= actual;
+            PlayerMana += actual;
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
+        // ── Reactions ─────────────────────────────────────────────────────────
+
+        public void AddDeadMansTurnCharge()
+        {
+            DeadMansTurnCharges++;
+            GameEventBus.FireReactionCharged(ReactionType.DeadMansTurn, DeadMansTurnCharges);
+        }
+
+        public void AddBloodForBloodCharge()
+        {
+            BloodForBloodCharges++;
+            GameEventBus.FireReactionCharged(ReactionType.BloodForBlood, BloodForBloodCharges);
+        }
+
+        public bool ConsumeDeadMansTurn()
+        {
+            if (DeadMansTurnCharges <= 0) return false;
+            DeadMansTurnCharges--;
+            GameEventBus.FireReactionFired(ReactionType.DeadMansTurn);
+            return true;
+        }
+
+        public bool ConsumeBloodForBlood()
+        {
+            if (BloodForBloodCharges <= 0) return false;
+            BloodForBloodCharges--;
+            GameEventBus.FireReactionFired(ReactionType.BloodForBlood);
+            return true;
+        }
+
+        public bool HasAnyReaction() =>
+            DeadMansTurnCharges > 0 || BloodForBloodCharges > 0;
+
+        // ── Status Effects ────────────────────────────────────────────────────
+
         public void SetSirenActive()
         {
             SirenSongActive    = true;
@@ -86,6 +189,8 @@ namespace ThroneOfTides.Systems
             SirenSongActive    = false;
             PendingUnblockable = false;
         }
+
+        // ── DOT ───────────────────────────────────────────────────────────────
 
         public void AddDotEffect(DotEffect effect)
         {
@@ -108,18 +213,23 @@ namespace ThroneOfTides.Systems
             }
         }
 
+        // ── Card Play Validation ──────────────────────────────────────────────
+
         public bool CanPlayCard(CardSO card)
         {
-            // Must draw before playing
-            if (!HasDrawnThisTurn) return false;
+            if (!HasDrawnThisTurn)                  return false;
+            if (card.CardType == CardType.Reaction) return false;
+            if (PlayerMana < card.ManaCost)          return false;
+
             if (card.CardType == CardType.Action)
                 return !ActionCardPlayedThisTurn && card.IsEligibleAsActionPair;
+
             return !DamageCardPlayedThisTurn;
         }
 
         public bool CanDraw() =>
             !HasDrawnThisTurn &&
-            IsPlayerTurn &&
+            IsPlayerTurn      &&
             PlayerHand.Count < 5 &&
             PlayerDeck.Count > 0;
 
@@ -140,24 +250,7 @@ namespace ThroneOfTides.Systems
             HasDrawnThisTurn         = false;
         }
 
-        public bool IsGameOver()
-        {
-            if (PlayerHP <= 0 || EnemyHP <= 0) return true;
-            if (PlayerDeck.Count == 0 && PlayerHand.Count == 0) return true;
-            if (EnemyDeck.Count  == 0 && EnemyHand.Count  == 0) return true;
-            return false;
-        }
-
-        public Winner GetWinner()
-        {
-            if (PlayerHP <= 0 || (PlayerDeck.Count == 0 && PlayerHand.Count == 0)) return Winner.Enemy;
-            if (EnemyHP  <= 0 || (EnemyDeck.Count  == 0 && EnemyHand.Count  == 0)) return Winner.Player;
-            return Winner.None;
-        }
-
-        public void NotifyEnemyTurnReady()               => OnEnemyTurnReady?.Invoke();
-        public void NotifyCardDrawn(CardSO card)         => GameEventBus.FireCardDrawn(card);
-        public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
+        // ── Combo ─────────────────────────────────────────────────────────────
 
         public void IncrementCombo(CardSO card)
         {
@@ -182,6 +275,25 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireComboStackChanged(0);
         }
 
+        // ── Game Over ─────────────────────────────────────────────────────────
+
+        public bool IsGameOver()
+        {
+            if (PlayerHP <= 0 || EnemyHP <= 0) return true;
+            if (PlayerDeck.Count == 0 && PlayerHand.Count == 0) return true;
+            if (EnemyDeck.Count  == 0 && EnemyHand.Count  == 0) return true;
+            return false;
+        }
+
+        public Winner GetWinner()
+        {
+            if (PlayerHP <= 0 || (PlayerDeck.Count == 0 && PlayerHand.Count == 0)) return Winner.Enemy;
+            if (EnemyHP  <= 0 || (EnemyDeck.Count  == 0 && EnemyHand.Count  == 0)) return Winner.Player;
+            return Winner.None;
+        }
+
+        // ── Discard ───────────────────────────────────────────────────────────
+
         public void DiscardPlayerCard(CardSO card) => _playerDiscard.Add(card);
         public void DiscardEnemyCard(CardSO card)  => _enemyDiscard.Add(card);
 
@@ -199,5 +311,25 @@ namespace ThroneOfTides.Systems
             }
             return retrieved;
         }
+
+        public List<CardSO> GetRandomFromSnapshot(int count)
+        {
+            var pool   = new List<CardSO>(_originalDeckSnapshot);
+            var result = new List<CardSO>();
+
+            for (int i = 0; i < count && pool.Count > 0; i++)
+            {
+                int index = UnityEngine.Random.Range(0, pool.Count);
+                result.Add(pool[index]);
+                pool.RemoveAt(index);
+            }
+            return result;
+        }
+
+        // ── Notifications ─────────────────────────────────────────────────────
+
+        public void NotifyEnemyTurnReady()               => OnEnemyTurnReady?.Invoke();
+        public void NotifyCardDrawn(CardSO card)         => GameEventBus.FireCardDrawn(card);
+        public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
     }
 }

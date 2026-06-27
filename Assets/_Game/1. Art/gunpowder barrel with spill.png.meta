@@ -1,0 +1,897 @@
+fileFormatVersion: 2
+guid: 270093075b9044742ade3d150757c038
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3460682387886902827
+    second: gunpowder barrel with spill_0
+  - first:
+      213: 3642599894811559222
+    second: gunpowder barrel with spill_1
+  - first:
+      213: 4191755554072713445
+    second: gunpowder barrel with spill_2
+  - first:
+      213: 6572828517035144386
+    second: gunpowder barrel with spill_3
+  - first:
+      213: 2183973514411629234
+    second: gunpowder barrel with spill_4
+  - first:
+      213: 2782349903444276479
+    second: gunpowder barrel with spill_5
+  - first:
+      213: -2225019890964938733
+    second: gunpowder barrel with spill_6
+  - first:
+      213: 5183255748290443673
+    second: gunpowder barrel with spill_7
+  - first:
+      213: 4289711197605434543
+    second: gunpowder barrel with spill_8
+  - first:
+      213: 5522184791934901288
+    second: gunpowder barrel with spill_9
+  - first:
+      213: -878443734511975234
+    second: gunpowder barrel with spill_10
+  - first:
+      213: 740591568094916740
+    second: gunpowder barrel with spill_11
+  - first:
+      213: 9177422965502553394
+    second: gunpowder barrel with spill_12
+  - first:
+      213: -5772232061911215138
+    second: gunpowder barrel with spill_13
+  - first:
+      213: -662677875261022160
+    second: gunpowder barrel with spill_14
+  - first:
+      213: -8372742190084053976
+    second: gunpowder barrel with spill_15
+  - first:
+      213: 5934598426984751603
+    second: gunpowder barrel with spill_16
+  - first:
+      213: -5625893531618274281
+    second: gunpowder barrel with spill_17
+  - first:
+      213: -8012343388757265465
+    second: gunpowder barrel with spill_18
+  - first:
+      213: -4546251626947850352
+    second: gunpowder barrel with spill_19
+  - first:
+      213: -5038341704964462569
+    second: gunpowder barrel with spill_20
+  - first:
+      213: 4513429052416546096
+    second: gunpowder barrel with spill_21
+  - first:
+      213: 712676338680137024
+    second: gunpowder barrel with spill_22
+  - first:
+      213: -6856427338255896183
+    second: gunpowder barrel with spill_23
+  - first:
+      213: 1522251418752442490
+    second: gunpowder barrel with spill_24
+  - first:
+      213: 3092905693804996585
+    second: gunpowder barrel with spill_25
+  - first:
+      213: -4757760800893035813
+    second: gunpowder barrel with spill_26
+  - first:
+      213: -6348623142129981551
+    second: gunpowder barrel with spill_27
+  - first:
+      213: 4588877258366808067
+    second: gunpowder barrel with spill_28
+  - first:
+      213: -6279451238328893126
+    second: gunpowder barrel with spill_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_0
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 182
+        width: 699
+        height: 776
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d1fc8524bf29ffc0800000000000000
+      internalID: -3460682387886902827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_1
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 913
+        width: 135
+        height: 85
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6354e151e4d1d8230800000000000000
+      internalID: 3642599894811559222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_2
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 958
+        width: 76
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e856c1b77b1c2a30800000000000000
+      internalID: 4191755554072713445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_3
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 523
+        width: 192
+        height: 337
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c4ff6f36b0673b50800000000000000
+      internalID: 6572828517035144386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_4
+      rect:
+        serializedVersion: 2
+        x: 831
+        y: 636
+        width: 16
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2badd5517580f4e10800000000000000
+      internalID: 2183973514411629234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_5
+      rect:
+        serializedVersion: 2
+        x: 803
+        y: 545
+        width: 31
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff473a3ee74ec9620800000000000000
+      internalID: 2782349903444276479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_6
+      rect:
+        serializedVersion: 2
+        x: 804
+        y: 569
+        width: 46
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3104bd4a2342f11e0800000000000000
+      internalID: -2225019890964938733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_7
+      rect:
+        serializedVersion: 2
+        x: 839
+        y: 526
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9997ad814af9ee740800000000000000
+      internalID: 5183255748290443673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_8
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 278
+        width: 112
+        height: 207
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa4994a3b9d188b30800000000000000
+      internalID: 4289711197605434543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_9
+      rect:
+        serializedVersion: 2
+        x: 844
+        y: 431
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82c185b7fcdb2ac40800000000000000
+      internalID: 5522184791934901288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_10
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 423
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb40f31e3142fc3f0800000000000000
+      internalID: -878443734511975234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_11
+      rect:
+        serializedVersion: 2
+        x: 844
+        y: 408
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48072fb7b1c174a00800000000000000
+      internalID: 740591568094916740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_12
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 233
+        width: 123
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23daa442091cc5f70800000000000000
+      internalID: 9177422965502553394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_13
+      rect:
+        serializedVersion: 2
+        x: 807
+        y: 245
+        width: 27
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed359a4b589e4efa0800000000000000
+      internalID: -5772232061911215138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_14
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 157
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0306e84cbf1bdc6f0800000000000000
+      internalID: -662677875261022160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_15
+      rect:
+        serializedVersion: 2
+        x: 626
+        y: 172
+        width: 20
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8242d1cb65b0ecb80800000000000000
+      internalID: -8372742190084053976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_16
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 168
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f1a40593ddeb5250800000000000000
+      internalID: 5934598426984751603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_17
+      rect:
+        serializedVersion: 2
+        x: 486
+        y: 124
+        width: 26
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71499b7e3afcce1b0800000000000000
+      internalID: -5625893531618274281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_18
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 134
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c37cae93207ec090800000000000000
+      internalID: -8012343388757265465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_19
+      rect:
+        serializedVersion: 2
+        x: 664
+        y: 99
+        width: 45
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09f4b3c7b3878e0c0800000000000000
+      internalID: -4546251626947850352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_20
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 98
+        width: 36
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 718ae82e9e6341ab0800000000000000
+      internalID: -5038341704964462569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_21
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 89
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 035573c5fcbe2ae30800000000000000
+      internalID: 4513429052416546096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_22
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 95
+        width: 20
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0450bd6aa5fe3e900800000000000000
+      internalID: 712676338680137024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_23
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 64
+        width: 26
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 981fafaa9a319d0a0800000000000000
+      internalID: -6856427338255896183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_24
+      rect:
+        serializedVersion: 2
+        x: 422
+        y: 76
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a70e291a99f102510800000000000000
+      internalID: 1522251418752442490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_25
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 67
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e7a70377553cea20800000000000000
+      internalID: 3092905693804996585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_26
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 55
+        width: 18
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bda1e7062c909fdb0800000000000000
+      internalID: -4757760800893035813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_27
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 58
+        width: 26
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 197a48083e825e7a0800000000000000
+      internalID: -6348623142129981551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_28
+      rect:
+        serializedVersion: 2
+        x: 363
+        y: 6
+        width: 83
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30072d6bd87feaf30800000000000000
+      internalID: 4588877258366808067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gunpowder barrel with spill_29
+      rect:
+        serializedVersion: 2
+        x: 525
+        y: 15
+        width: 27
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3105036e58ead8a0800000000000000
+      internalID: -6279451238328893126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      gunpowder barrel with spill_0: -3460682387886902827
+      gunpowder barrel with spill_1: 3642599894811559222
+      gunpowder barrel with spill_10: -878443734511975234
+      gunpowder barrel with spill_11: 740591568094916740
+      gunpowder barrel with spill_12: 9177422965502553394
+      gunpowder barrel with spill_13: -5772232061911215138
+      gunpowder barrel with spill_14: -662677875261022160
+      gunpowder barrel with spill_15: -8372742190084053976
+      gunpowder barrel with spill_16: 5934598426984751603
+      gunpowder barrel with spill_17: -5625893531618274281
+      gunpowder barrel with spill_18: -8012343388757265465
+      gunpowder barrel with spill_19: -4546251626947850352
+      gunpowder barrel with spill_2: 4191755554072713445
+      gunpowder barrel with spill_20: -5038341704964462569
+      gunpowder barrel with spill_21: 4513429052416546096
+      gunpowder barrel with spill_22: 712676338680137024
+      gunpowder barrel with spill_23: -6856427338255896183
+      gunpowder barrel with spill_24: 1522251418752442490
+      gunpowder barrel with spill_25: 3092905693804996585
+      gunpowder barrel with spill_26: -4757760800893035813
+      gunpowder barrel with spill_27: -6348623142129981551
+      gunpowder barrel with spill_28: 4588877258366808067
+      gunpowder barrel with spill_29: -6279451238328893126
+      gunpowder barrel with spill_3: 6572828517035144386
+      gunpowder barrel with spill_4: 2183973514411629234
+      gunpowder barrel with spill_5: 2782349903444276479
+      gunpowder barrel with spill_6: -2225019890964938733
+      gunpowder barrel with spill_7: 5183255748290443673
+      gunpowder barrel with spill_8: 4289711197605434543
+      gunpowder barrel with spill_9: 5522184791934901288
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

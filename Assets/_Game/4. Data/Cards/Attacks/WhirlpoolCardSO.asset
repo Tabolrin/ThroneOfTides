@@ -15,6 +15,9 @@ MonoBehaviour:
   _name: Whirlpool
   _cardType: 3
   _description: The sea swallows the wicked. Deal 3 damage per turn for 3 turns.
+  _manaCost: 3
+  _storageCost: 5
+  _hpCost: 0
   _damage: 0
   _comboDamage: 0
   _comboStackBonus: 0
@@ -22,7 +25,8 @@ MonoBehaviour:
   _dotDamagePerTurn: 3
   _dotDuration: 3
   _actionEffect: {fileID: 0}
-  _art: {fileID: 21300000, guid: ad7fd14b45f56a94d84f9ba55b36e0bb, type: 3}
+  _isEligibleAsActionPair: 0
+  _tags: []
+  _art: {fileID: 21300000, guid: 415c10d89a5a7f240bcc8673bb9f82c5, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
-  _isEligibleAsActionPair: 0

@@ -16,6 +16,9 @@ MonoBehaviour:
   _cardType: 3
   _description: No shelter. No mercy. No end to the rain. Deal 2 damage per turn
     for 3 turns.
+  _manaCost: 3
+  _storageCost: 3
+  _hpCost: 0
   _damage: 0
   _comboDamage: 0
   _comboStackBonus: 0
@@ -23,7 +26,8 @@ MonoBehaviour:
   _dotDamagePerTurn: 2
   _dotDuration: 3
   _actionEffect: {fileID: 0}
-  _art: {fileID: 21300000, guid: a70603d9963264d4fb63afa44db8414b, type: 3}
+  _isEligibleAsActionPair: 0
+  _tags: []
+  _art: {fileID: 21300000, guid: e4762d97957af8c46a9ebaf58ce289e2, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
-  _isEligibleAsActionPair: 0
