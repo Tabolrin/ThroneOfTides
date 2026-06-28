@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: c96ae3709fa617c47b5cc13d887d06dd
+guid: 6ee40a7e199211a4fa7f689d36baacfa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7076498652138506769
-    second: image-15_0
+      213: 1793976845679935968
+    second: Project_20260628055243_0
+  - first:
+      213: -896310537924225842
+    second: Project_20260628055243_1
+  - first:
+      213: -8288995197937685839
+    second: Project_20260628055243_2
+  - first:
+      213: -7170981345945462427
+    second: Project_20260628055243_3
+  - first:
+      213: -3568860416221752185
+    second: Project_20260628055243_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +112,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: image-15_0
+      name: Project_20260628055243_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 1024
-        height: 572
+        height: 1024
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 11a0f3ef706c43260800000000000000
-      internalID: 7076498652138506769
+      spriteID: 0e1470eaf6c75e810800000000000000
+      internalID: 1793976845679935968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Project_20260628055243_1
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 1024
+        height: 1024
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec4569a805aaf83f0800000000000000
+      internalID: -896310537924225842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Project_20260628055243_2
+      rect:
+        serializedVersion: 2
+        x: 2048
+        y: 0
+        width: 1024
+        height: 1024
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ba6102d8c297fc80800000000000000
+      internalID: -8288995197937685839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Project_20260628055243_3
+      rect:
+        serializedVersion: 2
+        x: 3072
+        y: 0
+        width: 1024
+        height: 1024
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 569d7f7957e8b7c90800000000000000
+      internalID: -7170981345945462427
       vertices: []
       indices: 
       edges: []
@@ -125,7 +203,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 98967ef56f7706a4395422cb4afd40d0
     internalID: 0
     vertices: []
     indices: 
@@ -133,9 +211,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":4.0,"y":1.0},"gridSpriteSize":{"x":1024.0,"y":1024.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      image-15_0: 7076498652138506769
+      Project_20260628055243_0: 1793976845679935968
+      Project_20260628055243_1: -896310537924225842
+      Project_20260628055243_2: -8288995197937685839
+      Project_20260628055243_3: -7170981345945462427
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

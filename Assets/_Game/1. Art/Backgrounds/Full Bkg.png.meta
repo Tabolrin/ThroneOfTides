@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9c7907b0dc3bc4b44b2d859c81f73490
+guid: 2957c05d6789e784b871ebcb2d6995c2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1408170864890386675
-    second: pixellab-Pixel-art-style--top-down-aeri-1778495424887_0
+      213: -3221564144854296863
+    second: Full Bkg_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pixellab-Pixel-art-style--top-down-aeri-1778495424887_0
+      name: Full Bkg_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 200
-        height: 128
+        width: 1920
+        height: 1080
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3f898d8d0f3da8310800000000000000
-      internalID: 1408170864890386675
+      spriteID: 1e613d49a74ba43d0800000000000000
+      internalID: -3221564144854296863
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      pixellab-Pixel-art-style--top-down-aeri-1778495424887_0: 1408170864890386675
+      Full Bkg_0: -3221564144854296863
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
