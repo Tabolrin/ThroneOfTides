@@ -27,7 +27,5 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
-  _tags: []
-  _art: {fileID: 21300000, guid: 9979c99597c0bdf4c9f3cb11e2d0d458, type: 3}
-  _cardTypeSymbol: {fileID: 0}
+  _art: {fileID: 21300000, guid: c8b6762b78e0e524aa81d96f1f0c857b, type: 3}
   _cardArtAnimator: {fileID: 0}

@@ -321,7 +321,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MoreMountains.Tools::MoreMountains.Tools.MMSoundManager
   AutomaticallyUnparentOnAwake: 1
-  settingsSo: {fileID: 11400000, guid: 07ea3ff88e1ecb84d91f58aa804badc6, type: 2}
+  settingsSo: {fileID: 11400000, guid: e6885915e95b88b4eb7fb91b1d6081b6, type: 2}
   AudioSourcePoolSize: 10
   PoolCanExpand: 1
 --- !u!4 &587045875
@@ -1701,8 +1701,8 @@ MonoBehaviour:
         PoolSize: 10
         UseLegacyEventsMode: 0
         StopSoundOnFeedbackStop: 1
-        MinVolume: 1
-        MaxVolume: 1
+        MinVolume: 0.6
+        MaxVolume: 0.6
         MinPitch: 0.8
         MaxPitch: 1.2
         SfxAudioMixerGroup: {fileID: -3165942800488051908, guid: 7e984f512e89b60468e829489e8883e3, type: 2}
@@ -2360,12 +2360,12 @@ MonoBehaviour:
   Channel: 0
   Playlist: {fileID: 11400000, guid: 647d2a60b483cb54a846e584104e9581, type: 2}
   PlayOnStart: 1
-  VolumeMultiplier: 1
+  VolumeMultiplier: 0.2
   PitchMultiplier: 1
   Persistent: 0
   AutomaticallyUnparentOnAwake: 1
   AutoHandleApplicationPause: 1
-  FadeIn: 1
+  FadeIn: 0
   FadeOut: 0
   FadeDuration: 0.65
   FadeTween:

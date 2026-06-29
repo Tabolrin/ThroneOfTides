@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: fea533f9939a4c74b8eb8ad6df6404d5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1642126875355863256
+    second: hail card art_0
+  - first:
+      213: 3267759849357103474
+    second: hail card art_1
+  - first:
+      213: -7266925067615781181
+    second: hail card art_2
+  - first:
+      213: 5535927510325347666
+    second: hail card art_3
+  - first:
+      213: -608851130818690166
+    second: hail card art_4
+  - first:
+      213: -8067944282508876995
+    second: hail card art_5
+  - first:
+      213: 4588047257775202370
+    second: hail card art_6
+  - first:
+      213: -2288618304397573967
+    second: hail card art_7
+  - first:
+      213: 3134210413881910633
+    second: hail card art_8
+  - first:
+      213: -5123548216406673646
+    second: hail card art_9
+  - first:
+      213: -4938935506746720209
+    second: hail card art_10
+  - first:
+      213: 2171475726548620880
+    second: hail card art_11
+  - first:
+      213: 2967828641937289545
+    second: hail card art_12
+  - first:
+      213: 3676715722505097629
+    second: hail card art_13
+  - first:
+      213: 1655857431442860103
+    second: hail card art_14
+  - first:
+      213: -3589957769331862055
+    second: hail card art_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: hail card art_0
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 659
+        width: 648
+        height: 358
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d855b951b10ac610800000000000000
+      internalID: 1642126875355863256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_1
+      rect:
+        serializedVersion: 2
+        x: 393
+        y: 574
+        width: 72
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 271d638054a695d20800000000000000
+      internalID: 3267759849357103474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_2
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 544
+        width: 72
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ce316f1722b62b90800000000000000
+      internalID: -7266925067615781181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_3
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 584
+        width: 56
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25541437db093dc40800000000000000
+      internalID: 5535927510325347666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_4
+      rect:
+        serializedVersion: 2
+        x: 610
+        y: 483
+        width: 147
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8305725f1dec87f0800000000000000
+      internalID: -608851130818690166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_5
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 369
+        width: 117
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d332a6dbb67e80090800000000000000
+      internalID: -8067944282508876995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_6
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 440
+        width: 125
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24065642ca40caf30800000000000000
+      internalID: 4588047257775202370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_7
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 257
+        width: 86
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b00deb17c13d30e0800000000000000
+      internalID: -2288618304397573967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_8
+      rect:
+        serializedVersion: 2
+        x: 445
+        y: 290
+        width: 117
+        height: 107
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 965e2c204c3fe7b20800000000000000
+      internalID: 3134210413881910633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_9
+      rect:
+        serializedVersion: 2
+        x: 623
+        y: 317
+        width: 81
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2177e7bfa0085e8b0800000000000000
+      internalID: -5123548216406673646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_10
+      rect:
+        serializedVersion: 2
+        x: 310
+        y: 137
+        width: 125
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f204ccff250657bb0800000000000000
+      internalID: -4938935506746720209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_11
+      rect:
+        serializedVersion: 2
+        x: 499
+        y: 128
+        width: 128
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05650571ba1a22e10800000000000000
+      internalID: 2171475726548620880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_12
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 200
+        width: 115
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 941f6e4fc68df2920800000000000000
+      internalID: 2967828641937289545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_13
+      rect:
+        serializedVersion: 2
+        x: 294
+        y: 10
+        width: 89
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9192043871560330800000000000000
+      internalID: 3676715722505097629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_14
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 34
+        width: 93
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 748a7df8f89caf610800000000000000
+      internalID: 1655857431442860103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hail card art_15
+      rect:
+        serializedVersion: 2
+        x: 661
+        y: 14
+        width: 97
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d51250ed68ed2ec0800000000000000
+      internalID: -3589957769331862055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      hail card art_0: 1642126875355863256
+      hail card art_1: 3267759849357103474
+      hail card art_10: -4938935506746720209
+      hail card art_11: 2171475726548620880
+      hail card art_12: 2967828641937289545
+      hail card art_13: 3676715722505097629
+      hail card art_14: 1655857431442860103
+      hail card art_15: -3589957769331862055
+      hail card art_2: -7266925067615781181
+      hail card art_3: 5535927510325347666
+      hail card art_4: -608851130818690166
+      hail card art_5: -8067944282508876995
+      hail card art_6: 4588047257775202370
+      hail card art_7: -2288618304397573967
+      hail card art_8: 3134210413881910633
+      hail card art_9: -5123548216406673646
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

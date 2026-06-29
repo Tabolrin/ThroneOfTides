@@ -973,7 +973,7 @@
     "m_ShaderOutputName": "Steps",
     "m_StageCapability": 3,
     "m_Value": {
-        "x": 3.0,
+        "x": 30.0,
         "y": 4.0,
         "z": 4.0,
         "w": 4.0
@@ -1070,7 +1070,7 @@
     "m_Hidden": false,
     "m_ShaderOutputName": "Smoothness",
     "m_StageCapability": 2,
-    "m_Value": 0.0,
+    "m_Value": -20.0,
     "m_DefaultValue": 0.5,
     "m_Labels": [],
     "m_LiteralMode": false
@@ -1186,10 +1186,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1242.0,
-            "y": 428.9999694824219,
+            "x": -1118.0,
+            "y": 237.0,
             "width": 208.0,
-            "height": 302.0000305175781
+            "height": 302.0
         }
     },
     "m_Slots": [
@@ -1429,7 +1429,7 @@
     "m_Hidden": false,
     "m_ShaderOutputName": "Occlusion",
     "m_StageCapability": 2,
-    "m_Value": 1.0,
+    "m_Value": 0.0,
     "m_DefaultValue": 1.0,
     "m_Labels": [],
     "m_LiteralMode": false
@@ -1524,7 +1524,7 @@
     "m_Hidden": false,
     "m_ShaderOutputName": "CellDensity",
     "m_StageCapability": 3,
-    "m_Value": 10.0,
+    "m_Value": 50.0,
     "m_DefaultValue": 5.0,
     "m_Labels": [],
     "m_LiteralMode": false
