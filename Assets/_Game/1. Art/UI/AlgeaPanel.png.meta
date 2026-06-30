@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9d154f23fa017e745a4e049225167cea
+guid: ecc30f3df2e0d7745bc6ed570404652e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 416455848596828656
-    second: card art background_0
+      213: -1756702949308165717
+    second: AlgeaPanel_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,13 +46,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 9
-  spritePivot: {x: 0.53, y: 0.5}
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 204, y: 80, z: 184, w: 62}
+  spriteBorder: {x: 132, y: 68, z: 139, w: 198}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: card art background_0
+      name: AlgeaPanel_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 9
-        width: 1024
-        height: 1015
-      alignment: 9
-      pivot: {x: 0.525, y: 0.5}
-      border: {x: 210, y: 72, z: 184, w: 57}
+        x: 17
+        y: 5
+        width: 1003
+        height: 1010
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0f17f38436c87c500800000000000000
-      internalID: 416455848596828656
+      spriteID: ba11b9a99ffee97e0800000000000000
+      internalID: -1756702949308165717
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      card art background_0: 416455848596828656
+      AlgeaPanel_0: -1756702949308165717
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

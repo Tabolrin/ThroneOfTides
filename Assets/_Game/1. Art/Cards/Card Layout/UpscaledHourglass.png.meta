@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9d154f23fa017e745a4e049225167cea
+guid: 02b93f9b06c277f4082b636980ce8fde
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 416455848596828656
-    second: card art background_0
+      213: -1955728391402628398
+    second: UpscaledHourglass_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,13 +46,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 9
-  spritePivot: {x: 0.53, y: 0.5}
-  spritePixelsToUnits: 100
-  spriteBorder: {x: 204, y: 80, z: 184, w: 62}
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 150
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: card art background_0
+      name: UpscaledHourglass_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 9
-        width: 1024
-        height: 1015
-      alignment: 9
-      pivot: {x: 0.525, y: 0.5}
-      border: {x: 210, y: 72, z: 184, w: 57}
+        x: 98
+        y: 4
+        width: 313
+        height: 504
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0f17f38436c87c500800000000000000
-      internalID: 416455848596828656
+      spriteID: 2dadc41d36bdbd4e0800000000000000
+      internalID: -1955728391402628398
       vertices: []
       indices: 
       edges: []
@@ -126,7 +126,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      card art background_0: 416455848596828656
+      UpscaledHourglass_0: -1955728391402628398
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

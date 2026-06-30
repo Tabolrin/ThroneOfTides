@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9d154f23fa017e745a4e049225167cea
+guid: 30022489cc94ebb468262db6af705c09
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 416455848596828656
-    second: card art background_0
+      213: 8734339387003463134
+    second: MenuOrSave_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,10 +49,10 @@ TextureImporter:
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 9
-  spritePivot: {x: 0.53, y: 0.5}
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 204, y: 80, z: 184, w: 62}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: card art background_0
+      name: MenuOrSave_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 9
-        width: 1024
-        height: 1015
-      alignment: 9
-      pivot: {x: 0.525, y: 0.5}
-      border: {x: 210, y: 72, z: 184, w: 57}
+        x: 14
+        y: 12
+        width: 230
+        height: 230
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0f17f38436c87c500800000000000000
-      internalID: 416455848596828656
+      spriteID: ed56b0e556b963970800000000000000
+      internalID: 8734339387003463134
       vertices: []
       indices: 
       edges: []
@@ -125,8 +125,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      card art background_0: 416455848596828656
+      MenuOrSave_0: 8734339387003463134
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
