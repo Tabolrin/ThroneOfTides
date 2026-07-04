@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: PlayerInventoryTEMP
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.PlayerInventory
   _collection: []
+  _playerDeck: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
   _rum: 0
   _shipwrecks: 0
   _powerUps: []
   _hullReinforcementLevel: 0
   _expandedCargoHoldLevel: 0
+  _manaCrystalLevel: 0

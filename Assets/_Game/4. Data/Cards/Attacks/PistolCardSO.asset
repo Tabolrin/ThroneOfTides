@@ -15,6 +15,9 @@ MonoBehaviour:
   _name: Pistol
   _cardType: 0
   _description: One bullet. One less problem. Deal 1 damage.
+  _manaCost: 0
+  _storageCost: 1
+  _hpCost: 0
   _damage: 1
   _comboDamage: 0
   _comboStackBonus: 0
@@ -22,7 +25,8 @@ MonoBehaviour:
   _dotDamagePerTurn: 0
   _dotDuration: 0
   _actionEffect: {fileID: 0}
-  _art: {fileID: 21300000, guid: fe87ec3e88b250c4ca773d27f80c20cc, type: 3}
+  _isEligibleAsActionPair: 0
+  _tags: []
+  _art: {fileID: 21300000, guid: 05809f8e7a19184428fced385fffbad6, type: 3}
   _cardTypeSymbol: {fileID: 0}
   _cardArtAnimator: {fileID: 0}
-  _isEligibleAsActionPair: 0

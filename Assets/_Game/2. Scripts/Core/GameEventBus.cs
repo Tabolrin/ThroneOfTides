@@ -1,9 +1,5 @@
+// Assets/_Game/2. Scripts/Core/GameEventBus.cs
 using System;
-
-// Assembly: ThroneOfTides.Core
-// Location: Scripts/Core/GameEventBus.cs
-// Pattern: Static event bus — all systems publish and subscribe here.
-//          No direct cross-system references required.
 
 namespace ThroneOfTides.Core
 {
@@ -18,10 +14,7 @@ namespace ThroneOfTides.Core
         public static event Action<ICard> OnCardPlayAccepted;
         public static event Action<ICard> OnPlayerCardRemoved;
         public static event Action<ICard> OnEnemyCardPlayed;
-
-        // Invoked by the App layer once the enemy card play animation completes.
-        // Set by TurnCoordinator before firing OnEnemyCardPlayed.
-        public static Action OnEnemyCardAnimationComplete;
+        public static Action             OnEnemyCardAnimationComplete;
 
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
@@ -33,18 +26,23 @@ namespace ThroneOfTides.Core
         public static event Action<DotEffect> OnDOTApplied;
         public static event Action<DotEffect> OnDOTTick;
 
+        // ── Mana ──────────────────────────────────────────────────────────────
+        public static event Action<int, int> OnPlayerManaChanged; // current, max
+        public static event Action<int, int> OnEnemyManaChanged;  // current, max
+
+        // ── Reactions ─────────────────────────────────────────────────────────
+        // ReactionType distinguishes DMT from BFB so subscribers can update
+        // the correct charge indicator without needing to query GameState directly.
+        public static event Action<ReactionType, int> OnReactionCharged; // type, charges remaining
+        public static event Action<ReactionType>      OnReactionFired;   // type consumed
+
         // ── Action Cards ──────────────────────────────────────────────────────
         public static event Action       OnDeadMansTurnPrompt;
         public static event Action<bool> OnDeadMansTurnResolved;
         public static event Action       OnPowerUpUsed;
 
         // ── Creature VFX Sync ─────────────────────────────────────────────────
-        // Fired by CardVFXHandler at the precise animation moment damage applies.
-        // Allows TurnCoordinator to stay decoupled from VFX timing.
         public static event Action OnKrakenAttackMoment;
-
-        // Fired by CardVFXHandler once the siren is fully risen and visible.
-        // TurnCoordinator waits on this before marking SirenSong as active in GameState.
         public static event Action OnSirenSongActive;
 
         // ── Match ─────────────────────────────────────────────────────────────
@@ -64,6 +62,10 @@ namespace ThroneOfTides.Core
         public static void FireComboStackChanged(int count)                  => OnComboStackChanged?.Invoke(count);
         public static void FireDOTApplied(DotEffect effect)                  => OnDOTApplied?.Invoke(effect);
         public static void FireDOTTick(DotEffect effect)                     => OnDOTTick?.Invoke(effect);
+        public static void FirePlayerManaChanged(int current, int max)       => OnPlayerManaChanged?.Invoke(current, max);
+        public static void FireEnemyManaChanged(int current, int max)        => OnEnemyManaChanged?.Invoke(current, max);
+        public static void FireReactionCharged(ReactionType type, int charges) => OnReactionCharged?.Invoke(type, charges);
+        public static void FireReactionFired(ReactionType type)              => OnReactionFired?.Invoke(type);
         public static void FireDeadMansTurnPrompt()                          => OnDeadMansTurnPrompt?.Invoke();
         public static void FireDeadMansTurnResolved(bool negated)            => OnDeadMansTurnResolved?.Invoke(negated);
         public static void FirePowerUpUsed()                                 => OnPowerUpUsed?.Invoke();
@@ -72,7 +74,6 @@ namespace ThroneOfTides.Core
         public static void FireMatchWin()                                    => OnMatchWin?.Invoke();
         public static void FireMatchLoss()                                   => OnMatchLoss?.Invoke();
 
-        // Unsubscribes all listeners — call on scene unload to prevent stale references.
         public static void ClearAllListeners()
         {
             OnTurnPhaseChanged           = null;
@@ -88,6 +89,10 @@ namespace ThroneOfTides.Core
             OnComboStackChanged          = null;
             OnDOTApplied                 = null;
             OnDOTTick                    = null;
+            OnPlayerManaChanged          = null;
+            OnEnemyManaChanged           = null;
+            OnReactionCharged            = null;
+            OnReactionFired              = null;
             OnDeadMansTurnPrompt         = null;
             OnDeadMansTurnResolved       = null;
             OnPowerUpUsed                = null;

@@ -1,0 +1,20 @@
+{
+  "name": "com.peermalul.hierarchytools",
+  "version": "1.0.0",
+  "displayName": "Hierarchy Folders & Symbols",
+  "description": "Editor utility for organizing the Scene Hierarchy with virtual folders and custom row icons. Folders are removed automatically before builds and Play Mode, so they add no runtime component or overhead. Works with standard GameObjects, UI under a Canvas, and prefabs.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Pe'er Malul",
+    "email": "REPLACE_WITH_YOUR_CONTACT_EMAIL"
+  },
+  "category": "Utilities",
+  "keywords": [
+    "hierarchy",
+    "folders",
+    "icons",
+    "organization",
+    "editor",
+    "workflow"
+  ]
+}

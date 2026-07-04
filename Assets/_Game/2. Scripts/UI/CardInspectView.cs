@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/UI/CardInspectView.cs
 using DG.Tweening;
 using TMPro;
 using ThroneOfTides.Core;
@@ -10,20 +11,33 @@ namespace ThroneOfTides.UI
 {
     public class CardInspectView : MonoBehaviour, IPointerClickHandler
     {
-        [SerializeField] private Image           _overlay;
-        [SerializeField] private RectTransform   _cardView;
+        [Header("Structure")]
+        [SerializeField] private Image         _overlay;
+        [SerializeField] private RectTransform _cardView;
+
+        [Header("Type Banner")]
+        [SerializeField] private Image _typeBannerBackground;
+        [SerializeField] private Image _typeSymbolIcon;
+
+        [Header("Identity")]
         [SerializeField] private Image           _cardArt;
-        [SerializeField] private Image           _cardFrame;
         [SerializeField] private TextMeshProUGUI _cardName;
         [SerializeField] private TextMeshProUGUI _descriptionText;
+
+        [Header("Damage Badge")]
         [SerializeField] private GameObject      _damageBadge;
         [SerializeField] private TextMeshProUGUI _damageLabel;
+
+        [Header("Data")]
+        [SerializeField] private CardTypePaletteSO _palette;
 
         [Header("Animation")]
         [SerializeField] private float _openDuration  = 0.25f;
         [SerializeField] private float _closeDuration = 0.18f;
 
         private void Awake() => gameObject.SetActive(false);
+
+        // ── Public API ─────────────────────────────────────────────────────────
 
         public void Show(CardSO card)
         {
@@ -32,30 +46,11 @@ namespace ThroneOfTides.UI
             _cardName.text        = card.Name;
             _descriptionText.text = card.Description;
 
-            bool hasDamage = card.Damage > 0 ||
-                             card.CardType == CardType.Combo ||
-                             card.CardType == CardType.DOT;
-            _damageBadge.SetActive(hasDamage);
-
-            if (hasDamage)
-                _damageLabel.text = card.CardType == CardType.DOT
-                    ? $"{card.DotDamagePerTurn}x{card.DotDuration}"
-                    : card.Damage.ToString();
-
-            if (card.Art != null)
+            if (_cardArt != null && card.Art != null)
                 _cardArt.sprite = card.Art;
 
-            if (_cardFrame != null)
-            {
-                _cardFrame.color = card.CardType switch
-                {
-                    CardType.Weapon => new Color(0.3f, 0.5f, 1f),
-                    CardType.Combo  => new Color(1f, 0.85f, 0f),
-                    CardType.Action => new Color(0.3f, 0.8f, 0.4f),
-                    CardType.DOT    => new Color(0.8f, 0.3f, 0.3f),
-                    _               => Color.white
-                };
-            }
+            ApplyTypeVisuals(card);
+            SetupDamageBadge(card);
 
             _overlay.DOFade(0.75f, _openDuration).From(0f);
             _cardView.DOScale(Vector3.one, _openDuration)
@@ -71,7 +66,39 @@ namespace ThroneOfTides.UI
                      .OnComplete(() => gameObject.SetActive(false));
         }
 
-        // Click anywhere on overlay closes inspect
         public void OnPointerClick(PointerEventData eventData) => Hide();
+
+        // ── Private setup ──────────────────────────────────────────────────────
+
+        private void ApplyTypeVisuals(CardSO card)
+        {
+            if (_palette == null) return;
+
+            var visuals = _palette.GetVisuals(card.CardType);
+
+            if (_typeBannerBackground != null)
+                _typeBannerBackground.color = visuals.BannerColor;
+
+            if (_typeSymbolIcon != null)
+            {
+                bool hasSymbol = visuals.TypeSymbol != null;
+                _typeSymbolIcon.gameObject.SetActive(hasSymbol);
+                if (hasSymbol) _typeSymbolIcon.sprite = visuals.TypeSymbol;
+            }
+        }
+
+        private void SetupDamageBadge(CardSO card)
+        {
+            bool hasDamage = card.Damage > 0         ||
+                             card.CardType == CardType.Combo ||
+                             card.CardType == CardType.DOT;
+
+            if (_damageBadge != null) _damageBadge.SetActive(hasDamage);
+
+            if (hasDamage && _damageLabel != null)
+                _damageLabel.text = card.CardType == CardType.DOT
+                    ? $"{card.DotDamagePerTurn}\u00D7{card.DotDuration}"
+                    : card.Damage.ToString();
+        }
     }
 }

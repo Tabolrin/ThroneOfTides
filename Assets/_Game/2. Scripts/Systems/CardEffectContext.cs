@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/Systems/CardEffectContext.cs
 using System.Collections.Generic;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
@@ -8,16 +9,22 @@ namespace ThroneOfTides.Systems
     {
         private readonly GameState          _gameState;
         private readonly IHandLayoutManager _handLayout;
+        private readonly System.Func<bool>  _secondaryDraw;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
         public int PlayerDeckCount => _gameState.PlayerDeck.Count;
         public int EnemyDeckCount  => _gameState.EnemyDeck.Count;
+        public int PlayerMana      => _gameState.PlayerMana;
+        public int PlayerMaxMana   => _gameState.PlayerMaxMana;
+        public int EnemyMana       => _gameState.EnemyMana;
 
-        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout)
+        public CardEffectContext(GameState gameState, IHandLayoutManager handLayout,
+                                 System.Func<bool> secondaryDraw = null)
         {
-            _gameState  = gameState;
-            _handLayout = handLayout;
+            _gameState     = gameState;
+            _handLayout    = handLayout;
+            _secondaryDraw = secondaryDraw;
         }
 
         public void ApplyDamage(DamageTarget target, int amount) =>
@@ -29,11 +36,32 @@ namespace ThroneOfTides.Systems
         public void SetSirenActive() =>
             _gameState.SetSirenActive();
 
-        public void SetDeadMansTurnActive() =>
-            _gameState.SetDeadMansTurnActive();
-
         public void ApplyDot(DamageTarget target, int damagePerTurn, int turns) =>
             _gameState.AddDotEffect(new DotEffect(target, damagePerTurn, turns));
+
+        public void SpendPlayerMana(int amount) =>
+            _gameState.SpendPlayerMana(amount);
+
+        public void AddPlayerMaxMana(int amount) =>
+            _gameState.AddPlayerMaxMana(amount);
+
+        public void StealEnemyMana(int amount) =>
+            _gameState.StealEnemyMana(amount);
+
+        public void AddDeadMansTurnCharge() =>
+            _gameState.AddDeadMansTurnCharge();
+
+        public void AddBloodForBloodCharge() =>
+            _gameState.AddBloodForBloodCharge();
+
+        public void ReturnFromSnapshot(int count)
+        {
+            var cards = _gameState.GetRandomFromSnapshot(count);
+            foreach (var card in cards)
+                _gameState.PlayerDeck.ReturnCard(card);
+        }
+
+        public void DrawOneCard() => _secondaryDraw?.Invoke();
 
         public void AddCardToPlayerHand(ICard card)
         {
@@ -64,7 +92,7 @@ namespace ThroneOfTides.Systems
                 _gameState.PlayerDeck.ReturnCard(card);
         }
 
-        public IReadOnlyList<ICard> GetEnemyHand() => _gameState.EnemyHand.Cards;
+        public IReadOnlyList<ICard> GetEnemyHand()  => _gameState.EnemyHand.Cards;
         public IReadOnlyList<ICard> GetPlayerHand() => _gameState.PlayerHand.Cards;
     }
 }

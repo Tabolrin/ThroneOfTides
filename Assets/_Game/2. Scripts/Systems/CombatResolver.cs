@@ -1,14 +1,20 @@
+// Assets/_Game/2. Scripts/Systems/CombatResolver.cs
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
 
 namespace ThroneOfTides.Systems
 {
-    // Resolves all combat - damage, combo, DOT, action cards
-    // Pure logic - no MonoBehaviour, no UI references
     public class CombatResolver
     {
         private readonly GameState _gameState;
+
+        // Set by TurnCoordinator before each card resolution.
+        // Allows effect SOs to trigger secondary draws without assembly boundary issues.
+        private System.Func<bool> _secondaryDrawCallback;
+
+        public void SetSecondaryDrawCallback(System.Func<bool> callback)
+            => _secondaryDrawCallback = callback;
 
         public CombatResolver(GameState gameState)
         {
@@ -17,70 +23,101 @@ namespace ThroneOfTides.Systems
 
         public int ResolvePlayerCard(CardSO card, IHandLayoutManager handLayout)
         {
+            if (card.HPCost > 0)
+            {
+                _gameState.ApplyDamage(DamageTarget.Player, card.HPCost);
+                Debug.Log($"{card.Name} — paid {card.HPCost} HP");
+            }
+
             switch (card.CardType)
             {
-                case CardType.Combo:
-                    return ResolveCombo(card);
-
-                case CardType.DOT:
-                    _gameState.AddDotEffect(new DotEffect(DamageTarget.Enemy, card.DotDamagePerTurn, card.DotDuration));
-                    Debug.Log($"DOT applied - {card.DotDamagePerTurn} dmg for {card.DotDuration} turns");
-                    return 0;
-
-                case CardType.Action:
-                    if (card.ActionEffect != null)
-                    {
-                        var context = new CardEffectContext(_gameState, handLayout);
-                        card.ActionEffect.Execute(context);
-                    }
-                    else
-                        Debug.LogWarning($"Action card {card.Name} has no ActionEffect assigned");
-                    return 0;
-
-                case CardType.Weapon:
-                    return ResolveWeapon(card);
-
-                default:
-                    return card.Damage;
+                case CardType.Combo:    return ResolveCombo(card);
+                case CardType.DOT:      return ResolveDOT(card);
+                case CardType.Action:   return ResolveEffect(card, handLayout);
+                case CardType.Reaction: return ResolveEffect(card, handLayout);
+                case CardType.Weapon:   return ResolveWeapon(card);
+                default:                return card.Damage;
             }
         }
 
+        public int ResolveBloodForBlood(int incomingDamage)
+        {
+            int reflected = Mathf.FloorToInt(incomingDamage * 0.5f);
+            Debug.Log($"Blood for Blood — reflecting {reflected} damage");
+            return reflected;
+        }
+
+        // ── Private ───────────────────────────────────────────────────────────
+
         private int ResolveCombo(CardSO card)
         {
-            // ComboStackBonus > 0 = initiator (Gunpowder)
             if (card.ComboStackBonus > 0)
             {
                 _gameState.IncrementCombo(card);
-                Debug.Log($"Gunpowder primed - stack: {_gameState.ComboStackCount}");
+                Debug.Log($"Gunpowder primed — stack: {_gameState.ComboStackCount}");
                 return 0;
             }
-            // Torch - resolve if combo active
             if (_gameState.ComboStackCount > 0 && _gameState.ActiveComboCard != null)
             {
-                int comboDamage = _gameState.ResolveCombo();
-                Debug.Log($"Combo resolved - damage: {comboDamage}");
-                return comboDamage;
+                int damage = _gameState.ResolveCombo();
+                Debug.Log($"Combo resolved — damage: {damage}");
+                return damage;
             }
-            Debug.Log("Torch with no active Gunpowder - base damage only");
+            Debug.Log("Torch with no active combo — base damage only");
             return card.Damage;
+        }
+
+        private int ResolveDOT(CardSO card)
+        {
+            _gameState.AddDotEffect(
+                new DotEffect(DamageTarget.Enemy, card.DotDamagePerTurn, card.DotDuration));
+            Debug.Log($"DOT applied — {card.DotDamagePerTurn} dmg × {card.DotDuration} turns");
+            return 0;
+        }
+
+        private int ResolveEffect(CardSO card, IHandLayoutManager handLayout)
+        {
+            if (card.ActionEffect == null)
+            {
+                Debug.LogWarning($"{card.Name} has no ActionEffect assigned");
+                return 0;
+            }
+            var context = new CardEffectContext(_gameState, handLayout, _secondaryDrawCallback);
+            card.ActionEffect.Execute(context);
+            return 0;
         }
 
         private int ResolveWeapon(CardSO card)
         {
-            // Boarding Party - player sacrifices 2 HP on play
-            if (card.Name == "Boarding Party")
+            switch (card.Name)
             {
-                _gameState.ApplyDamage(DamageTarget.Player, 2);
-                Debug.Log("Boarding Party - sacrificed 2 HP");
-            }
-            // Tidal Wave - breaks active combo
-            // TODO - add target selection UI for self-damage option
-            if (card.Name == "Tidal Wave" && _gameState.ComboStackCount > 0)
-            {
-                _gameState.ResetCombo();
-                Debug.Log("Tidal Wave - combo broken");
+                case "Ram the Hull":
+                    // HP cost deducted above — ship shake TODO when VFX event defined
+                    break;
+                case "Chain Shot":
+                    DiscardRandomEnemyCard();
+                    break;
+                case "Tidal Wave":
+                    if (_gameState.ComboStackCount > 0)
+                    {
+                        _gameState.ResetCombo();
+                        Debug.Log("Tidal Wave — enemy combo broken");
+                    }
+                    break;
             }
             return card.Damage;
+        }
+
+        private void DiscardRandomEnemyCard()
+        {
+            var hand = _gameState.EnemyHand.CardsSO;
+            if (hand.Count == 0) return;
+
+            int    index = UnityEngine.Random.Range(0, hand.Count);
+            CardSO card  = hand[index];
+            _gameState.EnemyHand.RemoveCard(card);
+            _gameState.DiscardEnemyCard(card);
+            Debug.Log("Chain Shot — discarded 1 enemy card");
         }
     }
 }

@@ -1,4 +1,4 @@
 namespace ThroneOfTides.Core
 {
-    public enum CardType { Weapon, Combo, Action, DOT }
+    public enum CardType { Weapon, Combo, Action, DOT, Reaction }
 }

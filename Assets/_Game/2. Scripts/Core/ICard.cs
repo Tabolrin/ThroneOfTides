@@ -11,5 +11,8 @@ namespace ThroneOfTides.Core
         int      DotDamagePerTurn { get; }
         int      DotDuration      { get; }
         string   Description      { get; }
+        int      ManaCost         { get; }
+        int      StorageCost      { get; }
+        int      HPCost           { get; }
     }
 }
