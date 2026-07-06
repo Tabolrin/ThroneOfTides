@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 036c3b1121ca60b429b6bdbc904e6947
+guid: 159e14d7e97eb8848a0e2b4e7ce32409
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2084412806545939239
-    second: Project_20260617061933_0
+      213: -5858078844070004584
+    second: whale ram_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Project_20260617061933_0
+      name: whale ram_0
       rect:
         serializedVersion: 2
-        x: 37
-        y: 39
-        width: 950
-        height: 946
+        x: 2
+        y: 292
+        width: 1019
+        height: 444
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 72b127367625dec10800000000000000
-      internalID: 2084412806545939239
+      spriteID: 898f9f8245ce3bea0800000000000000
+      internalID: -5858078844070004584
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Project_20260617061933_0: 2084412806545939239
+      whale ram_0: -5858078844070004584
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
