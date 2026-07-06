@@ -2395,7 +2395,7 @@ Material:
     - _reflectionY: 1.0840445
     - _rm_type2: 0
     - _scrStrength: 0
-    - _strips_alpha: 1
+    - _strips_alpha: 0.421
     - _strips_density: 16
     - _strips_scrolling_speed: 0
     - _strips_size: 0.57
