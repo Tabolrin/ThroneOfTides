@@ -1,16 +1,10 @@
+// Assets/_Game/2. Scripts/Data/LevelRewardSO.cs
 using System;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ThroneOfTides.Data
 {
-    [Serializable]
-    public struct MaterialReward
-    {
-        public int Rum;
-        public int Shipwrecks;
-    }
-
     [CreateAssetMenu(menuName = "ThroneOfTides/Data/LevelReward")]
     public class LevelRewardSO : ScriptableObject
     {
@@ -18,30 +12,25 @@ namespace ThroneOfTides.Data
         // Guaranteed on win only
         [SerializeField] private List<CardSO> _rewardCards;
 
-        [Header("Material Rewards - Win")]
-        [SerializeField] private MaterialReward _highHPReward;
-        [SerializeField] private MaterialReward _midHPReward;
-        [SerializeField] private MaterialReward _lowHPReward;
+        [Header("Coin Rewards — Win")]
+        [SerializeField] private int _highHPCoinReward = 30;
+        [SerializeField] private int _midHPCoinReward  = 20;
+        [SerializeField] private int _lowHPCoinReward  = 10;
 
-        // HP thresholds matching GDD - High >20, Mid 10-20, Low <10
+        // HP thresholds — High >20, Mid 10-20, Low <10
         private const int HighHPThreshold = 20;
         private const int LowHPThreshold  = 10;
 
         public IReadOnlyList<CardSO> RewardCards => _rewardCards.AsReadOnly();
 
-        public MaterialReward GetMaterialReward(int remainingHP, bool isWin)
+        public int GetCoinReward(int remainingHP, bool isWin)
         {
-            MaterialReward baseReward = remainingHP > HighHPThreshold ? _highHPReward :
-                remainingHP >= LowHPThreshold  ? _midHPReward  :
-                _lowHPReward;
-            if (isWin) return baseReward;
+            int baseReward = remainingHP > HighHPThreshold ? _highHPCoinReward :
+                remainingHP >= LowHPThreshold  ? _midHPCoinReward  :
+                _lowHPCoinReward;
 
             // Loss: 50% rounded down, no card rewards
-            return new MaterialReward
-            {
-                Rum        = Mathf.FloorToInt(baseReward.Rum        * 0.5f),
-                Shipwrecks = Mathf.FloorToInt(baseReward.Shipwrecks * 0.5f)
-            };
+            return isWin ? baseReward : Mathf.FloorToInt(baseReward * 0.5f);
         }
     }
 }

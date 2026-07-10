@@ -10,8 +10,6 @@ using UnityEngine.UI;
 namespace ThroneOfTides.App
 {
     // Scene composition root for the Port.
-    // Creates and wires all sub-panels; handles save, navigation, and
-    // routing upgrade purchases back to the correct panels.
     public class PortManager : MonoBehaviour
     {
         [Header("Data")]
@@ -29,8 +27,7 @@ namespace ThroneOfTides.App
         [SerializeField] private PortInventoryView _inventoryView;
 
         [Header("Header")]
-        [SerializeField] private TextMeshProUGUI _rumLabel;
-        [SerializeField] private TextMeshProUGUI _shipwrecksLabel;
+        [SerializeField] private TextMeshProUGUI _coinsLabel;
 
         [Header("Navigation")]
         [SerializeField] private Button _mainMenuButton;
@@ -49,30 +46,27 @@ namespace ThroneOfTides.App
 
             int effectiveStorage = ComputeEffectiveStorage();
 
-            // Upgrade panel — pass base values so nodes can display actual totals
             _upgradePanel.Initialise(
                 _playerInventory,
                 _manaUpgrade, _hpUpgrade, _storageUpgrade,
                 _config.StartingMaxMana, _config.StartingHP, _config.BaseStorageCapacity,
                 OnUpgradePurchased);
 
-            // Deck editor — starts from the player's configured deck SO
             _deckEditor.Initialise(_playerInventory.PlayerDeck, effectiveStorage);
             _deckEditor.OnSaveRequested += SaveDeck;
 
-            // Inventory view — reads collection, queries deck editor for counts
             _inventoryView.Initialise(_playerInventory, _deckEditor);
             _inventoryView.OnAddCardRequested += OnAddCardRequested;
 
             _mainMenuButton?.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
             _levelSelectButton?.onClick.AddListener(() => SceneManager.LoadScene("LevelSelect"));
 
-            RefreshMaterials();
+            RefreshCoins();
         }
 
         private void OnDestroy()
         {
-            if (_deckEditor    != null) _deckEditor.OnSaveRequested    -= SaveDeck;
+            if (_deckEditor    != null) _deckEditor.OnSaveRequested       -= SaveDeck;
             if (_inventoryView != null) _inventoryView.OnAddCardRequested -= OnAddCardRequested;
         }
 
@@ -86,22 +80,18 @@ namespace ThroneOfTides.App
                 Debug.Log($"[Port] Cannot add {card.Name} — storage full " +
                           $"({_deckEditor.GetStorageUsed()} / {_deckEditor.MaxStorage})");
 
-            // Refresh inventory so Add buttons reflect the new state
             _inventoryView.Refresh();
         }
 
         private void OnUpgradePurchased(UpgradeType type)
         {
-            // If storage was upgraded, push new cap to the deck editor and
-            // refresh inventory so previously-greyed Add buttons may re-enable
             if (type == UpgradeType.MaxStorage)
             {
                 _deckEditor.UpdateMaxStorage(ComputeEffectiveStorage());
                 _inventoryView.Refresh();
             }
 
-            RefreshMaterials();
-            // Upgrade panel refreshes itself internally after purchase
+            RefreshCoins();
         }
 
         // ── Save ───────────────────────────────────────────────────────────────
@@ -113,9 +103,7 @@ namespace ThroneOfTides.App
             UnityEditor.AssetDatabase.SaveAssets();
             Debug.Log("[Port] Deck saved to asset.");
 #endif
-            // TODO (post-vertical-slice): replace with JSON serialization for builds
-            // The deck SO is already mutated in memory so the match will use the
-            // updated configuration within this play session even without file-save.
+            // TODO (post-vertical-slice): JSON serialization for build persistence
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────
@@ -129,10 +117,10 @@ namespace ThroneOfTides.App
             return _config.BaseStorageCapacity + bonus;
         }
 
-        private void RefreshMaterials()
+        private void RefreshCoins()
         {
-            if (_rumLabel        != null) _rumLabel.text        = $"Rum: {_playerInventory.Rum}";
-            if (_shipwrecksLabel != null) _shipwrecksLabel.text = $"Shipwrecks: {_playerInventory.Shipwrecks}";
+            if (_coinsLabel != null)
+                _coinsLabel.text = $"Coins: {_playerInventory.Coins}";
         }
     }
 }

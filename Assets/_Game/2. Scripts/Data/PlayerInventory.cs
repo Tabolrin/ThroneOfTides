@@ -20,12 +20,10 @@ namespace ThroneOfTides.Data
         [SerializeField] private List<CardSO> _collection = new List<CardSO>();
 
         [Header("Active Deck")]
-        // The deck the player has configured — used by GameBootstrapper at match start
         [SerializeField] private DeckDefinitionSO _playerDeck;
 
-        [Header("Materials")]
-        [SerializeField] private int _rum;
-        [SerializeField] private int _shipwrecks;
+        [Header("Currency")]
+        [SerializeField] private int _coins;
 
         [Header("Power-Ups")]
         [SerializeField] private List<PowerUpEntry> _powerUps = new List<PowerUpEntry>();
@@ -39,8 +37,7 @@ namespace ThroneOfTides.Data
 
         public IReadOnlyList<CardSO>      Collection             => _collection.AsReadOnly();
         public DeckDefinitionSO           PlayerDeck             => _playerDeck;
-        public int                        Rum                    => _rum;
-        public int                        Shipwrecks             => _shipwrecks;
+        public int                        Coins                  => _coins;
         public IReadOnlyList<PowerUpEntry> PowerUps              => _powerUps.AsReadOnly();
         public int                        HullReinforcementLevel => _hullReinforcementLevel;
         public int                        ExpandedCargoHoldLevel => _expandedCargoHoldLevel;
@@ -50,7 +47,6 @@ namespace ThroneOfTides.Data
 
         public void AddCards(List<CardSO> cards) => _collection.AddRange(cards);
 
-        // Returns how many copies of this card the player owns
         public int CountOwned(CardSO card)
         {
             int count = 0;
@@ -59,22 +55,16 @@ namespace ThroneOfTides.Data
             return count;
         }
 
-        // ── Materials ─────────────────────────────────────────────────────────
+        // ── Currency ──────────────────────────────────────────────────────────
 
-        public void AddMaterials(int rum, int shipwrecks)
+        public void AddCoins(int amount) => _coins += amount;
+
+        public bool CanAfford(int amount) => _coins >= amount;
+
+        public bool SpendCoins(int amount)
         {
-            _rum        += rum;
-            _shipwrecks += shipwrecks;
-        }
-
-        public bool CanAfford(int rum, int shipwrecks) =>
-            _rum >= rum && _shipwrecks >= shipwrecks;
-
-        public bool SpendMaterials(int rum, int shipwrecks)
-        {
-            if (!CanAfford(rum, shipwrecks)) return false;
-            _rum        -= rum;
-            _shipwrecks -= shipwrecks;
+            if (!CanAfford(amount)) return false;
+            _coins -= amount;
             return true;
         }
 
@@ -88,15 +78,13 @@ namespace ThroneOfTides.Data
             _                     => 0
         };
 
-        // Spends materials and increments level — returns false if can't afford or already maxed
         public bool TryPurchaseUpgrade(UpgradeSO upgrade)
         {
             int currentLevel = GetUpgradeLevel(upgrade.Type);
             if (upgrade.IsMaxed(currentLevel)) return false;
 
-            int rum = upgrade.GetRumCostToLevel(currentLevel);
-            int sw  = upgrade.GetShipwreckCostToLevel(currentLevel);
-            if (!SpendMaterials(rum, sw)) return false;
+            int cost = upgrade.GetCoinCostToLevel(currentLevel);
+            if (!SpendCoins(cost)) return false;
 
             IncrementUpgradeLevel(upgrade.Type);
             return true;
@@ -106,9 +94,9 @@ namespace ThroneOfTides.Data
         {
             switch (type)
             {
-                case UpgradeType.MaxHP:      _hullReinforcementLevel++;  break;
+                case UpgradeType.MaxHP:      _hullReinforcementLevel++; break;
                 case UpgradeType.MaxStorage: _expandedCargoHoldLevel++; break;
-                case UpgradeType.MaxMana:    _manaCrystalLevel++;        break;
+                case UpgradeType.MaxMana:    _manaCrystalLevel++;       break;
             }
         }
 
@@ -127,8 +115,7 @@ namespace ThroneOfTides.Data
         {
             _collection.Clear();
             _powerUps.Clear();
-            _rum                    = 0;
-            _shipwrecks             = 0;
+            _coins                  = 0;
             _hullReinforcementLevel = 0;
             _expandedCargoHoldLevel = 0;
             _manaCrystalLevel       = 0;

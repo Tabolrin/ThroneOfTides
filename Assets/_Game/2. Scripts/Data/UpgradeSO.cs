@@ -19,13 +19,11 @@ namespace ThroneOfTides.Data
         // Value added per upgrade level — index 0 is the value gained at level 1
         public int[] ValuePerLevel = { 1, 1, 1 };
 
-        [Header("Cost per level (index 0 = cost to reach level 1)")]
-        public int[] RumCostPerLevel        = { 5,  10, 20 };
-        public int[] ShipwreckCostPerLevel  = { 2,  4,  8  };
+        [Header("Coin cost per level (index 0 = cost to reach level 1)")]
+        public int[] CoinCostPerLevel = { 50, 100, 200 };
 
         // ── Queries ───────────────────────────────────────────────────────────
 
-        // Total additional value accumulated at the given level
         public int GetValueAtLevel(int level)
         {
             int total = 0;
@@ -34,16 +32,10 @@ namespace ThroneOfTides.Data
             return total;
         }
 
-        public int GetRumCostToLevel(int currentLevel)
+        public int GetCoinCostToLevel(int currentLevel)
         {
-            if (IsMaxed(currentLevel) || currentLevel >= RumCostPerLevel.Length) return 0;
-            return RumCostPerLevel[currentLevel];
-        }
-
-        public int GetShipwreckCostToLevel(int currentLevel)
-        {
-            if (IsMaxed(currentLevel) || currentLevel >= ShipwreckCostPerLevel.Length) return 0;
-            return ShipwreckCostPerLevel[currentLevel];
+            if (IsMaxed(currentLevel) || currentLevel >= CoinCostPerLevel.Length) return 0;
+            return CoinCostPerLevel[currentLevel];
         }
 
         public bool IsMaxed(int currentLevel) => currentLevel >= MaxLevel;

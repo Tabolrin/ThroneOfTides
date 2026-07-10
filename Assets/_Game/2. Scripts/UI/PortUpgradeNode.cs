@@ -12,29 +12,29 @@ namespace ThroneOfTides.UI
     public class PortUpgradeNode : MonoBehaviour
     {
         [Header("Identity")]
-        [SerializeField] private Image            _icon;
-        [SerializeField] private TextMeshProUGUI  _nameLabel;
-        [SerializeField] private TextMeshProUGUI  _descriptionLabel;
+        [SerializeField] private Image           _icon;
+        [SerializeField] private TextMeshProUGUI _nameLabel;
+        [SerializeField] private TextMeshProUGUI _descriptionLabel;
 
         [Header("Level Display")]
-        [SerializeField] private TextMeshProUGUI  _levelLabel;
-        [SerializeField] private Image[]          _levelPips;
-        private static readonly Color PipFilled  = new Color(1.00f, 0.85f, 0.20f);
-        private static readonly Color PipEmpty   = new Color(0.25f, 0.25f, 0.25f, 0.8f);
+        [SerializeField] private TextMeshProUGUI _levelLabel;
+        [SerializeField] private Image[]         _levelPips;
+        private static readonly Color PipFilled = new Color(1.00f, 0.85f, 0.20f);
+        private static readonly Color PipEmpty  = new Color(0.25f, 0.25f, 0.25f, 0.8f);
 
         [Header("Value Display")]
-        [SerializeField] private TextMeshProUGUI  _currentValueLabel;
-        [SerializeField] private TextMeshProUGUI  _nextValueLabel;
+        [SerializeField] private TextMeshProUGUI _currentValueLabel;
+        [SerializeField] private TextMeshProUGUI _nextValueLabel;
 
         [Header("Purchase")]
-        [SerializeField] private TextMeshProUGUI  _costLabel;
-        [SerializeField] private Button           _buyButton;
-        [SerializeField] private GameObject       _maxedDisplay;
+        [SerializeField] private TextMeshProUGUI _costLabel;
+        [SerializeField] private Button          _buyButton;
+        [SerializeField] private GameObject      _maxedDisplay;
 
-        private UpgradeSO        _upgrade;
-        private PlayerInventory  _inventory;
-        private int              _baseValue;
-        private System.Action    _onBuyClicked;
+        private UpgradeSO       _upgrade;
+        private PlayerInventory _inventory;
+        private int             _baseValue;
+        private System.Action   _onBuyClicked;
 
         // ── Setup ──────────────────────────────────────────────────────────────
 
@@ -72,25 +72,24 @@ namespace ThroneOfTides.UI
             if (isMaxed)
             {
                 _buyButton.gameObject.SetActive(false);
-                if (_maxedDisplay    != null) _maxedDisplay.SetActive(true);
-                if (_costLabel       != null) _costLabel.gameObject.SetActive(false);
-                if (_nextValueLabel  != null) _nextValueLabel.gameObject.SetActive(false);
+                if (_maxedDisplay   != null) _maxedDisplay.SetActive(true);
+                if (_costLabel      != null) _costLabel.gameObject.SetActive(false);
+                if (_nextValueLabel != null) _nextValueLabel.gameObject.SetActive(false);
             }
             else
             {
                 _buyButton.gameObject.SetActive(true);
                 if (_maxedDisplay != null) _maxedDisplay.SetActive(false);
 
-                int rum = _upgrade.GetRumCostToLevel(currentLevel);
-                int sw  = _upgrade.GetShipwreckCostToLevel(currentLevel);
-                bool canAfford = _inventory.CanAfford(rum, sw);
+                int  cost      = _upgrade.GetCoinCostToLevel(currentLevel);
+                bool canAfford = _inventory.CanAfford(cost);
 
                 _buyButton.interactable = canAfford;
 
                 if (_costLabel != null)
                 {
                     _costLabel.gameObject.SetActive(true);
-                    _costLabel.text  = $"{rum} Rum  {sw} Shipwrecks";
+                    _costLabel.text  = $"{cost} Coins";
                     _costLabel.color = canAfford ? Color.white : new Color(1f, 0.35f, 0.35f);
                 }
 

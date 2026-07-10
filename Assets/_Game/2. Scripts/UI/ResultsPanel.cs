@@ -1,3 +1,4 @@
+// Assets/_Game/2. Scripts/UI/ResultsPanel.cs
 using System.Collections.Generic;
 using TMPro;
 using ThroneOfTides.Systems;
@@ -16,7 +17,7 @@ namespace ThroneOfTides.UI
 
         [Header("UI")]
         [SerializeField] private TextMeshProUGUI _titleLabel;
-        [SerializeField] private TextMeshProUGUI _materialRewardLabel;
+        [SerializeField] private TextMeshProUGUI _coinRewardLabel;
         [SerializeField] private Transform       _rewardCardsContainer;
         [SerializeField] private TextMeshProUGUI _rewardCardNamePrefab;
 
@@ -41,20 +42,15 @@ namespace ThroneOfTides.UI
             gameObject.SetActive(true);
             _titleLabel.text = "Victory!";
 
-            // Mark level beaten in progression
             _progression.SetLevelBeaten(GameSession.SelectedLevelIndex);
 
-            // Grant reward cards
             var rewardCards = new List<CardSO>(reward.RewardCards);
             _playerInventory.AddCards(rewardCards);
 
-            // Grant materials based on HP tier
-            MaterialReward materials = reward.GetMaterialReward(playerHP, isWin: true);
-            _playerInventory.AddMaterials(materials.Rum, materials.Shipwrecks);
+            int coins = reward.GetCoinReward(playerHP, isWin: true);
+            _playerInventory.AddCoins(coins);
+            _coinRewardLabel.text = $"+{coins} Coins";
 
-            _materialRewardLabel.text = $"Rum: +{materials.Rum}    Shipwrecks: +{materials.Shipwrecks}";
-
-            // Display reward card names
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);
 
@@ -70,11 +66,10 @@ namespace ThroneOfTides.UI
             gameObject.SetActive(true);
             _titleLabel.text = "Defeated";
 
-            // Loss - materials only at 50%, no card reward
-            MaterialReward materials = reward.GetMaterialReward(playerHP, isWin: false);
-            _playerInventory.AddMaterials(materials.Rum, materials.Shipwrecks);
-
-            _materialRewardLabel.text = $"Rum: +{materials.Rum}    Shipwrecks: +{materials.Shipwrecks}";
+            // Loss — coins only at 50%, no card reward
+            int coins = reward.GetCoinReward(playerHP, isWin: false);
+            _playerInventory.AddCoins(coins);
+            _coinRewardLabel.text = $"+{coins} Coins";
 
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);
@@ -86,16 +81,10 @@ namespace ThroneOfTides.UI
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
-        private void OnMainMenuPressed() =>
-            SceneManager.LoadScene("MainMenu");
+        private void OnMainMenuPressed() => SceneManager.LoadScene("MainMenu");
 
-        private void OnPortPressed()
-        {
-            // TODO - load Port scene when built
-            Debug.Log("Port - not yet implemented");
-        }
+        private void OnPortPressed() => SceneManager.LoadScene("Port");
 
-        private void OnLevelSelectPressed() =>
-            SceneManager.LoadScene("LevelSelect");
+        private void OnLevelSelectPressed() => SceneManager.LoadScene("LevelSelect");
     }
 }
