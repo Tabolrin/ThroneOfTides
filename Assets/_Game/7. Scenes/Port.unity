@@ -119,6 +119,43 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!84 &28199828
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 587
+  m_Height: 330
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 52
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 0
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 0
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 0
+    m_WrapV: 0
+    m_WrapW: 0
+  m_Dimension: 2
+  m_VolumeDepth: 1
+  m_ShadowSamplingMode: 2
 --- !u!1 &34772217
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,7 +622,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1665541412}
   m_Direction: 0
   m_Value: 1
-  m_Size: 0.9999998
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -628,43 +665,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 53896450}
   m_CullTransparentMesh: 1
---- !u!84 &75475436
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 587
-  m_Height: 330
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 52
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 0
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1 &87476204
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,8 +699,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -793, y: 0}
+  m_SizeDelta: {x: 300, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &87476206
 MonoBehaviour:
@@ -722,10 +722,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Port
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
+  m_sharedMaterial: {fileID: 6588893179586125160, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -749,15 +749,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 72
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -802,61 +802,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 87476204}
   m_CullTransparentMesh: 1
---- !u!21 &94532360
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: box blur
-  m_Shader: {fileID: -6465566751694194690, guid: 954127d931965f8499f2048d08052c2a, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex2:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_Lightmaps:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_LightmapsInd:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_ShadowMasks:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _area: 0.01
-    - _falloffE: 1
-    - _falloffP: 0
-    - _falloffS: 0
-    - _falloffU: 0
-    - _sigmaX: 0.6
-    m_Colors:
-    - White: {r: 1, g: 1, b: 1, a: 1}
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &128089564
 GameObject:
   m_ObjectHideFlags: 0
@@ -1302,8 +1247,8 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_IsAlphaChannelOptional: 0
   serializedVersion: 6
-  m_Width: 939
-  m_Height: 528
+  m_Width: 846
+  m_Height: 476
   m_AntiAliasing: 1
   m_MipCount: -1
   m_DepthStencilFormat: 93
@@ -1594,8 +1539,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1964696470}
   m_HandleRect: {fileID: 1964696469}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 0.99999976
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1905,1093 +1850,9 @@ MonoBehaviour:
   _upgradePanel: {fileID: 497026835}
   _deckEditor: {fileID: 817875957}
   _inventoryView: {fileID: 2009767133}
-  _coinsLabel: {fileID: 0}
+  _coinsLabel: {fileID: 928100843}
   _mainMenuButton: {fileID: 1993419971}
   _levelSelectButton: {fileID: 598554542}
---- !u!1 &551285987
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 551285992}
-  - component: {fileID: 551285991}
-  - component: {fileID: 551285990}
-  - component: {fileID: 551285989}
-  - component: {fileID: 551285988}
-  m_Layer: 4
-  m_Name: water
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!253 &551285988
-BuoyancyEffector2D:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551285987}
-  m_Enabled: 1
-  m_UseColliderMask: 1
-  m_ColliderMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_SurfaceLevel: 0
-  m_Density: 2
-  m_LinearDamping: 5
-  m_AngularDamping: 5
-  m_FlowAngle: 0
-  m_FlowMagnitude: 0
-  m_FlowVariation: 0
---- !u!61 &551285989
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551285987}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 1
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 16, y: 16}
-    newSize: {x: 0.03125, y: 0.03125}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 16, y: 16}
-  m_EdgeRadius: 0
---- !u!212 &551285990
-SpriteRenderer:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551285987}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 1357526742}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: -3
-  m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: ced0a51abbb19fa41be243a46a103728, type: 3}
-  m_Color: {r: 0.4828231, g: 0.6127408, b: 0.6603774, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 0.03125, y: 0.03125}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
---- !u!114 &551285991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551285987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93a4eb44351a6e644ad5211a5b0d8712, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  renderMode: 0
-  _previousRenderMode: 0
-  _renderChild: {fileID: 0}
-  _grid: {fileID: 0}
-  _tilemap: {fileID: 0}
-  _tilemapRenderer: {fileID: 0}
-  _waterSimulationType: 0
-  _wavesSimulation:
-    WaterGO: {fileID: 551285987}
-    WaterSr: {fileID: 551285990}
-    collider: {fileID: 551285989}
-    buoyancy: {fileID: 551285988}
-    settings:
-      automaticWaves:
-        _value: 1
-      enableBuoyancy:
-        _value: 1
-      enableRigidbodyCollisions:
-        _value: 1
-      wavePoints:
-        _value: 20000
-      simulationSteps:
-        _value: 20
-      waveDensity:
-        _value: 1
-      waveDensity2:
-        _value: 1
-      waveHeight:
-        _value: 0.385
-      stringDampening:
-        _value: 0.46
-      stringSpread:
-        _value: 0
-      stringStiffness:
-        _value: 0.402
-      edgeColoringSize:
-        _value: 0
-      edgeColor:
-        _value: {r: 1, g: 1, b: 1, a: 1}
-      edgeIgnoreTransparency:
-        _value: 0
-      splashForceMin:
-        _value: 0
-      splashForceMax:
-        _value: 10
-      splashVelMin:
-        _value: 0
-      splashVelMax:
-        _value: 1
-      splashNodesWidthMin:
-        _value: 1
-      splashNodesWidthMax:
-        _value: 1
-    heights: {fileID: 0}
-    nodes:
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-    - vel: 0
-      force: 0
-      h: 0.9
-      ht: 0.9
-  _surfaceRenderer: {fileID: 2021292163}
-  _childPPLayerRenderer:
-    water2D: {fileID: 0}
-    layerTexture: {fileID: 0}
-    rendererType: 0
-    sr: {fileID: 0}
-    format: 0
-    fliterMode: 0
-    bitDepth: 0
-    layerName: Water
-    layerMask: -1
-    mainCamera: {fileID: 0}
-    holder: {fileID: 0}
-    res: 1
-    scale: {x: 1, y: 1}
-    centerPerspectiveMargins: 0
-    reflectionLayerIdx: 4
-    copyMainBackground: 0
-    lastOrtographicSize: 0
-    lastAspectRatio: 0
-  _childPP: {fileID: 0}
-  ManagersVisible:
-    _value: 0
-  enableObstruction:
-    _value: 1
-  enableReflections:
-    _value: 1
-  enableSimulation:
-    _value: 1
-  enableWavesSimulation:
-    _value: 0
-  enableBlur:
-    _value: 0
-  lightingWhenBlur: 0
-  normalsPreview:
-    _value: 0
-  overrideMainCamera:
-    _value: 0
-  cameraOverride: {fileID: 0}
-  raymarchUnits: 0
-  settings:
-    _obstructorSettings:
-      mainCamera: {fileID: 0}
-      textureResolution:
-        _value: 1
-      overrideMainCamera:
-        _value: 0
-      obstructionObjectsVisible:
-        _value: 1
-      cameraVisible:
-        _value: 1
-    _reflectionsSettings:
-      enableTopDownReflections:
-        _value: 1
-      enablePlatformerReflections:
-        _value: 0
-      enableRaymarchedReflections:
-        _value: 0
-      mainCamera: {fileID: 0}
-      textureResolution:
-        _value: 1
-      overrideMainCamera:
-        _value: 0
-      reflectionObjectsVisible:
-        _value: 1
-      cameraVisible:
-        _value: 1
-      defaultReflectionSprflipx:
-        _value: 0
-      angle:
-        _value: 0
-      tilt:
-        _value: 0
-      length:
-        _value: 0
-      topdownReflections_FalloffStrength:
-        _value: 1
-      topdownReflections_FalloffStart:
-        _value: 0
-      topdownReflections3D_FalloffColor:
-        _value: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 1}
-      originalColor:
-        _value: 0
-      color:
-        _value: {r: 0.74105555, g: 0.83752006, b: 0.8584906, a: 1}
-      alpha:
-        _value: 1
-      mirrorY:
-        _value: 0
-      layers: 
-      usePerspective:
-        _value: 0
-      waterPerspective:
-        _value: {x: 0, y: 0}
-      reflectionsPerspective:
-        _value: {x: 0, y: 0}
-      falloffStrength:
-        _value: 0
-      falloffStart:
-        _value: 0
-      enableFalloff:
-        _value: 0
-      enableScrolling:
-        _value: 0
-      customReflectionStart:
-        _value: 0
-      playerPosition: {fileID: 0}
-      scrollingStrength:
-        _value: 0
-      DistortionFPRH:
-        _value: 0
-      raymarchlayers: 
-      raymarchSteps:
-        _value: 0
-      type2:
-        _value: 0
-      raymarchFalloffStart:
-        _value: 0
-      raymarchFalloffEnd:
-        _value: 0
-    _waterSettings:
-      color:
-        _value: {r: 0.9575472, g: 0.9809694, b: 1, a: 0}
-      depthColor:
-        _value: {r: 0.8915094, g: 0.9619473, b: 1, a: 0}
-      waterType: 0
-      coloringType: 1
-      tiling:
-        _value: {x: 1, y: 1}
-      baseAlpha:
-        _value: 1
-      alphaTexture: {fileID: 0}
-      numOfPixels:
-        _value: 256
-      pixelPerfect:
-        _value: 0
-      obstructionWidth:
-        _value: 0.15
-      obstructionColor:
-        _value: {r: 1, g: 1, b: 1, a: 0}
-      obstructionAlpha:
-        _value: 1
-      foamColor:
-        _value: {r: 0.80451226, g: 0.9499255, b: 0.9528302, a: 0}
-      foamSize:
-        _value: 1
-      foamSpeed:
-        _value: {x: -0.75, y: 0}
-      foamAlpha:
-        _value: 0
-      distortionSpeed:
-        _value: {x: -0.07, y: 0}
-      distortionStrength:
-        _value: {x: 0.03, y: 0}
-      distortionTiling:
-        _value: {x: 0.5, y: 5}
-      distortionMinMax:
-        _value: {x: 0, y: 0.5}
-      distortionColor:
-        _value: {r: 1, g: 1, b: 1, a: 1}
-      distortionTexture: {fileID: 2800000, guid: 63a3a961b343e5341a13f8efb4988815, type: 3}
-      sunStripsTexture: {fileID: 2800000, guid: 02b9ccfabe688644ebd37eb70cbe2341, type: 3}
-      stripsSpeed:
-        _value: -5
-      stripsScrollingSpeed:
-        _value: 0
-      stripsSize:
-        _value: 1
-      surfaceSprite: {fileID: 551285990}
-      surfaceTexture: {fileID: 0}
-      surfaceTiling:
-        _value: {x: 0, y: 0}
-      surfaceSpeed:
-        _value: {x: 0, y: 0}
-      useFoamSpeed:
-        _value: 0
-      surfaceAlpha:
-        _value: 0
-      stripsAlpha:
-        _value: 0.66
-      stripsDensity:
-        _value: 15
-      foamDensity:
-        _value: 0.15
-      perspective:
-        _value: {x: 0, y: 0}
-      _useLighting:
-        _value: 0
-      depthFromObstructors:
-        _value: 0
-      enableBelowWater:
-        _value: 1
-      belowWaterUV:
-        _value: {x: 0, y: 0, z: 0, w: 0}
-      belowWaterDistortionStrength:
-        _value: 0
-      belowWaterAlpha:
-        _value: 0
-      colorGradient:
-        _value:
-          serializedVersion: 2
-          key0: {r: 1, g: 1, b: 1, a: 1}
-          key1: {r: 1, g: 1, b: 1, a: 1}
-          key2: {r: 0, g: 0, b: 0, a: 0}
-          key3: {r: 0, g: 0, b: 0, a: 0}
-          key4: {r: 0, g: 0, b: 0, a: 0}
-          key5: {r: 0, g: 0, b: 0, a: 0}
-          key6: {r: 0, g: 0, b: 0, a: 0}
-          key7: {r: 0, g: 0, b: 0, a: 0}
-          ctime0: 0
-          ctime1: 65535
-          ctime2: 0
-          ctime3: 0
-          ctime4: 0
-          ctime5: 0
-          ctime6: 0
-          ctime7: 0
-          atime0: 0
-          atime1: 65535
-          atime2: 0
-          atime3: 0
-          atime4: 0
-          atime5: 0
-          atime6: 0
-          atime7: 0
-          m_Mode: 0
-          m_ColorSpace: -1
-          m_NumColorKeys: 2
-          m_NumAlphaKeys: 2
-      depthMlp:
-        _value: 0
-    _simulationSettings:
-      resolution:
-        _value: {x: 1024, y: 620}
-      waterCmp: {fileID: 7200000, guid: 14821a0cc6771aa45b7163f15854b208, type: 3}
-      sr: {fileID: 551285990}
-      obstruction: {fileID: 1741519541}
-      mainCam: {fileID: 0}
-      chunksX:
-        _value: 0
-      chunksY:
-        _value: 0
-      waveRad:
-        _value: 0.005
-      waveHeight:
-        _value: 0.21
-      dispersion:
-        _value: 0.985
-      iterations:
-        _value: 4
-      simulationSpeed:
-        _value: 1
-      moreStableObstructionSimulation:
-        _value: 0
-      enableRain:
-        _value: 1
-      rainWaveHeight:
-        _value: 1
-      rainSpeed:
-        _value: 0.56
-      rainSizeX:
-        _value: 2
-      rainSizeY:
-        _value: 2
-      normalStrength:
-        _value: 1
-      waveColor:
-        _value: {r: 0.78764683, g: 0.9433962, b: 0.93597955, a: 1}
-      waveColorMinMaxHeight:
-        _value: {x: 0, y: 0.4}
-    _wavesSettings:
-      automaticWaves:
-        _value: 1
-      enableBuoyancy:
-        _value: 1
-      enableRigidbodyCollisions:
-        _value: 1
-      wavePoints:
-        _value: 20000
-      simulationSteps:
-        _value: 20
-      waveDensity:
-        _value: 1
-      waveDensity2:
-        _value: 1
-      waveHeight:
-        _value: 0.385
-      stringDampening:
-        _value: 0.46
-      stringSpread:
-        _value: 0
-      stringStiffness:
-        _value: 0.402
-      edgeColoringSize:
-        _value: 0
-      edgeColor:
-        _value: {r: 1, g: 1, b: 1, a: 1}
-      edgeIgnoreTransparency:
-        _value: 0
-      splashForceMin:
-        _value: 0
-      splashForceMax:
-        _value: 10
-      splashVelMin:
-        _value: 0
-      splashVelMax:
-        _value: 1
-      splashNodesWidthMin:
-        _value: 1
-      splashNodesWidthMax:
-        _value: 1
-    _blurSettings:
-      blurType: 0
-      useBlur:
-        _value: 0
-      boxSamplingRange:
-        _value: 8
-      boxStrength:
-        _value: 1
-      gaussianSamplingRange:
-        _value: 8
-      gaussianStrengthX:
-        _value: 2
-      bokehArea:
-        _value: 0.003
-      bokehQuality:
-        _value: 8
-      bokehGamma:
-        _value: 10.5
-      bokehHardness:
-        _value: 0.3
-      bokehRatio:
-        _value: 1.5
-      useFalloff:
-        _value: 0
-      falloffStart:
-        _value: 0
-      falloffEnd:
-        _value: 1
-      falloffStrength:
-        _value: 1
-  customWaterMaterial: 0
-  _mat: {fileID: 1357526742}
-  _matb: {fileID: 94532360}
-  _sr: {fileID: 551285990}
---- !u!4 &551285992
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551285987}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.3007, y: -0.4681, z: 0}
-  m_LocalScale: {x: 1.3974898, y: 0.84697247, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &565569242
 GameObject:
   m_ObjectHideFlags: 0
@@ -3055,7 +1916,7 @@ MonoBehaviour:
     reflectionLayerIdx: 10
     copyMainBackground: 0
     lastOrtographicSize: 5
-    lastAspectRatio: 1.7775468
+    lastAspectRatio: 1.777311
   _run: 1
   startupQF: 1
   pivotDetectionAlphaTreshold: 0
@@ -3186,8 +2047,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 693, y: 0}
+  m_SizeDelta: {x: 160, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &598554542
 MonoBehaviour:
@@ -3253,8 +2114,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 2530564911472380330, guid: 46003a30d9dc8f64e8f93a67748ca3fb, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3431,11 +2292,11 @@ RectTransform:
   - {fileID: 598554541}
   m_Father: {fileID: 1923302981}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 15, y: 410}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: 0, y: 150}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &730073762
 GameObject:
   m_ObjectHideFlags: 0
@@ -3471,7 +2332,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -10, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &730073764
 MonoBehaviour:
@@ -3493,7 +2354,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Map
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
   m_sharedMaterial: {fileID: 6588893179586125160, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
@@ -3502,8 +2363,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3520,12 +2381,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24.4
+  m_fontSize: 50
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 50
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -4272,10 +3133,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1289638649}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 408, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 60, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &928100843
 MonoBehaviour:
@@ -4297,10 +3158,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Gold: X'
+  m_text: XX
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
+  m_sharedMaterial: {fileID: 6588893179586125160, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4324,15 +3185,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 40.65
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -4514,7 +3375,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 931120352}
   m_CullTransparentMesh: 1
---- !u!84 &976609487
+--- !u!1 &1054541606
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1054541607}
+  m_Layer: 5
+  m_Name: SectionTitle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1054541607
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054541606}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2009767130}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!84 &1168358373
 RenderTexture:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4551,41 +3447,6 @@ RenderTexture:
   m_Dimension: 2
   m_VolumeDepth: 1
   m_ShadowSamplingMode: 2
---- !u!1 &1054541606
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1054541607}
-  m_Layer: 5
-  m_Name: SectionTitle
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1054541607
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1054541606}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2009767130}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1198824332
 GameObject:
   m_ObjectHideFlags: 0
@@ -4884,8 +3745,8 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_IsAlphaChannelOptional: 0
   serializedVersion: 6
-  m_Width: 939
-  m_Height: 528
+  m_Width: 846
+  m_Height: 476
   m_AntiAliasing: 1
   m_MipCount: -1
   m_DepthStencilFormat: 93
@@ -4909,6 +3770,143 @@ RenderTexture:
   m_Dimension: 2
   m_VolumeDepth: 1
   m_ShadowSamplingMode: 2
+--- !u!1 &1269938181
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1269938182}
+  - component: {fileID: 1269938184}
+  - component: {fileID: 1269938183}
+  m_Layer: 5
+  m_Name: GoldLabelTitle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1269938182
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269938181}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1289638649}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 110, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1269938183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269938181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: 'Gold:'
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
+  m_sharedMaterial: {fileID: 6588893179586125160, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 40.65
+  m_fontSizeBase: 36
+  m_fontWeight: 400
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 1
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1269938184
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269938181}
+  m_CullTransparentMesh: 1
 --- !u!1 &1289638648
 GameObject:
   m_ObjectHideFlags: 0
@@ -4918,6 +3916,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1289638649}
+  - component: {fileID: 1289638650}
   m_Layer: 5
   m_Name: GoldCoins
   m_TagString: Untagged
@@ -4937,15 +3936,42 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 928100842}
   - {fileID: 1685095438}
+  - {fileID: 1269938182}
+  - {fileID: 928100842}
   m_Father: {fileID: 2055101255}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -50}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 225, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1289638650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1289638648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 5
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1313211926
 GameObject:
   m_ObjectHideFlags: 0
@@ -5119,153 +4145,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1321063945}
   m_CullTransparentMesh: 1
---- !u!21 &1357526742
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: water2d/waterg
-  m_Shader: {fileID: -6465566751694194690, guid: 13326eeed13ec4b498f4eb0770b38c60, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _alphaTexture:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _belowWaterTex:
-        m_Texture: {fileID: 353525532}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _colorGradient:
-        m_Texture: {fileID: 2057432147}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _distortion_tex:
-        m_Texture: {fileID: 2800000, guid: 63a3a961b343e5341a13f8efb4988815, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _simTex:
-        m_Texture: {fileID: 1541186817}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _sun_strips:
-        m_Texture: {fileID: 2800000, guid: 02b9ccfabe688644ebd37eb70cbe2341, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _surfaceTex:
-        m_Texture: {fileID: 2800000, guid: ced0a51abbb19fa41be243a46a103728, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_Lightmaps:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_LightmapsInd:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_ShadowMasks:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _belowWaterTexAlpha: 0
-    - _belowWaterTexDistortionStrength: 0
-    - _cheapWater: 0
-    - _color_type: 1
-    - _depthFromObstructors: 0
-    - _depthMlp: 0
-    - _distortionFPRH: 0
-    - _edgeIgnoreTransparency: 0
-    - _edgeSize: 0
-    - _enableFalloff: 0
-    - _enable_nor: 0
-    - _enable_obs: 1
-    - _enable_pl: 0
-    - _enable_ref: 1
-    - _enable_rm: 0
-    - _enable_scrolling: 0
-    - _enable_sim: 1
-    - _enable_td: 1
-    - _falloffStart: 0
-    - _falloffStrength: 0
-    - _foam_alpha: 0
-    - _foam_density: 0.15
-    - _foam_size: 1
-    - _lighting: 0
-    - _mobileWater: 0
-    - _normStr: 1
-    - _num_of_pixels: 256
-    - _obstruction_alpha: 1
-    - _obstruction_width: 0.15
-    - _pixel_perfect: 0
-    - _raymarchFalloffEnd: 0
-    - _raymarchFalloffStart: 0
-    - _raymarchSteps: 0
-    - _reflectionY: 1.1307681
-    - _rm_type2: 0
-    - _scrStrength: 0
-    - _strips_alpha: 0.66
-    - _strips_density: 15
-    - _strips_scrolling_speed: 0
-    - _strips_size: 1
-    - _strips_speed: -5
-    - _surfaceAlpha: 1
-    - _surfaceTexAlpha: 0
-    - _tilemapMode: 0
-    - _useFoamSpeedForST: 0
-    - _usePerspective: 0
-    m_Colors:
-    - White: {r: 1, g: 1, b: 1, a: 1}
-    - _belowWaterTexUV: {r: -0.14586872, g: 1.1120355, b: -0.22438799, a: 1.1307681}
-    - _color: {r: 0.9575472, g: 0.9809694, b: 1, a: 0}
-    - _deep_color: {r: 0.8915094, g: 0.9619473, b: 1, a: 0}
-    - _deep_minmax: {r: 0.29, g: 0.99, b: 0, a: 0}
-    - _distortion_color: {r: 1, g: 1, b: 1, a: 1}
-    - _distortion_minmax: {r: 0, g: 0.5, b: 0, a: 0}
-    - _distortion_speed: {r: -0.07, g: 0, b: 0, a: 0}
-    - _distortion_strength: {r: 0.03, g: 0, b: 0, a: 0}
-    - _distortion_tiling: {r: 0.5, g: 5, b: 0, a: 0}
-    - _edgeColor: {r: 1, g: 1, b: 1, a: 1}
-    - _foam_color: {r: 0.80451226, g: 0.9499255, b: 0.9528302, a: 0}
-    - _foam_speed: {r: -0.75, g: 0, b: 0, a: 0}
-    - _obs_transform: {r: 0.8, g: 0.8, b: 0.099999994, a: 0.099999994}
-    - _obstruction_color: {r: 1, g: 1, b: 1, a: 0}
-    - _perspective: {r: 0, g: 0, b: 0, a: 0}
-    - _perspective2: {r: 0, g: 0, b: 0, a: 0}
-    - _playerPosition: {r: 0, g: 0, b: 0, a: 0}
-    - _refTexRes: {r: 1024, g: 1024, b: 0, a: 0}
-    - _ref_transform: {r: 1, g: 0.6666666, b: 0, a: 0.16666667}
-    - _reflectionsColor: {r: 0.74105555, g: 0.83752006, b: 0.8584906, a: 1}
-    - _simFoamColor: {r: 0.78764683, g: 0.9433962, b: 0.93597955, a: 1}
-    - _simMinMaxWavesHeightFoam: {r: 0, g: 0.4, b: 0, a: 0}
-    - _simUvs: {r: 0, g: 0, b: 1, a: 1}
-    - _simWorldBounds: {r: 0, g: 0, b: 1, a: 0}
-    - _surfaceTexSpeed: {r: 0, g: 0, b: 0, a: 0}
-    - _surfaceTexTiling: {r: 0, g: 0, b: 0, a: 0}
-    - _surfaceTexUV: {r: 0, g: 1, b: 0, a: 1}
-    - _tiling: {r: 1, g: 1, b: 0, a: 0}
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &1373076167
 GameObject:
   m_ObjectHideFlags: 0
@@ -5616,43 +4495,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b475c27aa4218864fa0a9fb819be0f6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: HierarchyTools.Runtime::HierarchyTools.Runtime.HierarchySymbol
---- !u!84 &1541186817
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 1024
-  m_Height: 620
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 94
-  m_ColorFormat: 46
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 0
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1001 &1543861228
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6080,7 +4922,7 @@ MonoBehaviour:
     reflectionLayerIdx: 8
     copyMainBackground: 0
     lastOrtographicSize: 6.25
-    lastAspectRatio: 1.7775468
+    lastAspectRatio: 1.777311
   _run: 1
   overrideMainCamera:
     _value: 0
@@ -6095,8 +4937,8 @@ MonoBehaviour:
   uvShader: {fileID: 0}
   jfMaterial: {fileID: 0}
   uvMaterial: {fileID: 0}
-  jfRenderTexture1: {fileID: 976609487}
-  jfRenderTexture2: {fileID: 75475436}
+  jfRenderTexture1: {fileID: 1168358373}
+  jfRenderTexture2: {fileID: 28199828}
   genSDF: 0
 --- !u!20 &1612722965
 Camera:
@@ -6256,10 +5098,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1289638649}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1685095439
 MonoBehaviour:
@@ -6311,8 +5153,8 @@ RenderTexture:
     Hash: 00000000000000000000000000000000
   m_IsAlphaChannelOptional: 0
   serializedVersion: 6
-  m_Width: 1174
-  m_Height: 660
+  m_Width: 1058
+  m_Height: 595
   m_AntiAliasing: 1
   m_MipCount: -1
   m_DepthStencilFormat: 93
@@ -6749,8 +5591,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 779974624}
   m_HandleRect: {fileID: 779974623}
   m_Direction: 2
-  m_Value: 1.0000002
-  m_Size: 0.61
+  m_Value: 1
+  m_Size: 0.6099999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6828,7 +5670,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -10, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1809110733
 MonoBehaviour:
@@ -6850,7 +5692,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Main Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
   m_sharedMaterial: {fileID: 6588893179586125160, guid: e47534dbb0a3e874180ec161fe254117, type: 2}
@@ -6859,8 +5701,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -6877,13 +5719,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24.4
+  m_fontSize: 44.75
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontSizeMax: 100
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -7872,8 +6714,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 865, y: 0}
+  m_SizeDelta: {x: 160, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1993419971
 MonoBehaviour:
@@ -7939,7 +6781,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 2530564911472380330, guid: 46003a30d9dc8f64e8f93a67748ca3fb, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7948,7 +6790,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 9
 --- !u!222 &1993419973
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8210,7 +7052,7 @@ MonoBehaviour:
     reflectionLayerIdx: -1
     copyMainBackground: 0
     lastOrtographicSize: 5
-    lastAspectRatio: 1.7775468
+    lastAspectRatio: 1.777311
   _run: 1
 --- !u!20 &2021292164
 Camera:
@@ -8296,55 +7138,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 484, y: 0}
+  m_SizeDelta: {x: 225, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!28 &2057432147
-Texture2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 4
-  m_Width: 128
-  m_Height: 1
-  m_CompleteImageSize: 512
-  m_MipsStripped: 0
-  m_TextureFormat: 5
-  m_MipCount: 1
-  m_IsReadable: 1
-  m_IsPreProcessed: 0
-  m_IgnoreMipmapLimit: 1
-  m_MipmapLimitGroupName: 
-  m_StreamingMipmaps: 0
-  m_StreamingMipmapsPriority: 0
-  m_VTOnly: 0
-  m_AlphaIsTransparency: 0
-  m_ImageCount: 1
-  m_TextureDimension: 2
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 0
-    m_WrapV: 0
-    m_WrapW: 0
-  m_LightmapFormat: 0
-  m_ColorSpace: 1
-  m_PlatformBlob: 
-  image data: 512
-  _typelessdata: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &2064305337
 GameObject:
   m_ObjectHideFlags: 0
@@ -8463,8 +7259,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 205976639}
   m_HandleRect: {fileID: 205976638}
   m_Direction: 2
-  m_Value: 1.0000002
-  m_Size: 0.61
+  m_Value: 1
+  m_Size: 0.6099999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -8987,4 +7783,3 @@ SceneRoots:
   - {fileID: 543503305}
   - {fileID: 1523102480}
   - {fileID: 407786647}
-  - {fileID: 551285992}
