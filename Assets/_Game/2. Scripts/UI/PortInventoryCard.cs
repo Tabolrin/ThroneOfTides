@@ -11,7 +11,7 @@ namespace ThroneOfTides.UI
     // Prefab: VerticalLayout root.
     public class PortInventoryCard : MonoBehaviour
     {
-        [SerializeField] private Image            _typeBackground;
+        // Type is conveyed via _typeLabel's text — no per-type background tint anymore.
         [SerializeField] private Image            _cardArt;
         [SerializeField] private TextMeshProUGUI  _nameLabel;
         [SerializeField] private TextMeshProUGUI  _typeLabel;
@@ -22,15 +22,10 @@ namespace ThroneOfTides.UI
         [SerializeField] private Button           _addButton;
         [SerializeField] private TextMeshProUGUI  _addButtonLabel;
 
-        private static readonly Color BackgroundAlpha = new Color(1f, 1f, 1f, 0.25f);
-
-        public void Setup(CardSO card, CardTypePaletteSO palette,
+        public void Setup(CardSO card,
                           int ownedCount, int inDeckCount,
                           bool canAdd, System.Action onAdd)
         {
-            if (_typeBackground != null && palette != null)
-                _typeBackground.color = palette.GetColor(card.CardType) * BackgroundAlpha;
-
             if (_cardArt != null)
             {
                 _cardArt.gameObject.SetActive(card.Art != null);

@@ -1,4 +1,5 @@
 // Assets/_Game/2. Scripts/Data/CardSO.cs
+using System.Collections.Generic;
 using ThroneOfTides.Core;
 using UnityEngine;
 
@@ -8,36 +9,60 @@ namespace ThroneOfTides.Data
     public class CardSO : ScriptableObject, ICard
     {
         [Header("Identity")]
-        [SerializeField] private string   _name;
+        [Tooltip("Display name shown on the card and used to look it up in the deck builder/inventory.")]
+        [SerializeField] private string _name;
+
+        [Tooltip("Determines how this card is resolved: Weapon deals flat damage, Combo needs a Partner, Action/Reaction run an Effect SO, DOT applies damage over time.")]
         [SerializeField] private CardType _cardType;
-        [SerializeField] private string   _description;
+
+        [Tooltip("Flavor/rules text shown on the card and in the inspect view.")]
+        [SerializeField] private string _description;
 
         [Header("Cost")]
+        [Tooltip("Mana required to play this card.")]
         [SerializeField] private int _manaCost;
+
+        [Tooltip("Deck slots this card occupies — enforced by the deck builder's storage cap.")]
         [SerializeField] private int _storageCost;
-        // Only non-zero on cards that sacrifice HP to play (Ram the Hull, Stolen Wind)
+
+        [Tooltip("HP the caster pays to play this card. Only non-zero on cards that sacrifice HP (e.g. Ram the Hull, Stolen Wind).")]
         [SerializeField] private int _hpCost;
 
         [Header("Combat")]
+        [Tooltip("Flat damage dealt. For Combo cards this is the primer's base damage; for DOT cards this is the initial hit before the damage-over-time ticks.")]
         [SerializeField] private int _damage;
 
         [Header("Combo")]
-        [SerializeField] private int    _comboDamage;
-        [SerializeField] private int    _comboStackBonus;
+        [Tooltip("Bonus damage dealt when this card resolves a combo (played after its Partner primed the stack).")]
+        [SerializeField] private int _comboDamage;
+
+        [Tooltip("Extra damage added per additional primer stacked before the combo resolves.")]
+        [SerializeField] private int _comboStackBonus;
+
+        [Tooltip("The other card in this combo pairing (e.g. the primer if this is the resolver, or vice versa).")]
         [SerializeField] private CardSO _comboPartner;
 
         [Header("DOT")]
+        [Tooltip("Damage dealt on each subsequent enemy-turn tick after this card is played.")]
         [SerializeField] private int _dotDamagePerTurn;
+
+        [Tooltip("Number of turns the damage-over-time effect lasts.")]
         [SerializeField] private int _dotDuration;
 
         [Header("Action")]
+        [Tooltip("The ScriptableObject that implements this card's gameplay effect. Required for Action and Reaction cards — without it the card does nothing.")]
         [SerializeField] private ActionEffectSO _actionEffect;
-        [SerializeField] private bool           _isEligibleAsActionPair;
+
+        [Tooltip("Whether this Action card can be played in the same turn as a damage card without using up the turn's action-card allowance twice.")]
+        [SerializeField] private bool _isEligibleAsActionPair;
 
         [Header("Visuals")]
-        [SerializeField] private Sprite                    _art;
-        // Art animator owned by Eldar — not used in code yet, reserved for future
-        [SerializeField] private RuntimeAnimatorController _cardArtAnimator;
+        [Tooltip("The card artwork shown on its face.")]
+        [SerializeField] private Sprite _art;
+
+        [Header("Play Presentation")]
+        [Tooltip("What spawns when this card is played — sprite-only effects or paired UI-sprite + world-particle effects, per caster side. See CardPresentationPlayer.")]
+        [SerializeField] private List<CardPresentationEntry> _presentationEntries = new List<CardPresentationEntry>();
 
         // ── ICard ──────────────────────────────────────────────────────────────
         public string   Name             => _name;
@@ -54,9 +79,9 @@ namespace ThroneOfTides.Data
         public int      HPCost           => _hpCost;
 
         // ── CardSO-only ────────────────────────────────────────────────────────
-        public ActionEffectSO            ActionEffect           => _actionEffect;
-        public bool                      IsEligibleAsActionPair => _isEligibleAsActionPair;
-        public Sprite                    Art                    => _art;
-        public RuntimeAnimatorController CardArtAnimator        => _cardArtAnimator;
+        public ActionEffectSO ActionEffect           => _actionEffect;
+        public bool            IsEligibleAsActionPair => _isEligibleAsActionPair;
+        public Sprite           Art                    => _art;
+        public IReadOnlyList<CardPresentationEntry> PresentationEntries => _presentationEntries;
     }
 }

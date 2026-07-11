@@ -2,7 +2,8 @@
     "name": "ThroneOfTides.Data",
     "rootNamespace": "ThroneOfTides.Data",
     "references": [
-        "GUID:5e07d9d5988b12f4e8e8626be9243ad4"
+        "GUID:5e07d9d5988b12f4e8e8626be9243ad4",
+        "GUID:4a1cb1490dc4df8409b2580d6b44e75e"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,4 +1,5 @@
 using UnityEngine;
+using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Systems
 {
@@ -6,15 +7,7 @@ namespace ThroneOfTides.Systems
     // Place as child GameObjects on each ship
     public class VFXSpawnPosition : MonoBehaviour
     {
-        public enum SpawnPositionType
-        {
-            ShipHit,
-            ShipDeck,
-            ShipFront,
-            SeaSurface
-        }
-
-        [SerializeField] private SpawnPositionType _type;
-        public SpawnPositionType Type => _type;
+        [SerializeField] private VfxAnchorType _type;
+        public VfxAnchorType Type => _type;
     }
 }

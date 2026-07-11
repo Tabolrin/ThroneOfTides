@@ -15,7 +15,6 @@ namespace ThroneOfTides.UI
         [Header("Grid")]
         [SerializeField] private Transform        _inventoryContent;
         [SerializeField] private PortInventoryCard _cardPanelPrefab;
-        [SerializeField] private CardTypePaletteSO _palette;
 
         [Header("Filter")]
         [SerializeField] private Button _filterAll;
@@ -82,7 +81,7 @@ namespace ThroneOfTides.UI
                 var panel   = Instantiate(_cardPanelPrefab, _inventoryContent);
                 var cardRef = card; // capture for lambda
 
-                panel.Setup(card, _palette, ownedCount, inDeckCount, canAdd,
+                panel.Setup(card, ownedCount, inDeckCount, canAdd,
                             () => OnAddCardRequested?.Invoke(cardRef));
             }
         }

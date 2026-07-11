@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEngine;
 using ThroneOfTides.Systems;
+using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Tools
 {
@@ -101,11 +102,11 @@ namespace ThroneOfTides.Tools
         {
             Color color = point.Type switch
             {
-                VFXSpawnPosition.SpawnPositionType.ShipHit    => _hitColor,
-                VFXSpawnPosition.SpawnPositionType.ShipDeck   => _deckColor,
-                VFXSpawnPosition.SpawnPositionType.ShipFront  => _frontColor,
-                VFXSpawnPosition.SpawnPositionType.SeaSurface => _surfaceColor,
-                _                                       => Color.white
+                VfxAnchorType.ShipHit    => _hitColor,
+                VfxAnchorType.ShipDeck   => _deckColor,
+                VfxAnchorType.ShipFront  => _frontColor,
+                VfxAnchorType.SeaSurface => _surfaceColor,
+                _                        => Color.white
             };
 
             Vector3 pos = point.transform.position;
