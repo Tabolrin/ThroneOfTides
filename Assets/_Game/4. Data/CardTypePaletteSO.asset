@@ -12,8 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 524125d41856677489e6cc1ff4660c76, type: 3}
   m_Name: CardTypePaletteSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardTypePaletteSO
-  WeaponColor: {r: 0.6886792, g: 0.026159989, b: 0, a: 1}
-  ComboColor: {r: 0.9150943, g: 0.5995034, b: 0, a: 1}
-  ActionColor: {r: 0.43454072, g: 0.6601976, b: 0.990566, a: 1}
-  DotColor: {r: 0.8, g: 0.3, b: 0.3, a: 1}
-  DefaultColor: {r: 1, g: 1, b: 1, a: 1}
+  WeaponVisuals:
+    BannerColor: {r: 1, g: 1, b: 1, a: 1}
+    TypeSymbol: {fileID: 21300000, guid: 417b0f6e69235f94eae6c3a1453d2e39, type: 3}
+  ComboVisuals:
+    BannerColor: {r: 1, g: 1, b: 1, a: 1}
+    TypeSymbol: {fileID: 21300000, guid: 417b0f6e69235f94eae6c3a1453d2e39, type: 3}
+  ActionVisuals:
+    BannerColor: {r: 1, g: 1, b: 1, a: 1}
+    TypeSymbol: {fileID: 21300000, guid: 6aa3ec38b8d57894591dbd5d9ae5b6a3, type: 3}
+  DOTVisuals:
+    BannerColor: {r: 1, g: 1, b: 1, a: 1}
+    TypeSymbol: {fileID: 21300000, guid: 02b93f9b06c277f4082b636980ce8fde, type: 3}
+  ReactionVisuals:
+    BannerColor: {r: 1, g: 1, b: 1, a: 1}
+    TypeSymbol: {fileID: 21300000, guid: fe2ced9e8704fe24c947ac5ef5deccd1, type: 3}
+  DefaultVisuals:
+    BannerColor: {r: 1, g: 1, b: 1, a: 1}
+    TypeSymbol: {fileID: 21300000, guid: 0ed051501bea95a4cbf436ce46a01c1a, type: 3}

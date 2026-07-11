@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c958ddd0be6ae5c449dbea96b77e17f0
+guid: 7ac2c3b71e2fe614d8b8ec025c511503
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4621652967258408511
-    second: monkey front with dirt_0
+      213: -8203960809527574535
+    second: whirlpool_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: monkey front with dirt_0
+      name: whirlpool_0
       rect:
         serializedVersion: 2
-        x: 213
-        y: 4
-        width: 768
-        height: 1007
+        x: 4
+        y: 229
+        width: 1016
+        height: 564
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1c9be63ec179cdfb0800000000000000
-      internalID: -4621652967258408511
+      spriteID: 9fff1e43c1da52e80800000000000000
+      internalID: -8203960809527574535
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      monkey front with dirt_0: -4621652967258408511
+      whirlpool_0: -8203960809527574535
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

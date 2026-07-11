@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c8b6762b78e0e524aa81d96f1f0c857b
+guid: 82fb0fc9e4a722547865ca5cf292b586
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1053670164736264715
-    second: kraken card art_0
+      213: 5165333672402020310
+    second: rum_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 2
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -48,7 +48,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -73,9 +73,9 @@ TextureImporter:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
-    resizeAlgorithm: 1
+    resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 3
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: kraken card art_0
+      name: rum_0
       rect:
         serializedVersion: 2
-        x: 16
-        y: 50
-        width: 972
-        height: 870
+        x: 276
+        y: 8
+        width: 467
+        height: 994
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5f5b778519c9061f0800000000000000
-      internalID: -1053670164736264715
+      spriteID: 6d7e2e1ab93fea740800000000000000
+      internalID: 5165333672402020310
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      kraken card art_0: -1053670164736264715
+      rum_0: 5165333672402020310
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
