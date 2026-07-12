@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: e58c800ddb6455544aab3d5ef3c06455
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8112142081989906228
+    second: Hail Mini Icon_0
+  - first:
+      213: -1145479494106840110
+    second: Hail Mini Icon_1
+  - first:
+      213: -909549917434649508
+    second: Hail Mini Icon_2
+  - first:
+      213: -4464694183674367177
+    second: Hail Mini Icon_3
+  - first:
+      213: -1525978373868267818
+    second: Hail Mini Icon_4
+  - first:
+      213: 5299470638640822823
+    second: Hail Mini Icon_5
+  - first:
+      213: -7749795453331939408
+    second: Hail Mini Icon_6
+  - first:
+      213: -3600566433580060376
+    second: Hail Mini Icon_7
+  - first:
+      213: -7352029697765669584
+    second: Hail Mini Icon_8
+  - first:
+      213: 2760630811164478
+    second: Hail Mini Icon_9
+  - first:
+      213: -6643707018416583549
+    second: Hail Mini Icon_10
+  - first:
+      213: -801465397412614949
+    second: Hail Mini Icon_11
+  - first:
+      213: -7074637276238714341
+    second: Hail Mini Icon_12
+  - first:
+      213: 7143458120478294785
+    second: Hail Mini Icon_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Hail Mini Icon_0
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 97
+        width: 253
+        height: 146
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43f818c5e3e149070800000000000000
+      internalID: 8112142081989906228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_1
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 79
+        width: 21
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d3844818707a10f0800000000000000
+      internalID: -1145479494106840110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_2
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 86
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5462d94b21a063f0800000000000000
+      internalID: -909549917434649508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_3
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 81
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 733365f7b483a02c0800000000000000
+      internalID: -4464694183674367177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_4
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 78
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d657a201c2a2dae0800000000000000
+      internalID: -1525978373868267818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_5
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 73
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72a7cc1d7708b8940800000000000000
+      internalID: 5299470638640822823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_6
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 44
+        width: 26
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bf563a6812337490800000000000000
+      internalID: -7749795453331939408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_7
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 55
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 821f340c7e7380ec0800000000000000
+      internalID: -3600566433580060376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_8
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 43
+        width: 21
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0350e8e41f758f990800000000000000
+      internalID: -7352029697765669584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_9
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 51
+        width: 21
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3ffad277cec90000800000000000000
+      internalID: 2760630811164478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_10
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 11
+        width: 22
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38c8287aaafccc3a0800000000000000
+      internalID: -6643707018416583549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_11
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 17
+        width: 29
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdc2477a77f90e4f0800000000000000
+      internalID: -801465397412614949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_12
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 0
+        width: 26
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1aed0b51e6d1dd90800000000000000
+      internalID: -7074637276238714341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hail Mini Icon_13
+      rect:
+        serializedVersion: 2
+        x: 181
+        y: 25
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1030dfa1059a22360800000000000000
+      internalID: 7143458120478294785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Hail Mini Icon_0: 8112142081989906228
+      Hail Mini Icon_1: -1145479494106840110
+      Hail Mini Icon_10: -6643707018416583549
+      Hail Mini Icon_11: -801465397412614949
+      Hail Mini Icon_12: -7074637276238714341
+      Hail Mini Icon_13: 7143458120478294785
+      Hail Mini Icon_2: -909549917434649508
+      Hail Mini Icon_3: -4464694183674367177
+      Hail Mini Icon_4: -1525978373868267818
+      Hail Mini Icon_5: 5299470638640822823
+      Hail Mini Icon_6: -7749795453331939408
+      Hail Mini Icon_7: -3600566433580060376
+      Hail Mini Icon_8: -7352029697765669584
+      Hail Mini Icon_9: 2760630811164478
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
