@@ -20,13 +20,19 @@ namespace ThroneOfTides.UI
         [SerializeField] private TextMeshProUGUI _enemyHPLabel;
         [SerializeField] private Image           _enemyHPFill;
 
-        [Header("Mana")]
+        [Header("Player Mana")]
         [SerializeField] private TextMeshProUGUI _playerManaLabel;
+        [SerializeField] private Image           _playerManaFill;
+
+        [Header("Enemy Mana")]
+        [SerializeField] private TextMeshProUGUI _enemyManaLabel;
+        [SerializeField] private Image           _enemyManaFill;
 
         public void Refresh(int playerHP,   int maxPlayerHP,
             int enemyHP,    int maxEnemyHP,
             int deckCount,  bool isPlayerTurn,
-            int playerMana, int playerMaxMana)
+            int playerMana, int playerMaxMana,
+            int enemyMana,  int enemyMaxMana)
         {
             _playerHPLabel.text  = $"HP: {playerHP} / {maxPlayerHP}";
             _enemyHPLabel.text   = $"HP: {enemyHP} / {maxEnemyHP}";
@@ -36,8 +42,13 @@ namespace ThroneOfTides.UI
             SetFillAmount(_playerHPFill, playerHP, maxPlayerHP);
             SetFillAmount(_enemyHPFill,  enemyHP,  maxEnemyHP);
 
+            SetFillAmount(_playerManaFill, playerMana, playerMaxMana);
+            SetFillAmount(_enemyManaFill,  enemyMana,  enemyMaxMana);
+
             if (_playerManaLabel != null)
-                _playerManaLabel.text = $"Mana: {playerMana} / {playerMaxMana}";
+                _playerManaLabel.text = $"{playerMana} / {playerMaxMana}";
+            if (_enemyManaLabel != null)
+                _enemyManaLabel.text = $"{enemyMana} / {enemyMaxMana}";
         }
 
         // Guards against div-by-zero and clamps to a valid 0–1 range for Image.fillAmount

@@ -27,5 +27,7 @@ MonoBehaviour:
   _dotDuration: 3
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
+  _requiresTargetSelection: 0
+  _statusType: 3
   _art: {fileID: 21300000, guid: fea533f9939a4c74b8eb8ad6df6404d5, type: 3}
-  _cardArtAnimator: {fileID: 0}
+  _presentationEntries: []

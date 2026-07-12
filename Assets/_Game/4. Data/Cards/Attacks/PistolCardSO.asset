@@ -26,7 +26,7 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
-  _tags: []
-  _art: {fileID: 21300000, guid: 05809f8e7a19184428fced385fffbad6, type: 3}
-  _cardTypeSymbol: {fileID: 0}
-  _cardArtAnimator: {fileID: 0}
+  _requiresTargetSelection: 0
+  _statusType: 0
+  _art: {fileID: -1583767249323058203, guid: 05809f8e7a19184428fced385fffbad6, type: 3}
+  _presentationEntries: []

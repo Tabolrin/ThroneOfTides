@@ -19,10 +19,10 @@ namespace ThroneOfTides.Systems
     public class CardPresentationPlayer : MonoBehaviour
     {
         [Header("Ship Anchors")]
-        [Tooltip("The ShipVfxAnchors on the player's ship — resolves anchor points when the player is the caster or the opponent.")]
+        [Tooltip("The ShipVfxAnchors on the player's ship — resolves anchor points when the player is the caster, opponent, or explicitly chosen target.")]
         [SerializeField] private ShipVfxAnchors _playerShipAnchors;
 
-        [Tooltip("The ShipVfxAnchors on the enemy's ship — resolves anchor points when the enemy is the caster or the opponent.")]
+        [Tooltip("The ShipVfxAnchors on the enemy's ship — resolves anchor points when the enemy is the caster, opponent, or explicitly chosen target.")]
         [SerializeField] private ShipVfxAnchors _enemyShipAnchors;
 
         [Header("UI")]
@@ -51,10 +51,10 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnEnemyCardPlayed -= HandleEnemyCardPlayed;
         }
 
-        private void HandlePlayerCardPlayed(ICard card) => Play(card, CardCasterFilter.Player);
-        private void HandleEnemyCardPlayed(ICard card) => Play(card, CardCasterFilter.Enemy);
+        private void HandlePlayerCardPlayed(ICard card, DamageTarget? target) => Play(card, CardCasterFilter.Player, target);
+        private void HandleEnemyCardPlayed(ICard card, DamageTarget? target) => Play(card, CardCasterFilter.Enemy, target);
 
-        private void Play(ICard card, CardCasterFilter caster)
+        private void Play(ICard card, CardCasterFilter caster, DamageTarget? explicitTarget)
         {
             if (!(card is CardSO cardSO)) return;
 
@@ -64,7 +64,7 @@ namespace ThroneOfTides.Systems
             {
                 if (!entry.MatchesCaster(caster)) continue;
 
-                PlayEntry(entry, card, caster, casterAnchors, opponentAnchors);
+                PlayEntry(entry, card, caster, casterAnchors, opponentAnchors, explicitTarget);
             }
         }
 
@@ -73,7 +73,8 @@ namespace ThroneOfTides.Systems
             ICard card,
             CardCasterFilter caster,
             ShipVfxAnchors casterAnchors,
-            ShipVfxAnchors opponentAnchors)
+            ShipVfxAnchors opponentAnchors,
+            DamageTarget? explicitTarget)
         {
             if (entry.SpritePrefab == null)
             {
@@ -86,7 +87,14 @@ namespace ThroneOfTides.Systems
             // points (e.g. a mana-pull arc between both ships' hit points).
             var casterPoint = casterAnchors.Get(entry.PositionType);
             var opponentPoint = opponentAnchors.Get(entry.PositionType);
-            var spawnTransform = entry.AnchorSide == CardPresentationSide.Caster ? casterPoint : opponentPoint;
+
+            var spawnTransform = entry.AnchorSide switch
+            {
+                CardPresentationSide.Caster => casterPoint,
+                CardPresentationSide.Opponent => opponentPoint,
+                CardPresentationSide.ExplicitTarget => ResolveExplicitTargetPoint(entry.PositionType, explicitTarget),
+                _ => casterPoint
+            };
 
             GameObject spriteInstance = entry.PresentationMode == CardPresentationMode.UiSpriteWithWorldParticle
                 ? SpawnUiSprite(entry, spawnTransform)
@@ -101,23 +109,40 @@ namespace ThroneOfTides.Systems
 
             if (spriteInstance.TryGetComponent<ICardPlayEffect>(out var playEffect))
             {
+                // Self-driving effects decide when their SFX actually happens (e.g. on impact,
+                // not at spawn) — hand them a bound callback instead of firing it here.
                 var context = new CardEffectSpawnContext(
                     casterPoint,
                     opponentPoint,
                     _gameCanvasRect,
                     _gameCamera,
                     card,
-                    caster);
+                    caster,
+                    playSfx: pos => CardSfxPlayer.Play(entry.Sfx, pos));
 
                 playEffect.Initialize(context);
                 playEffect.Completed += () => Destroy(spriteInstance);
             }
             else
             {
+                // Simple spawns have no sequence to sync against — play immediately.
                 Destroy(spriteInstance, entry.Lifetime);
+                CardSfxPlayer.Play(entry.Sfx, spawnTransform.position);
+            }
+        }
+
+        private Transform ResolveExplicitTargetPoint(VfxAnchorType positionType, DamageTarget? explicitTarget)
+        {
+            if (!explicitTarget.HasValue)
+            {
+                Debug.LogWarning(
+                    "A presentation entry uses Explicit Target anchoring but no target was selected for " +
+                    "this play (card is missing Requires Target Selection) — falling back to the player's ship.");
+                return _playerShipAnchors.Get(positionType);
             }
 
-            CardSfxPlayer.Play(entry.Sfx, spawnTransform.position);
+            var anchors = explicitTarget.Value == DamageTarget.Player ? _playerShipAnchors : _enemyShipAnchors;
+            return anchors.Get(positionType);
         }
 
         private GameObject SpawnWorldSprite(CardPresentationEntry entry, Transform spawnTransform)

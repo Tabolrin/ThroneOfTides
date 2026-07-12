@@ -13,10 +13,14 @@ namespace ThroneOfTides.Core
         int PlayerMaxMana   { get; }
         int EnemyMana       { get; }
 
+        /// The target the player explicitly chose via a targeting prompt (see
+        /// CardSO.RequiresTargetSelection). Null for cards that don't require target selection.
+        DamageTarget? SelectedTarget { get; }
+
         void ApplyDamage(DamageTarget target, int amount);
         void HealPlayer(int amount);
         void SetSirenActive();
-        void ApplyDot(DamageTarget target, int damagePerTurn, int turns);
+        void ApplyDot(DamageTarget target, int damagePerTurn, int turns, ShipStatusType source = ShipStatusType.None);
         void AddCardToPlayerHand(ICard card);
         void StealFromEnemyHand();
         void RetrieveFromDiscard(int count);
@@ -27,6 +31,11 @@ namespace ThroneOfTides.Core
         void AddBloodForBloodCharge();
         void ReturnFromSnapshot(int count);
         void DrawOneCard();
+        void ClearComboStack(DamageTarget target);
+
+        /// Registers a High Spirits play toward its permanent status icon count (distinct from
+        /// AddPlayerMaxMana, which other effects like Treasure Chest also grant mana through).
+        void RegisterHighSpiritsPlayed();
 
         IReadOnlyList<ICard> GetEnemyHand();
         IReadOnlyList<ICard> GetPlayerHand();

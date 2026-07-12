@@ -25,6 +25,8 @@ namespace ThroneOfTides.Tools
         private SerializedProperty _dotDamagePerTurn;
         private SerializedProperty _dotDuration;
         private SerializedProperty _presentationEntries;
+        private SerializedProperty _requiresTargetSelection;
+        private SerializedProperty _statusType;
 
         private static readonly Color WeaponColor   = new Color(0.22f, 0.38f, 0.62f, 0.18f);
         private static readonly Color ComboColor    = new Color(0.72f, 0.62f, 0.10f, 0.18f);
@@ -50,6 +52,8 @@ namespace ThroneOfTides.Tools
             _dotDamagePerTurn       = serializedObject.FindProperty("_dotDamagePerTurn");
             _dotDuration            = serializedObject.FindProperty("_dotDuration");
             _presentationEntries    = serializedObject.FindProperty("_presentationEntries");
+            _requiresTargetSelection = serializedObject.FindProperty("_requiresTargetSelection");
+            _statusType              = serializedObject.FindProperty("_statusType");
         }
 
         public override void OnInspectorGUI()
@@ -171,6 +175,12 @@ namespace ThroneOfTides.Tools
                 MessageType.None);
             EditorGUILayout.Space(6);
 
+            // ── Ship Status ───────────────────────────────────────────────────
+            EditorGUILayout.LabelField("Ship Status", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_statusType, Label(_statusType, "Status Icon"));
+            EditorGUILayout.PropertyField(_requiresTargetSelection, Label(_requiresTargetSelection, "Requires Target Selection"));
+            EditorGUILayout.Space(6);
+
             // ── Play Presentation ─────────────────────────────────────────────
             EditorGUILayout.LabelField("Play Presentation", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_presentationEntries, Label(_presentationEntries, "Presentation Entries"), true);
@@ -182,6 +192,7 @@ namespace ThroneOfTides.Tools
                 case CardType.Weapon:
                     EditorGUILayout.LabelField("Weapon", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(_damage, Label(_damage, "Damage"));
+                    EditorGUILayout.PropertyField(_actionEffect, Label(_actionEffect, "Effect (optional — overrides legacy weapon logic)"));
                     break;
 
                 case CardType.Combo:

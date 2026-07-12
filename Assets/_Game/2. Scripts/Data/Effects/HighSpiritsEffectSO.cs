@@ -10,6 +10,7 @@ namespace ThroneOfTides.Data
         public override void Execute(ICardEffectContext context)
         {
             context.AddPlayerMaxMana(1);
+            context.RegisterHighSpiritsPlayed();
             Debug.Log("High Spirits — +1 max mana this match");
         }
     }

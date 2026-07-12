@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ThroneOfTides.Core
@@ -23,13 +24,22 @@ namespace ThroneOfTides.Core
         /// </summary>
         public readonly CardCasterFilter Caster;
 
+        /// <summary>
+        /// Plays this entry's configured SFX cue at the given world position. Self-driving
+        /// effects call this themselves at the moment that actually matters (e.g. on impact)
+        /// instead of the spawner firing it immediately at spawn time, which would desync
+        /// audio from a multi-beat sequence.
+        /// </summary>
+        public readonly Action<Vector3> PlaySfx;
+
         public CardEffectSpawnContext(
             Transform casterAnchor,
             Transform opponentAnchor,
             RectTransform gameCanvas,
             Camera gameCamera,
             ICard card,
-            CardCasterFilter caster)
+            CardCasterFilter caster,
+            Action<Vector3> playSfx)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -37,6 +47,7 @@ namespace ThroneOfTides.Core
             GameCamera = gameCamera;
             Card = card;
             Caster = caster;
+            PlaySfx = playSfx;
         }
     }
 }

@@ -35,6 +35,7 @@ namespace ThroneOfTides.App
         [SerializeField] private UnityEngine.UI.Button _endTurnButton;
         [SerializeField] private RectTransform         _playZone;
         [SerializeField] private DeadMansTurnPrompt    _deadMansTurnPrompt;
+        [SerializeField] private TargetSelectionPrompt _targetSelectionPrompt;
         [SerializeField] private ResultsPanel          _resultsPanel;
         [SerializeField] private TurnCoordinator       _turnCoordinator;
 
@@ -98,9 +99,10 @@ namespace ThroneOfTides.App
                 _gameState, _stateMachine, enemyAI,
                 _handLayoutManager, combatResolver, _config);
 
-            _turnCoordinator.OnHPChanged          += RefreshHUD;
-            _turnCoordinator.OnTurnChanged        += RefreshHUD;
-            _turnCoordinator.OnShowReactionPrompt += ShowReactionPrompt;
+            _turnCoordinator.OnHPChanged            += RefreshHUD;
+            _turnCoordinator.OnTurnChanged          += RefreshHUD;
+            _turnCoordinator.OnShowReactionPrompt   += ShowReactionPrompt;
+            _turnCoordinator.OnShowTargetSelection  += ShowTargetSelectionPrompt;
 
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
@@ -189,9 +191,10 @@ namespace ThroneOfTides.App
 
             if (_turnCoordinator != null)
             {
-                _turnCoordinator.OnHPChanged          -= RefreshHUD;
-                _turnCoordinator.OnTurnChanged        -= RefreshHUD;
-                _turnCoordinator.OnShowReactionPrompt -= ShowReactionPrompt;
+                _turnCoordinator.OnHPChanged           -= RefreshHUD;
+                _turnCoordinator.OnTurnChanged         -= RefreshHUD;
+                _turnCoordinator.OnShowReactionPrompt  -= ShowReactionPrompt;
+                _turnCoordinator.OnShowTargetSelection -= ShowTargetSelectionPrompt;
             }
 
             if (_gameState != null)
@@ -224,7 +227,7 @@ namespace ThroneOfTides.App
             RefreshHUD();
         }
 
-        private void OnEnemyCardPlayed(ICard card)
+        private void OnEnemyCardPlayed(ICard card, DamageTarget? selectedTarget)
         {
             var cardSO = card as CardSO;
             if (cardSO == null) return;
@@ -245,6 +248,11 @@ namespace ThroneOfTides.App
             _deadMansTurnPrompt.Show(card, damage, blockCost, onNegate, onTakeHit);
         }
 
+        private void ShowTargetSelectionPrompt(CardSO card, System.Action<DamageTarget> onTargetChosen)
+        {
+            _targetSelectionPrompt.Show(card, onTargetChosen);
+        }
+
         private void RefreshHUD()
         {
             _gameHUD.Refresh(
@@ -253,7 +261,9 @@ namespace ThroneOfTides.App
                 _gameState.PlayerDeck.Count,
                 _gameState.IsPlayerTurn,
                 _gameState.PlayerMana,
-                _gameState.PlayerMaxMana);
+                _gameState.PlayerMaxMana,
+                _gameState.EnemyMana,
+                _gameState.EnemyMaxMana);
 
             _endTurnButton.interactable = _gameState.IsPlayerTurn;
         }

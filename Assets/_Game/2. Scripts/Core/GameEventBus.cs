@@ -11,20 +11,26 @@ namespace ThroneOfTides.Core
         // ── Card ──────────────────────────────────────────────────────────────
         public static event Action<ICard> OnCardDrawn;
         public static event Action<ICard> OnCardPlayed;
-        public static event Action<ICard> OnCardPlayAccepted;
+        // Target is null for normally-targeted cards (inferred caster/opponent); non-null when
+        // the player explicitly chose a target ship via a targeting prompt (e.g. Tidal Wave).
+        public static event Action<ICard, DamageTarget?> OnCardPlayAccepted;
         public static event Action<ICard> OnPlayerCardRemoved;
-        public static event Action<ICard> OnEnemyCardPlayed;
+        public static event Action<ICard, DamageTarget?> OnEnemyCardPlayed;
         public static Action             OnEnemyCardAnimationComplete;
 
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
         public static event Action<int>               OnHPChanged;
         public static event Action                    OnComboResolved;
-        public static event Action<int>               OnComboStackChanged;
+        public static event Action<DamageTarget, int> OnComboStackChanged;
 
         // ── DOT ───────────────────────────────────────────────────────────────
         public static event Action<DotEffect> OnDOTApplied;
         public static event Action<DotEffect> OnDOTTick;
+
+        // ── Ship Status (persistent per-ship indicators: Gunpowder, DOT sources, buffs) ──────
+        // Count semantics: 0 = inactive (hide), >0 = active with that badge value.
+        public static event Action<ShipStatusType, DamageTarget, int> OnShipStatusCountChanged;
 
         // ── Mana ──────────────────────────────────────────────────────────────
         public static event Action<int, int> OnPlayerManaChanged; // current, max
@@ -53,15 +59,17 @@ namespace ThroneOfTides.Core
         public static void FireTurnPhaseChanged(TurnPhase phase)             => OnTurnPhaseChanged?.Invoke(phase);
         public static void FireCardDrawn(ICard card)                         => OnCardDrawn?.Invoke(card);
         public static void FireCardPlayed(ICard card)                        => OnCardPlayed?.Invoke(card);
-        public static void FireCardPlayAccepted(ICard card)                  => OnCardPlayAccepted?.Invoke(card);
+        public static void FireCardPlayAccepted(ICard card, DamageTarget? target = null) => OnCardPlayAccepted?.Invoke(card, target);
         public static void FirePlayerCardRemoved(ICard card)                 => OnPlayerCardRemoved?.Invoke(card);
-        public static void FireEnemyCardPlayed(ICard card)                   => OnEnemyCardPlayed?.Invoke(card);
+        public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
         public static void FireDamageDealt(DamageTarget target, int amount)  => OnDamageDealt?.Invoke(target, amount);
         public static void FireHPChanged(int hp)                             => OnHPChanged?.Invoke(hp);
         public static void FireComboResolved()                               => OnComboResolved?.Invoke();
-        public static void FireComboStackChanged(int count)                  => OnComboStackChanged?.Invoke(count);
+        public static void FireComboStackChanged(DamageTarget side, int count) => OnComboStackChanged?.Invoke(side, count);
         public static void FireDOTApplied(DotEffect effect)                  => OnDOTApplied?.Invoke(effect);
         public static void FireDOTTick(DotEffect effect)                     => OnDOTTick?.Invoke(effect);
+        public static void FireShipStatusCountChanged(ShipStatusType type, DamageTarget ship, int count)
+            => OnShipStatusCountChanged?.Invoke(type, ship, count);
         public static void FirePlayerManaChanged(int current, int max)       => OnPlayerManaChanged?.Invoke(current, max);
         public static void FireEnemyManaChanged(int current, int max)        => OnEnemyManaChanged?.Invoke(current, max);
         public static void FireReactionCharged(ReactionType type, int charges) => OnReactionCharged?.Invoke(type, charges);
@@ -89,6 +97,7 @@ namespace ThroneOfTides.Core
             OnComboStackChanged          = null;
             OnDOTApplied                 = null;
             OnDOTTick                    = null;
+            OnShipStatusCountChanged     = null;
             OnPlayerManaChanged          = null;
             OnEnemyManaChanged           = null;
             OnReactionCharged            = null;

@@ -38,6 +38,10 @@ namespace ThroneOfTides.Systems
                 // enemy AI doesn't hold reaction cards in normal gameplay
                 if (card.CardType == CardType.Reaction) continue;
 
+                // Cards requiring a player-chosen target (e.g. Tidal Wave) have no AI-facing
+                // targeting UI — excluded until the AI gets its own targeting heuristic.
+                if (card.RequiresTargetSelection) continue;
+
                 // Cannot play cards that cost more mana than currently available
                 if (card.ManaCost > enemyMana) continue;
 

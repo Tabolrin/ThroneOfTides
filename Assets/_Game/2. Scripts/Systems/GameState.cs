@@ -29,13 +29,25 @@ namespace ThroneOfTides.Systems
         public int EnemyMana     { get; private set; }
         public int EnemyMaxMana  { get; private set; }
 
-        // ── Combo ─────────────────────────────────────────────────────────────
-        public int    ComboStackCount { get; private set; }
-        public CardSO ActiveComboCard { get; private set; }
+        // ── Combo (per side — gunpowder priming/resolving works independently on each ship) ──
+        private readonly ComboState _playerCombo = new ComboState();
+        private readonly ComboState _enemyCombo  = new ComboState();
+
+        public int    PlayerComboStackCount => _playerCombo.StackCount;
+        public CardSO PlayerActiveComboCard => _playerCombo.ActiveCard;
+        public int    EnemyComboStackCount  => _enemyCombo.StackCount;
+        public CardSO EnemyActiveComboCard  => _enemyCombo.ActiveCard;
+
+        private class ComboState
+        {
+            public int    StackCount;
+            public CardSO ActiveCard;
+        }
 
         // ── Status Effects ────────────────────────────────────────────────────
         public bool SirenSongActive    { get; private set; }
         public bool PendingUnblockable { get; private set; }
+        public int  HighSpiritsPlayCount { get; private set; }
 
         // ── Turn Tracking ─────────────────────────────────────────────────────
         public bool DamageCardPlayedThisTurn { get; private set; }
@@ -182,12 +194,22 @@ namespace ThroneOfTides.Systems
         {
             SirenSongActive    = true;
             PendingUnblockable = true;
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, DamageTarget.Player, 1);
         }
 
         public void ClearSiren()
         {
             SirenSongActive    = false;
             PendingUnblockable = false;
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, DamageTarget.Player, 0);
+        }
+
+        // High Spirits is a permanent buff — its icon count only ever grows (capped at 3
+        // copies per deck) and is never cleared for the rest of the match.
+        public void RegisterHighSpiritsPlayed()
+        {
+            HighSpiritsPlayCount++;
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.HighSpirits, DamageTarget.Player, HighSpiritsPlayCount);
         }
 
         // ── DOT ───────────────────────────────────────────────────────────────
@@ -196,6 +218,9 @@ namespace ThroneOfTides.Systems
         {
             _dotEffects.Add(effect);
             GameEventBus.FireDOTApplied(effect);
+
+            if (effect.Source != ShipStatusType.None)
+                GameEventBus.FireShipStatusCountChanged(effect.Source, effect.Target, effect.TurnsRemaining);
         }
 
         public void ProcessDotEffects()
@@ -206,10 +231,15 @@ namespace ThroneOfTides.Systems
                 ApplyDamage(dot.Target, dot.DamagePerTurn);
                 GameEventBus.FireDOTTick(dot);
 
-                if (dot.TurnsRemaining <= 1)
+                int turnsRemaining = dot.TurnsRemaining - 1;
+
+                if (turnsRemaining <= 0)
                     _dotEffects.RemoveAt(i);
                 else
-                    _dotEffects[i] = new DotEffect(dot.Target, dot.DamagePerTurn, dot.TurnsRemaining - 1);
+                    _dotEffects[i] = new DotEffect(dot.Target, dot.DamagePerTurn, turnsRemaining, dot.Source);
+
+                if (dot.Source != ShipStatusType.None)
+                    GameEventBus.FireShipStatusCountChanged(dot.Source, dot.Target, Mathf.Max(0, turnsRemaining));
             }
         }
 
@@ -250,29 +280,37 @@ namespace ThroneOfTides.Systems
             HasDrawnThisTurn         = false;
         }
 
-        // ── Combo ─────────────────────────────────────────────────────────────
+        // ── Combo (per side) ──────────────────────────────────────────────────
 
-        public void IncrementCombo(CardSO card)
+        private ComboState GetCombo(DamageTarget side) =>
+            side == DamageTarget.Player ? _playerCombo : _enemyCombo;
+
+        public void IncrementCombo(DamageTarget side, CardSO card)
         {
-            ActiveComboCard = card;
-            ComboStackCount++;
-            GameEventBus.FireComboStackChanged(ComboStackCount);
+            var combo = GetCombo(side);
+            combo.ActiveCard = card;
+            combo.StackCount++;
+            GameEventBus.FireComboStackChanged(side, combo.StackCount);
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.Gunpowder, side, combo.StackCount);
         }
 
-        public int ResolveCombo()
+        public int ResolveCombo(DamageTarget side)
         {
-            int damage = ActiveComboCard.ComboDamage +
-                         ((ComboStackCount - 1) * ActiveComboCard.ComboStackBonus);
-            ResetCombo();
+            var combo = GetCombo(side);
+            int damage = combo.ActiveCard.ComboDamage +
+                         ((combo.StackCount - 1) * combo.ActiveCard.ComboStackBonus);
+            ResetCombo(side);
             GameEventBus.FireComboResolved();
             return damage;
         }
 
-        public void ResetCombo()
+        public void ResetCombo(DamageTarget side)
         {
-            ComboStackCount = 0;
-            ActiveComboCard = null;
-            GameEventBus.FireComboStackChanged(0);
+            var combo = GetCombo(side);
+            combo.StackCount = 0;
+            combo.ActiveCard = null;
+            GameEventBus.FireComboStackChanged(side, 0);
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.Gunpowder, side, 0);
         }
 
         // ── Game Over ─────────────────────────────────────────────────────────

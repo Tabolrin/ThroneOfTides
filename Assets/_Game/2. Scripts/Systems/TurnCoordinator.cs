@@ -24,6 +24,9 @@ namespace ThroneOfTides.Systems
             System.Action onNegate, System.Action onTakeHit);
         public ReactionPromptHandler OnShowReactionPrompt;
 
+        public delegate void TargetSelectionHandler(CardSO card, System.Action<DamageTarget> onTargetChosen);
+        public TargetSelectionHandler OnShowTargetSelection;
+
         public System.Action<CardSO> OnCardDrawn;
 
         public bool IsPlayerTurn => _gameState?.IsPlayerTurn ?? false;
@@ -54,8 +57,8 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.IsPlayerTurn) return;
 
-            if (_gameState.ComboStackCount > 0 && !_gameState.DamageCardPlayedThisTurn)
-                _gameState.ResetCombo();
+            if (_gameState.PlayerComboStackCount > 0 && !_gameState.DamageCardPlayedThisTurn)
+                _gameState.ResetCombo(DamageTarget.Player);
 
             if (_gameState.SirenSongActive && !_gameState.DamageCardPlayedThisTurn)
                 _gameState.ClearSiren();
@@ -124,14 +127,33 @@ namespace ThroneOfTides.Systems
                 return;
             }
 
-            GameEventBus.FireCardPlayAccepted(cardSO);
+            if (cardSO.RequiresTargetSelection)
+            {
+                StartCoroutine(PlayCardWithTargetSelection(cardSO));
+                return;
+            }
+
+            FinishHandleCardPlayed(cardSO, null);
+        }
+
+        private IEnumerator PlayCardWithTargetSelection(CardSO cardSO)
+        {
+            DamageTarget? chosen = null;
+            OnShowTargetSelection?.Invoke(cardSO, target => chosen = target);
+            yield return new WaitUntil(() => chosen.HasValue);
+            FinishHandleCardPlayed(cardSO, chosen);
+        }
+
+        private void FinishHandleCardPlayed(CardSO cardSO, DamageTarget? selectedTarget)
+        {
+            GameEventBus.FireCardPlayAccepted(cardSO, selectedTarget);
             _gameState.RegisterCardPlayed(cardSO);
             _gameState.PlayerHand.RemoveCard(cardSO);
             _gameState.DiscardPlayerCard(cardSO);
 
             _combatResolver.SetSecondaryDrawCallback(TryDrawCardSecondary);
 
-            int damage = _combatResolver.ResolvePlayerCard(cardSO, _handLayout);
+            int damage = _combatResolver.ResolvePlayerCard(cardSO, _handLayout, selectedTarget);
             if (damage > 0)
                 _gameState.ApplyDamage(DamageTarget.Enemy, damage);
 
@@ -223,6 +245,15 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator ResolveEnemyAttack(CardSO attackCard)
         {
+            // Combo/DOT cards go through CombatResolver so enemy-side gunpowder stacking and
+            // damage-over-time tracking actually work (previously always dealt flat attackCard.Damage).
+            int damage = attackCard.CardType == CardType.Combo || attackCard.CardType == CardType.DOT
+                ? _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout)
+                : attackCard.Damage;
+
+            // A combo primer or a DOT application deals no immediate damage this play.
+            if (damage <= 0) yield break;
+
             bool isKraken      = attackCard.Name == "The Kraken";
             bool isUnblockable = _gameState.SirenSongActive || isKraken;
             bool hasDMT        = _gameState.DeadMansTurnCharges > 0;
@@ -238,11 +269,11 @@ namespace ThroneOfTides.Systems
             bool canReact = !isUnblockable && (hasDMT || hasBFB);
 
             if (canReact)
-                yield return StartCoroutine(ReactionPrompt(attackCard, hasDMT, hasBFB));
+                yield return StartCoroutine(ReactionPrompt(attackCard, damage, hasDMT, hasBFB));
             else
             {
-                _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
-                Debug.Log($"Enemy attack — {attackCard.Name}: {attackCard.Damage} dmg");
+                _gameState.ApplyDamage(DamageTarget.Player, damage);
+                Debug.Log($"Enemy attack — {attackCard.Name}: {damage} dmg");
             }
         }
 
@@ -279,7 +310,7 @@ namespace ThroneOfTides.Systems
             }
         }
 
-        private IEnumerator ReactionPrompt(CardSO attackCard, bool hasDMT, bool hasBFB)
+        private IEnumerator ReactionPrompt(CardSO attackCard, int damage, bool hasDMT, bool hasBFB)
         {
             string label = hasDMT && hasBFB
                 ? "Dead Man's Turn (negate) | Blood for Blood (reflect half)"
@@ -291,7 +322,7 @@ namespace ThroneOfTides.Systems
             bool playerChose  = false;
 
             OnShowReactionPrompt?.Invoke(
-                attackCard, attackCard.Damage, label,
+                attackCard, damage, label,
                 () => { usedReaction = true; usedDMT = hasDMT; playerChose = true; },
                 () => { playerChose = true; });
 
@@ -299,7 +330,7 @@ namespace ThroneOfTides.Systems
 
             if (!usedReaction)
             {
-                _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
+                _gameState.ApplyDamage(DamageTarget.Player, damage);
                 yield break;
             }
 
@@ -309,10 +340,10 @@ namespace ThroneOfTides.Systems
             }
             else if (_gameState.ConsumeBloodForBlood())
             {
-                int reflected = _combatResolver.ResolveBloodForBlood(attackCard.Damage);
+                int reflected = _combatResolver.ResolveBloodForBlood(damage);
                 _gameState.ApplyDamage(DamageTarget.Enemy, reflected);
-                _gameState.ApplyDamage(DamageTarget.Player, attackCard.Damage);
-                Debug.Log($"Blood for Blood fired — reflected {reflected}, took {attackCard.Damage}");
+                _gameState.ApplyDamage(DamageTarget.Player, damage);
+                Debug.Log($"Blood for Blood fired — reflected {reflected}, took {damage}");
             }
         }
 

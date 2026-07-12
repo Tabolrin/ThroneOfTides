@@ -8,6 +8,11 @@ namespace ThroneOfTides.Core
     public enum CardPresentationSide
     {
         Caster,
-        Opponent
+        Opponent,
+
+        /// Uses the explicitly chosen target ship from a targeting prompt (see
+        /// CardCasterFilter/CardSO.RequiresTargetSelection) instead of caster/opponent
+        /// inference — for cards like Tidal Wave where the caster picks either ship.
+        ExplicitTarget
     }
 }

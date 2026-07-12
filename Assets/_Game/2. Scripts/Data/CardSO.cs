@@ -50,11 +50,18 @@ namespace ThroneOfTides.Data
         [SerializeField] private int _dotDuration;
 
         [Header("Action")]
-        [Tooltip("The ScriptableObject that implements this card's gameplay effect. Required for Action and Reaction cards — without it the card does nothing.")]
+        [Tooltip("The ScriptableObject that implements this card's gameplay effect. Required for Action and Reaction cards — without it the card does nothing. Optional for Weapon cards: if assigned, CombatResolver runs it instead of the legacy name-switch (e.g. Tidal Wave).")]
         [SerializeField] private ActionEffectSO _actionEffect;
 
         [Tooltip("Whether this Action card can be played in the same turn as a damage card without using up the turn's action-card allowance twice.")]
         [SerializeField] private bool _isEligibleAsActionPair;
+
+        [Tooltip("If true, playing this card shows a target-selection prompt (your ship / enemy ship) before it resolves. The chosen target is available to the Effect SO via ICardEffectContext.SelectedTarget.")]
+        [SerializeField] private bool _requiresTargetSelection;
+
+        [Header("Ship Status")]
+        [Tooltip("The persistent per-ship status this card's play produces (if any) — drives the world-space indicator sprite and the Active Effects Bar badge. Leave None for cards with no lingering status.")]
+        [SerializeField] private ShipStatusType _statusType = ShipStatusType.None;
 
         [Header("Visuals")]
         [Tooltip("The card artwork shown on its face.")]
@@ -81,6 +88,8 @@ namespace ThroneOfTides.Data
         // ── CardSO-only ────────────────────────────────────────────────────────
         public ActionEffectSO ActionEffect           => _actionEffect;
         public bool            IsEligibleAsActionPair => _isEligibleAsActionPair;
+        public bool             RequiresTargetSelection => _requiresTargetSelection;
+        public ShipStatusType   StatusType              => _statusType;
         public Sprite           Art                    => _art;
         public IReadOnlyList<CardPresentationEntry> PresentationEntries => _presentationEntries;
     }

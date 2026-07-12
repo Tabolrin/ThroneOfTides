@@ -354,7 +354,7 @@ RectTransform:
   m_GameObject: {fileID: 1838155713895299062}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1404799274128906195}
@@ -380,7 +380,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.UI::ThroneOfTides.UI.CardView
   _cardFront: {fileID: 3764492435537438155}
   _cardBack: {fileID: 5689307574751581862}
-  _typeBannerBackground: {fileID: 6929995707337555164}
   _typeSymbolIcon: {fileID: 259379820917826940}
   _nameLabel: {fileID: 2303582297856683896}
   _cardArt: {fileID: 1672190662367763131}

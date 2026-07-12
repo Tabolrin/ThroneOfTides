@@ -147,9 +147,9 @@ namespace ThroneOfTides.Systems
         private void OnMatchWin()                => StartCoroutine(WinSequence());
         private void OnMatchLoss()               => StartCoroutine(LossSequence());
 
-        private void OnComboStackChanged(int count)
+        private void OnComboStackChanged(DamageTarget side, int count)
         {
-            if (count > 0) _feedbackComboStackIncrement?.PlayFeedbacks();
+            if (side == DamageTarget.Player && count > 0) _feedbackComboStackIncrement?.PlayFeedbacks();
         }
 
         private void OnTurnPhaseChanged(TurnPhase phase)
@@ -178,7 +178,7 @@ namespace ThroneOfTides.Systems
         private void OnReactionFired(ReactionType type) =>
             _feedbackReactionFired?.PlayFeedbacks();
 
-        private void OnCardPlayAccepted(ICard card)
+        private void OnCardPlayAccepted(ICard card, DamageTarget? selectedTarget)
         {
             var cardSO = card as CardSO;
             if (cardSO == null) return;

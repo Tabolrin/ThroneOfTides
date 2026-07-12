@@ -57,7 +57,7 @@ namespace ThroneOfTides.UI
         private void OnEnable()  => GameEventBus.OnCardPlayAccepted += OnCardPlayAccepted;
         private void OnDisable() => GameEventBus.OnCardPlayAccepted -= OnCardPlayAccepted;
 
-        private void OnCardPlayAccepted(ICard card)
+        private void OnCardPlayAccepted(ICard card, DamageTarget? selectedTarget)
         {
             if (card as CardSO == CardData && IsBeingPlayed)
             {
