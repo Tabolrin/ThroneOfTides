@@ -8,22 +8,21 @@ using ThroneOfTides.Core;
 namespace ThroneOfTides.Systems.VFX
 {
     /// <summary>
-    /// Drives the hailstorm VFX sequence for a weather-based attack.
+    /// Drives the hailstorm VFX for a weather-based DOT attack. Unlike the other one-shot VFX
+    /// controllers, this one stays alive for the DOT's whole duration instead of a fixed sequence:
     ///
-    /// Sequence overview:
-    ///   1. Cloud fades in.
-    ///   2. Brief hold.
-    ///   3. Hail particles fire from _hailAnchor world position.
-    ///   4. OnAttackMoment fires after _damageDelay seconds.
-    ///   5. Particles run for _hailDuration then stop.
-    ///   6. Brief hold.
-    ///   7. Cloud fades out.
+    ///   1. Cloud fades in, hail particles start looping.
+    ///   2. Stays looping — tracks GameEventBus.OnShipStatusCountChanged for HailStorm on the
+    ///      target ship, so it keeps playing across turns for exactly as many turns as the
+    ///      card's DOT duration says (no hardcoded turn count here).
+    ///   3. When that count reaches 0 (DOT expired), hail stops and cloud fades out.
     ///
     /// Scene setup requirements:
     ///   - _cloudImage      : Image with alpha driven by color.a.
     ///   - _hailAnchor      : Empty RectTransform child of CloudImage, placed at
     ///                        the bottom edge — converted to world space for particles.
     ///   - _hailParticles   : Scene-level world-space ParticleSystem, passed via Inject().
+    ///                        Needs its own Looping enabled so it rains continuously while active.
     ///                        Never destroyed — stopped and cleared after each use.
     /// </summary>
     public class HailstormVFXController : MonoBehaviour, ICardPlayEffect
@@ -44,29 +43,16 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private float _cloudFadeInDuration = 0.4f;
         [SerializeField] private Ease  _cloudFadeInEase     = Ease.OutQuad;
 
-        [Header("Hold Before Hail")]
-        [SerializeField] private float _holdBeforeHail = 0.3f;
-
-        [Header("Hail")]
-        [SerializeField] private float _hailDuration = 0.8f;
-
-        [Header("Damage")]
-        // Delay from particle start before damage is applied.
-        [SerializeField] private float _damageDelay = 0.3f;
-
-        [Header("Hold After Hail")]
-        [SerializeField] private float _holdAfterHail = 0.15f;
-
         [Header("Cloud Fade Out")]
         [SerializeField] private float _cloudFadeOutDuration = 0.5f;
         [SerializeField] private Ease  _cloudFadeOutEase     = Ease.InQuad;
 
         // ── Events ────────────────────────────────────────────────────────────
 
-        /// <summary>Fired _damageDelay seconds after hail begins. Apply damage here.</summary>
+        /// <summary>Fired once when the hail starts looping. Apply the initial hit here if needed.</summary>
         public event Action OnAttackMoment;
 
-        /// <summary>Fired when fully faded. Safe to destroy or return to pool.</summary>
+        /// <summary>Fired when fully faded out (DOT expired). Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
         /// <summary>ICardPlayEffect — fired when fully faded, so CardPresentationPlayer destroys the instance.</summary>
@@ -79,7 +65,9 @@ namespace ThroneOfTides.Systems.VFX
         private Camera         _gameCamera;
         private ParticleSystem _hailParticles; // scene-level world-space, injected
 
-        private Sequence _seq;
+        private DamageTarget _targetShip;
+        private bool         _subscribed;
+        private Tween        _fadeTween;
 
         // ── Unity ─────────────────────────────────────────────────────────────
 
@@ -88,7 +76,11 @@ namespace ThroneOfTides.Systems.VFX
             _rectTransform = GetComponent<RectTransform>();
         }
 
-        private void OnDestroy() => _seq?.Kill();
+        private void OnDestroy()
+        {
+            _fadeTween?.Kill();
+            Unsubscribe();
+        }
 
         // ── Public API ────────────────────────────────────────────────────────
 
@@ -106,25 +98,71 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>
         /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Hail Storm always
         /// strikes the opponent's ship, matching this card's authored PresentationEntry
-        /// (AnchorSide: Opponent).
+        /// (AnchorSide: Opponent). Stays alive across turns until GameState's DOT tracking
+        /// reports the HailStorm status on that ship has run out.
         /// </summary>
         public void Initialize(CardEffectSpawnContext context)
         {
             Inject(context.GameCanvas, context.GameCamera, context.HailParticles);
-            OnSequenceEnd += () => Completed?.Invoke();
+
+            _targetShip = context.Caster == CardCasterFilter.Player ? DamageTarget.Enemy : DamageTarget.Player;
+
+            GameEventBus.OnShipStatusCountChanged += OnStatusCountChanged;
+            _subscribed = true;
+
             StartSequence(context.OpponentAnchor.position);
         }
+
+        // ── Start / Stop ──────────────────────────────────────────────────────
 
         // Named StartSequence to match the controller convention and avoid
         // conflict with DOTween's Play<T> extension on MonoBehaviours.
         public void StartSequence(Vector3 worldPosition)
         {
-            if (_seq != null && _seq.IsActive()) return;
-
             PositionAtWorldPoint(worldPosition);
-            ResetVisuals();
-            _seq = BuildSequence();
-            _seq.Play();
+            SetCloudAlpha(0f);
+
+            _fadeTween?.Kill();
+            _fadeTween = DOTween.To(
+                    () => _cloudImage.color.a,
+                    SetCloudAlpha,
+                    1f, _cloudFadeInDuration)
+                .SetEase(_cloudFadeInEase)
+                .OnComplete(() =>
+                {
+                    PositionParticles();
+                    _hailParticles.Play();
+                    _feedbackHailstorm?.PlayFeedbacks();
+                    OnAttackMoment?.Invoke();
+                });
+        }
+
+        private void OnStatusCountChanged(ShipStatusType type, DamageTarget ship, int count)
+        {
+            if (type != ShipStatusType.HailStorm || ship != _targetShip || count > 0) return;
+
+            // DOT expired — stop raining and fade the cloud out.
+            Unsubscribe();
+            _hailParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+            _fadeTween?.Kill();
+            _fadeTween = DOTween.To(
+                    () => _cloudImage.color.a,
+                    SetCloudAlpha,
+                    0f, _cloudFadeOutDuration)
+                .SetEase(_cloudFadeOutEase)
+                .OnComplete(() =>
+                {
+                    OnSequenceEnd?.Invoke();
+                    Completed?.Invoke();
+                });
+        }
+
+        private void Unsubscribe()
+        {
+            if (!_subscribed) return;
+            GameEventBus.OnShipStatusCountChanged -= OnStatusCountChanged;
+            _subscribed = false;
         }
 
         // ── Positioning ───────────────────────────────────────────────────────
@@ -154,64 +192,7 @@ namespace ThroneOfTides.Systems.VFX
             _hailParticles.transform.position = worldPoint;
         }
 
-        // ── Sequence ──────────────────────────────────────────────────────────
-
-        private Sequence BuildSequence()
-        {
-            Sequence seq = DOTween.Sequence();
-
-            // Phase 1 — Cloud fades in.
-            seq.Append(DOTween.To(
-                    () => _cloudImage.color.a,
-                    (float x) => SetCloudAlpha(x),
-                    1f, _cloudFadeInDuration)
-                .SetEase(_cloudFadeInEase));
-
-            seq.AppendInterval(_holdBeforeHail);
-
-            // Phase 2 — Position particles then start hail + FEEL.
-            // Positioned here so the anchor's canvas position is fully resolved
-            // after the prefab has been placed and laid out.
-            seq.AppendCallback(() =>
-            {
-                PositionParticles();
-                _hailParticles.Play();
-                _feedbackHailstorm?.PlayFeedbacks();
-            });
-
-            // Phase 3 — Damage fires a short moment after particles start
-            // so the player sees hail before taking the hit.
-            seq.AppendInterval(_damageDelay);
-            seq.AppendCallback(() => OnAttackMoment?.Invoke());
-
-            // Phase 4 — Wait out the remainder of the hail duration then stop.
-            seq.AppendInterval(_hailDuration - _damageDelay);
-            seq.AppendCallback(() =>
-                _hailParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting));
-
-            seq.AppendInterval(_holdAfterHail);
-
-            // Phase 5 — Cloud fades out.
-            seq.Append(DOTween.To(
-                    () => _cloudImage.color.a,
-                    (float x) => SetCloudAlpha(x),
-                    0f, _cloudFadeOutDuration)
-                .SetEase(_cloudFadeOutEase));
-
-            seq.OnComplete(() => OnSequenceEnd?.Invoke());
-
-            return seq;
-        }
-
         // ── Helpers ───────────────────────────────────────────────────────────
-
-        private void ResetVisuals()
-        {
-            _seq?.Kill();
-
-            SetCloudAlpha(0f);
-            _hailParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        }
 
         // Isolated alpha setter preserves the Inspector-assigned RGB tint.
         private void SetCloudAlpha(float a)

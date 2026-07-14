@@ -254,9 +254,11 @@ namespace ThroneOfTides.Systems
 
         public bool CanPlayCard(CardSO card)
         {
-            if (!HasDrawnThisTurn)                  return false;
-            if (card.CardType == CardType.Reaction) return false;
-            if (PlayerMana < card.ManaCost)          return false;
+            // Draw is only mandatory while the deck can still supply one — once it's empty,
+            // waiting for a draw that can never happen would softlock the player's turn.
+            if (!HasDrawnThisTurn && PlayerDeck.Count > 0) return false;
+            if (card.CardType == CardType.Reaction)        return false;
+            if (PlayerMana < card.ManaCost)                return false;
 
             return true;
         }
