@@ -8,14 +8,18 @@ namespace ThroneOfTides.Core
     /// depends on Data.
     /// </summary>
     /// <remarks>
-    /// Enum order must stay ShipHit, ShipDeck, ShipFront, SeaSurface — existing VFXSpawnPosition
-    /// components already placed in scenes serialize this as a plain int index.
+    /// Enum order must stay ShipHit, ShipDeck, ShipFront, SeaSurface, Sky — existing
+    /// VFXSpawnPosition components already placed in scenes serialize this as a plain int index.
+    /// New values must always be appended at the end, never inserted.
     /// </remarks>
     public enum VfxAnchorType
     {
         ShipHit,
         ShipDeck,
         ShipFront,
-        SeaSurface
+        SeaSurface,
+
+        /// High above the ship — for effects that strike or fall from overhead (Lightning, Hail Storm).
+        Sky
     }
 }

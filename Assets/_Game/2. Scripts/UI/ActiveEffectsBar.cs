@@ -1,18 +1,31 @@
 // Assets/_Game/2. Scripts/UI/ActiveEffectsBar.cs
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using ThroneOfTides.Core;
-using ThroneOfTides.Data;
 
 namespace ThroneOfTides.UI
 {
     // Shows reaction charges (player side only — reactions are player-only under current rules)
-    // and active per-ship status icons (Gunpowder/Whirlpool/Hail Storm/High Spirits/Siren Song),
-    // each with a numeric badge. One instance per ship — set Side to which ship this represents.
-    // Mana display lives on GameHUD instead (see its HP-bottle-style fill meter).
+    // and active per-ship status badges (Gunpowder/Whirlpool/Hail Storm/High Spirits/Siren Song).
+    // Unlike a dynamic instantiate-a-prefab system, this drives a fixed set of pre-placed badge
+    // GameObjects authored per status type — toggling visibility and updating a count label rather
+    // than spawning/destroying instances. One instance per ship — set Side to which ship this
+    // represents, and assign a Badges entry per status type you've placed in the scene.
     public class ActiveEffectsBar : MonoBehaviour
     {
+        [Serializable]
+        public class StatusBadge
+        {
+            [Tooltip("Which status this badge represents.")]
+            public ShipStatusType Type;
+            [Tooltip("Root GameObject to show/hide for this badge.")]
+            public GameObject Root;
+            [Tooltip("Count label shown on the badge (e.g. stack count or turns remaining).")]
+            public TextMeshProUGUI CountLabel;
+        }
+
         [Header("Side")]
         [Tooltip("Which ship this bar displays status for. Reaction charges only ever show on the Player instance.")]
         [SerializeField] private DamageTarget _side = DamageTarget.Player;
@@ -25,17 +38,12 @@ namespace ThroneOfTides.UI
         [SerializeField] private GameObject      _bfbRoot;
         [SerializeField] private TextMeshProUGUI _bfbChargesLabel;
 
-        [Header("Status Icons")]
-        [Tooltip("Maps each ShipStatusType to its icon sprite.")]
-        [SerializeField] private EffectSymbolPaletteSO _symbolPalette;
-        [Tooltip("Prefab instantiated per active status (icon + count badge).")]
-        [SerializeField] private EffectIconView _iconPrefab;
-        [Tooltip("Parent the icon row instantiates under.")]
-        [SerializeField] private Transform _iconContainer;
+        [Header("Status Badges")]
+        [Tooltip("One entry per pre-placed status badge in the scene.")]
+        [SerializeField] private List<StatusBadge> _badges = new List<StatusBadge>();
 
         private int _dmtCharges;
         private int _bfbCharges;
-        private readonly Dictionary<ShipStatusType, EffectIconView> _activeIcons = new Dictionary<ShipStatusType, EffectIconView>();
 
         private void OnEnable()
         {
@@ -91,27 +99,10 @@ namespace ThroneOfTides.UI
         {
             if (ship != _side) return;
 
-            if (count <= 0)
-            {
-                if (_activeIcons.TryGetValue(type, out var existing))
-                {
-                    if (existing != null) Destroy(existing.gameObject);
-                    _activeIcons.Remove(type);
-                }
-                return;
-            }
+            var badge = _badges.Find(b => b.Type == type);
+            if (badge == null) return;
 
-            if (_activeIcons.TryGetValue(type, out var icon))
-            {
-                icon.SetCount(count);
-                return;
-            }
-
-            if (_iconPrefab == null || _iconContainer == null) return;
-
-            var instance = Instantiate(_iconPrefab, _iconContainer);
-            instance.Setup(_symbolPalette != null ? _symbolPalette.GetIcon(type) : null, count);
-            _activeIcons[type] = instance;
+            Refresh(badge.Root, badge.CountLabel, count);
         }
 
         private void OnMatchEnd()
@@ -119,9 +110,8 @@ namespace ThroneOfTides.UI
             _dmtCharges = 0;
             _bfbCharges = 0;
 
-            foreach (var icon in _activeIcons.Values)
-                if (icon != null) Destroy(icon.gameObject);
-            _activeIcons.Clear();
+            foreach (var badge in _badges)
+                Refresh(badge.Root, badge.CountLabel, 0);
         }
 
         private static void Refresh(GameObject root, TextMeshProUGUI label, int charges)

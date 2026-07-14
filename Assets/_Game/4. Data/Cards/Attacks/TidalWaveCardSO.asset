@@ -25,7 +25,7 @@ MonoBehaviour:
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
-  _actionEffect: {fileID: 0}
+  _actionEffect: {fileID: 11400000, guid: 9a4016e19ed089644ba24d579e69e4f9, type: 2}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 1
   _statusType: 0

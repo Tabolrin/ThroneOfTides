@@ -3,10 +3,11 @@ using DG.Tweening;
 using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
+using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Systems.VFX
 {
-    public class KrakenVFXController : MonoBehaviour
+    public class KrakenVFXController : MonoBehaviour, ICardPlayEffect
     {
         // ── Inspector ─────────────────────────────────────────────────────────
 
@@ -47,6 +48,9 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully sunk. Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
+        /// <summary>ICardPlayEffect — fired when fully sunk, so CardPresentationPlayer destroys the instance.</summary>
+        public event Action Completed;
+
         // ── Private ───────────────────────────────────────────────────────────
 
         // Rest positions captured after positioning — never overwritten so
@@ -56,7 +60,7 @@ namespace ThroneOfTides.Systems.VFX
         private Vector2       _tentacleRestPosition;
         private Sequence      _masterSequence;
 
-        // Injected by CardVFXHandler — scene objects cannot be baked into the prefab.
+        // Injected by CardPresentationPlayer via Initialize — scene objects cannot be baked into the prefab.
         private RectTransform _rootCanvasRect;
         private Camera        _gameCamera;
 
@@ -75,13 +79,26 @@ namespace ThroneOfTides.Systems.VFX
         // ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Injected by CardVFXHandler after instantiation — these are scene objects
+        /// Injected by CardPresentationPlayer after instantiation — these are scene objects
         /// that cannot be serialized into the prefab.
         /// </summary>
         public void Inject(RectTransform canvasRect, Camera gameCamera)
         {
             _rootCanvasRect = canvasRect;
             _gameCamera     = gameCamera;
+        }
+
+        /// <summary>
+        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Kraken always rises
+        /// at the opponent's ship (the caster summons it against their target), matching this
+        /// card's authored PresentationEntry (AnchorSide: Opponent).
+        /// </summary>
+        public void Initialize(CardEffectSpawnContext context)
+        {
+            Inject(context.GameCanvas, context.GameCamera);
+            OnAttackMoment += GameEventBus.FireKrakenAttackMoment;
+            OnSequenceEnd  += () => Completed?.Invoke();
+            StartSequence(context.OpponentAnchor.position);
         }
 
         // Named StartSequence rather than Play to avoid conflict with DOTween's

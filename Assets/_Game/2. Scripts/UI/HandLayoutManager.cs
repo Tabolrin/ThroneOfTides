@@ -59,6 +59,9 @@ namespace ThroneOfTides.UI
         void IHandLayoutManager.StealCardFromEnemyHand(ICard card) =>
             StealCardFromEnemyHand(card as CardSO);
 
+        void IHandLayoutManager.AddCardToEnemyHand(ICard card) =>
+            AddCardToEnemyHand(card as CardSO);
+
         // ICard parameter to satisfy interface — cast to CardSO internally
         IEnumerator IHandLayoutManager.AnimateManualDraw(ICard card) =>
             AnimateManualDraw(card as CardSO);

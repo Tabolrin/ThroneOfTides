@@ -13,7 +13,6 @@ namespace ThroneOfTides.Systems
         [Header("Canvas & Camera")]
         [SerializeField] private RectTransform  _gameCanvasRect;
         [SerializeField] private Camera         _gameCamera;
-        [SerializeField] private ParticleSystem _musicNoteParticles;
 
         [Header("Spawn Points")]
         [SerializeField] private Transform _playerShipHitPoint;
@@ -29,18 +28,14 @@ namespace ThroneOfTides.Systems
         [Header("VFX Prefabs — Weapon")]
         [SerializeField] private GameObject _hitImpactStandardPrefab;
         [SerializeField] private GameObject _hitImpactExplosionPrefab;
-        [SerializeField] private GameObject _hailStormPrefab;
-        [SerializeField] private GameObject _lightningPrefab;
         [SerializeField] private GameObject _whirlpoolPrefab;
         [SerializeField] private GameObject _tidalWavePrefab;
         [SerializeField] private GameObject _gunpowderBarrelPrefab;
         [SerializeField] private GameObject _torchPrefab;
         [SerializeField] private GameObject _torchComboResolvePrefab;
         [SerializeField] private GameObject _ramTheHullPrefab;
-        [SerializeField] private GameObject _krakenPrefab;
 
         [Header("VFX Prefabs — Action")]
-        [SerializeField] private GameObject _sirenSongPrefab;
         [SerializeField] private GameObject _reconParrotPrefab;
         [SerializeField] private GameObject _highSpiritsPrefab;
         [SerializeField] private GameObject _lockerReturnPrefab;
@@ -159,7 +154,6 @@ namespace ThroneOfTides.Systems
 
         private void OnDOTTick(DotEffect effect)
         {
-            SpawnVFX(_hailStormPrefab, GetHitPoint(effect.Target).position);
             _feedbackDOTTick?.PlayFeedbacks();
         }
 
@@ -209,11 +203,11 @@ namespace ThroneOfTides.Systems
                     _feedbackHeavyHit?.PlayFeedbacks();
                     break;
 
-                case "Hail Storm":  SpawnVFX(_hailStormPrefab,  target.position); break;
                 case "Whirlpool":   SpawnVFX(_whirlpoolPrefab,  target.position); break;
 
+                // "Hail Storm" and "Lightning" are migrated to CardPresentationPlayer
+                // (PresentationEntries + ICardPlayEffect) — no case needed here.
                 case "Lightning":
-                    SpawnVFX(_lightningPrefab, target.position);
                     _feedbackLightningFlash?.PlayFeedbacks();
                     break;
 
@@ -227,13 +221,8 @@ namespace ThroneOfTides.Systems
                         : _torchPrefab, target.position);
                     break;
 
-                case "The Kraken":
-                    HandleCreatureVFX(_krakenPrefab, DamageTarget.Enemy);
-                    break;
-
-                case "Siren Song":
-                    HandleCreatureVFX(_sirenSongPrefab, DamageTarget.Enemy);
-                    break;
+                // "The Kraken" and "Siren Song" are migrated to CardPresentationPlayer
+                // (PresentationEntries + ICardPlayEffect) — no case needed here.
 
                 case "Recon Parrot":    SpawnVFX(_reconParrotPrefab,   target.position); break;
                 case "Locker's Return": SpawnVFX(_lockerReturnPrefab,  source.position); break;
@@ -258,35 +247,6 @@ namespace ThroneOfTides.Systems
                 case "Dead Man's Turn":
                 case "Blood for Blood":
                     break;
-            }
-        }
-
-        // ── Creature VFX ──────────────────────────────────────────────────────
-
-        private void HandleCreatureVFX(GameObject prefab, DamageTarget target)
-        {
-            if (prefab == null) return;
-
-            var instance     = Instantiate(prefab, _gameCanvasRect);
-            Vector3 worldPos = GetHitPoint(target).position;
-
-            if (prefab == _krakenPrefab)
-            {
-                var ctrl = instance.GetComponent<VFX.KrakenVFXController>();
-                if (ctrl == null) return;
-                ctrl.Inject(_gameCanvasRect, _gameCamera);
-                ctrl.OnAttackMoment += GameEventBus.FireKrakenAttackMoment;
-                ctrl.OnSequenceEnd  += () => Destroy(instance);
-                ctrl.StartSequence(worldPos);
-            }
-            else if (prefab == _sirenSongPrefab)
-            {
-                var ctrl = instance.GetComponent<VFX.SirenVFXController>();
-                if (ctrl == null) return;
-                ctrl.Inject(_gameCanvasRect, _gameCamera, _musicNoteParticles);
-                ctrl.OnSirenReady  += GameEventBus.FireSirenSongActive;
-                ctrl.OnSequenceEnd += () => Destroy(instance);
-                ctrl.StartSequence(worldPos);
             }
         }
 

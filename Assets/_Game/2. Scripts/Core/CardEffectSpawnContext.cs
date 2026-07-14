@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ThroneOfTides.Core
 {
@@ -32,6 +33,22 @@ namespace ThroneOfTides.Core
         /// </summary>
         public readonly Action<Vector3> PlaySfx;
 
+        /// <summary>
+        /// Persistent scene-level ParticleSystem reused by effects that need one (e.g. Siren
+        /// Song's music notes) instead of spawning/destroying their own instance every play.
+        /// Null for effects that don't need it.
+        /// </summary>
+        public readonly ParticleSystem MusicNoteParticles;
+
+        /// <summary>Persistent scene-level ParticleSystem for Lightning's strike burst.</summary>
+        public readonly ParticleSystem LightningStrikeParticles;
+
+        /// <summary>Persistent full-screen scene Image used for Lightning's whiteout flash.</summary>
+        public readonly Image WhiteoutImage;
+
+        /// <summary>Persistent scene-level ParticleSystem for Hail Storm's falling hail.</summary>
+        public readonly ParticleSystem HailParticles;
+
         public CardEffectSpawnContext(
             Transform casterAnchor,
             Transform opponentAnchor,
@@ -39,7 +56,11 @@ namespace ThroneOfTides.Core
             Camera gameCamera,
             ICard card,
             CardCasterFilter caster,
-            Action<Vector3> playSfx)
+            Action<Vector3> playSfx,
+            ParticleSystem musicNoteParticles = null,
+            ParticleSystem lightningStrikeParticles = null,
+            Image whiteoutImage = null,
+            ParticleSystem hailParticles = null)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -48,6 +69,10 @@ namespace ThroneOfTides.Core
             Card = card;
             Caster = caster;
             PlaySfx = playSfx;
+            MusicNoteParticles = musicNoteParticles;
+            LightningStrikeParticles = lightningStrikeParticles;
+            WhiteoutImage = whiteoutImage;
+            HailParticles = hailParticles;
         }
     }
 }

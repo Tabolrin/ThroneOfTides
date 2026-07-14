@@ -38,6 +38,7 @@ namespace ThroneOfTides.App
         [SerializeField] private TargetSelectionPrompt _targetSelectionPrompt;
         [SerializeField] private ResultsPanel          _resultsPanel;
         [SerializeField] private TurnCoordinator       _turnCoordinator;
+        [SerializeField] private CheatsPanel           _cheatsPanel;
 
         [Header("Captain — fallback for testing without level select")]
         [SerializeField] private CaptainSO _fallbackCaptain;
@@ -103,6 +104,8 @@ namespace ThroneOfTides.App
             _turnCoordinator.OnTurnChanged          += RefreshHUD;
             _turnCoordinator.OnShowReactionPrompt   += ShowReactionPrompt;
             _turnCoordinator.OnShowTargetSelection  += ShowTargetSelectionPrompt;
+
+            if (_cheatsPanel != null) _cheatsPanel.Initialise(_gameState, RefreshHUD);
 
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
@@ -256,8 +259,8 @@ namespace ThroneOfTides.App
         private void RefreshHUD()
         {
             _gameHUD.Refresh(
-                _gameState.PlayerHP,    _config.StartingHP,
-                _gameState.EnemyHP,     _config.StartingHP,
+                _gameState.PlayerHP,    _gameState.PlayerMaxHP,
+                _gameState.EnemyHP,     _gameState.EnemyMaxHP,
                 _gameState.PlayerDeck.Count,
                 _gameState.IsPlayerTurn,
                 _gameState.PlayerMana,

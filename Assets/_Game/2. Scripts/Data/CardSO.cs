@@ -59,6 +59,9 @@ namespace ThroneOfTides.Data
         [Tooltip("If true, playing this card shows a target-selection prompt (your ship / enemy ship) before it resolves. The chosen target is available to the Effect SO via ICardEffectContext.SelectedTarget.")]
         [SerializeField] private bool _requiresTargetSelection;
 
+        [Tooltip("Enemy AI: prefer playing this card before any attack card this turn (e.g. Siren Song, Monkey Grab — utility that's more valuable pre-attack). Also gates whether the enemy AI is allowed to actually execute this card's Action Effect at all — only cards confirmed side-safe for an Enemy caster should be flagged.")]
+        [SerializeField] private bool _aiPlayBeforeAttack;
+
         [Header("Ship Status")]
         [Tooltip("The persistent per-ship status this card's play produces (if any) — drives the world-space indicator sprite and the Active Effects Bar badge. Leave None for cards with no lingering status.")]
         [SerializeField] private ShipStatusType _statusType = ShipStatusType.None;
@@ -89,6 +92,7 @@ namespace ThroneOfTides.Data
         public ActionEffectSO ActionEffect           => _actionEffect;
         public bool            IsEligibleAsActionPair => _isEligibleAsActionPair;
         public bool             RequiresTargetSelection => _requiresTargetSelection;
+        public bool             AiPlayBeforeAttack      => _aiPlayBeforeAttack;
         public ShipStatusType   StatusType              => _statusType;
         public Sprite           Art                    => _art;
         public IReadOnlyList<CardPresentationEntry> PresentationEntries => _presentationEntries;

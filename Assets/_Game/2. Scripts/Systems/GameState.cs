@@ -21,7 +21,8 @@ namespace ThroneOfTides.Systems
         public int  EnemyHP      { get; private set; }
         public bool IsPlayerTurn { get; set; }
 
-        private readonly int _maxHP;
+        public int PlayerMaxHP { get; private set; }
+        public int EnemyMaxHP  { get; private set; }
 
         // ── Mana ──────────────────────────────────────────────────────────────
         public int PlayerMana    { get; private set; }
@@ -74,16 +75,22 @@ namespace ThroneOfTides.Systems
                          Deck playerDeck, Deck enemyDeck,
                          List<CardSO> originalDeckSnapshot)
         {
-            _maxHP     = startingHP;
-            PlayerHP   = startingHP;
-            EnemyHP    = startingHP;
-            PlayerDeck = playerDeck;
-            EnemyDeck  = enemyDeck;
-            PlayerHand = new Hand();
-            EnemyHand  = new Hand();
+            PlayerMaxHP = startingHP;
+            EnemyMaxHP  = startingHP;
+            PlayerHP    = startingHP;
+            EnemyHP     = startingHP;
+            PlayerDeck  = playerDeck;
+            EnemyDeck   = enemyDeck;
+            PlayerHand  = new Hand();
+            EnemyHand   = new Hand();
 
             PlayerMaxMana = startingMaxMana;
             EnemyMaxMana  = startingMaxMana;
+            // Both sides start with a full mana pool — previously only the player's mana was
+            // implicitly filled (as a side effect of PlayerTurnState.Enter() firing on the very
+            // first state-machine transition); the enemy had no equivalent until its first turn.
+            PlayerMana = startingMaxMana;
+            EnemyMana  = startingMaxMana;
 
             _originalDeckSnapshot = new List<CardSO>(originalDeckSnapshot);
         }
@@ -103,7 +110,7 @@ namespace ThroneOfTides.Systems
 
         public void HealPlayer(int amount)
         {
-            PlayerHP = Mathf.Min(PlayerHP + amount, _maxHP);
+            PlayerHP = Mathf.Min(PlayerHP + amount, PlayerMaxHP);
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
@@ -190,18 +197,18 @@ namespace ThroneOfTides.Systems
 
         // ── Status Effects ────────────────────────────────────────────────────
 
-        public void SetSirenActive()
+        public void SetSirenActive(DamageTarget caster = DamageTarget.Player)
         {
             SirenSongActive    = true;
             PendingUnblockable = true;
-            GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, DamageTarget.Player, 1);
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, caster, 1);
         }
 
-        public void ClearSiren()
+        public void ClearSiren(DamageTarget caster = DamageTarget.Player)
         {
             SirenSongActive    = false;
             PendingUnblockable = false;
-            GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, DamageTarget.Player, 0);
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, caster, 0);
         }
 
         // High Spirits is a permanent buff — its icon count only ever grows (capped at 3
@@ -251,10 +258,7 @@ namespace ThroneOfTides.Systems
             if (card.CardType == CardType.Reaction) return false;
             if (PlayerMana < card.ManaCost)          return false;
 
-            if (card.CardType == CardType.Action)
-                return !ActionCardPlayedThisTurn && card.IsEligibleAsActionPair;
-
-            return !DamageCardPlayedThisTurn;
+            return true;
         }
 
         public bool CanDraw() =>
@@ -369,5 +373,61 @@ namespace ThroneOfTides.Systems
         public void NotifyEnemyTurnReady()               => OnEnemyTurnReady?.Invoke();
         public void NotifyCardDrawn(CardSO card)         => GameEventBus.FireCardDrawn(card);
         public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
+
+        // ── Cheats (playtest only — see UI/CheatsPanel.cs) ────────────────────
+
+        public void CheatAddPlayerHP(int amount)
+        {
+            PlayerHP = Mathf.Clamp(PlayerHP + amount, 0, PlayerMaxHP);
+            GameEventBus.FireHPChanged(PlayerHP);
+        }
+
+        public void CheatAddEnemyHP(int amount)
+        {
+            EnemyHP = Mathf.Clamp(EnemyHP + amount, 0, EnemyMaxHP);
+            GameEventBus.FireHPChanged(EnemyHP);
+        }
+
+        public void CheatAddPlayerMana(int amount)
+        {
+            PlayerMana = Mathf.Clamp(PlayerMana + amount, 0, PlayerMaxMana);
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
+        public void CheatAddEnemyMana(int amount)
+        {
+            EnemyMana = Mathf.Clamp(EnemyMana + amount, 0, EnemyMaxMana);
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+        }
+
+        // Raises (or lowers) the ceiling itself — current value is only pulled down if it would
+        // otherwise exceed the new max. Follow with the matching Add cheat to fill it back up.
+        public void CheatSetPlayerMaxHP(int amount)
+        {
+            PlayerMaxHP = Mathf.Max(1, amount);
+            PlayerHP    = Mathf.Min(PlayerHP, PlayerMaxHP);
+            GameEventBus.FireHPChanged(PlayerHP);
+        }
+
+        public void CheatSetEnemyMaxHP(int amount)
+        {
+            EnemyMaxHP = Mathf.Max(1, amount);
+            EnemyHP    = Mathf.Min(EnemyHP, EnemyMaxHP);
+            GameEventBus.FireHPChanged(EnemyHP);
+        }
+
+        public void CheatSetPlayerMaxMana(int amount)
+        {
+            PlayerMaxMana = Mathf.Max(0, amount);
+            PlayerMana    = Mathf.Min(PlayerMana, PlayerMaxMana);
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
+        public void CheatSetEnemyMaxMana(int amount)
+        {
+            EnemyMaxMana = Mathf.Max(0, amount);
+            EnemyMana    = Mathf.Min(EnemyMana, EnemyMaxMana);
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+        }
     }
 }

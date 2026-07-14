@@ -27,6 +27,7 @@ namespace ThroneOfTides.Tools
         private SerializedProperty _presentationEntries;
         private SerializedProperty _requiresTargetSelection;
         private SerializedProperty _statusType;
+        private SerializedProperty _aiPlayBeforeAttack;
 
         private static readonly Color WeaponColor   = new Color(0.22f, 0.38f, 0.62f, 0.18f);
         private static readonly Color ComboColor    = new Color(0.72f, 0.62f, 0.10f, 0.18f);
@@ -54,6 +55,7 @@ namespace ThroneOfTides.Tools
             _presentationEntries    = serializedObject.FindProperty("_presentationEntries");
             _requiresTargetSelection = serializedObject.FindProperty("_requiresTargetSelection");
             _statusType              = serializedObject.FindProperty("_statusType");
+            _aiPlayBeforeAttack      = serializedObject.FindProperty("_aiPlayBeforeAttack");
         }
 
         public override void OnInspectorGUI()
@@ -207,6 +209,7 @@ namespace ThroneOfTides.Tools
                     EditorGUILayout.LabelField("Action", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(_actionEffect,           Label(_actionEffect, "Effect"));
                     EditorGUILayout.PropertyField(_isEligibleAsActionPair, Label(_isEligibleAsActionPair, "Can Pair With Damage Card"));
+                    EditorGUILayout.PropertyField(_aiPlayBeforeAttack,     Label(_aiPlayBeforeAttack, "AI: Play Before Attack"));
                     break;
 
                 case CardType.Reaction:

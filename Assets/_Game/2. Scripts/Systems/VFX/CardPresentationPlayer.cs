@@ -1,5 +1,6 @@
 // Assets/_Game/2. Scripts/Systems/VFX/CardPresentationPlayer.cs
 using UnityEngine;
+using UnityEngine.UI;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 
@@ -31,6 +32,18 @@ namespace ThroneOfTides.Systems
 
         [Tooltip("The camera used to convert world spawn points into screen/canvas space. Should match the camera CardVFXHandler uses.")]
         [SerializeField] private Camera _gameCamera;
+
+        [Tooltip("Persistent scene-level ParticleSystem reused by Siren Song's music notes — sized once in the editor and repositioned each use, never destroyed.")]
+        [SerializeField] private ParticleSystem _musicNoteParticles;
+
+        [Tooltip("Persistent scene-level ParticleSystem reused by Lightning's strike burst.")]
+        [SerializeField] private ParticleSystem _lightningStrikeParticles;
+
+        [Tooltip("Persistent full-screen scene Image used for Lightning's whiteout flash.")]
+        [SerializeField] private Image _whiteoutImage;
+
+        [Tooltip("Persistent scene-level ParticleSystem reused by Hail Storm's falling hail.")]
+        [SerializeField] private ParticleSystem _hailParticles;
 
         [Tooltip("Parent RectTransform that spawned UI-mode sprite prefabs are instantiated under (e.g. a full-stretch child of the gameplay Canvas).")]
         [SerializeField] private Transform _uiEffectParent;
@@ -118,7 +131,11 @@ namespace ThroneOfTides.Systems
                     _gameCamera,
                     card,
                     caster,
-                    playSfx: pos => CardSfxPlayer.Play(entry.Sfx, pos));
+                    playSfx: pos => CardSfxPlayer.Play(entry.Sfx, pos),
+                    musicNoteParticles: _musicNoteParticles,
+                    lightningStrikeParticles: _lightningStrikeParticles,
+                    whiteoutImage: _whiteoutImage,
+                    hailParticles: _hailParticles);
 
                 playEffect.Initialize(context);
                 playEffect.Completed += () => Destroy(spriteInstance);

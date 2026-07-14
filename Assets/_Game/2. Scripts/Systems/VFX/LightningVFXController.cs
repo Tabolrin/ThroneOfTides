@@ -3,6 +3,7 @@ using DG.Tweening;
 using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
+using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Systems.VFX
 {
@@ -26,7 +27,7 @@ namespace ThroneOfTides.Systems.VFX
     ///                        Raycast Target OFF, color (1,1,1,0) at rest.
     ///   - _strikeParticles : Scene-level world-space ParticleSystem, passed via Inject().
     /// </summary>
-    public class LightningVFXController : MonoBehaviour
+    public class LightningVFXController : MonoBehaviour, ICardPlayEffect
     {
         // ── Inspector ─────────────────────────────────────────────────────────
 
@@ -73,6 +74,9 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully faded. Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
+        /// <summary>ICardPlayEffect — fired when fully faded, so CardPresentationPlayer destroys the instance.</summary>
+        public event Action Completed;
+
         // ── Private ───────────────────────────────────────────────────────────
 
         private RectTransform  _rectTransform;
@@ -95,7 +99,7 @@ namespace ThroneOfTides.Systems.VFX
         // ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Injected by CardVFXHandler after instantiation.
+        /// Injected by CardPresentationPlayer after instantiation.
         /// Both strikeParticles and whiteoutImage are persistent scene objects —
         /// prefabs cannot hold references to scene objects, so both must be injected.
         /// </summary>
@@ -106,6 +110,18 @@ namespace ThroneOfTides.Systems.VFX
             _gameCamera      = gameCamera;
             _strikeParticles = strikeParticles;
             _whiteoutImage   = whiteoutImage;
+        }
+
+        /// <summary>
+        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Lightning always
+        /// strikes the opponent's ship, matching this card's authored PresentationEntry
+        /// (AnchorSide: Opponent).
+        /// </summary>
+        public void Initialize(CardEffectSpawnContext context)
+        {
+            Inject(context.GameCanvas, context.GameCamera, context.LightningStrikeParticles, context.WhiteoutImage);
+            OnSequenceEnd += () => Completed?.Invoke();
+            StartSequence(context.OpponentAnchor.position);
         }
 
         // Named StartSequence to match the controller convention and avoid

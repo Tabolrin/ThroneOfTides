@@ -32,7 +32,7 @@ MonoBehaviour:
   _art: {fileID: 21300000, guid: c8b6762b78e0e524aa81d96f1f0c857b, type: 3}
   _presentationEntries:
   - _casterFilter: 0
-    _presentationMode: 0
+    _presentationMode: 1
     _anchorSide: 1
     _positionType: 3
     _spritePrefab: {fileID: 3271371320943802326, guid: c9d3697436af9664ca38199be5dedecd, type: 3}

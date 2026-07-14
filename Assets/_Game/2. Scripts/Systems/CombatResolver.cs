@@ -38,8 +38,8 @@ namespace ThroneOfTides.Systems
             {
                 case CardType.Combo:    return ResolveCombo(card, caster);
                 case CardType.DOT:      return ResolveDOT(card, caster);
-                case CardType.Action:   return ResolveEffect(card, handLayout, selectedTarget);
-                case CardType.Reaction: return ResolveEffect(card, handLayout, selectedTarget);
+                case CardType.Action:   return ResolveEffect(card, caster, handLayout, selectedTarget);
+                case CardType.Reaction: return ResolveEffect(card, caster, handLayout, selectedTarget);
                 case CardType.Weapon:   return ResolveWeapon(card, caster, handLayout, selectedTarget);
                 default:                return card.Damage;
             }
@@ -93,14 +93,14 @@ namespace ThroneOfTides.Systems
             return 0;
         }
 
-        private int ResolveEffect(CardSO card, IHandLayoutManager handLayout, DamageTarget? selectedTarget)
+        private int ResolveEffect(CardSO card, DamageTarget caster, IHandLayoutManager handLayout, DamageTarget? selectedTarget)
         {
             if (card.ActionEffect == null)
             {
                 Debug.LogWarning($"{card.Name} has no ActionEffect assigned");
                 return 0;
             }
-            var context = new CardEffectContext(_gameState, handLayout, _secondaryDrawCallback, selectedTarget);
+            var context = new CardEffectContext(_gameState, handLayout, caster, _secondaryDrawCallback, selectedTarget);
             card.ActionEffect.Execute(context);
             return 0;
         }
@@ -112,7 +112,7 @@ namespace ThroneOfTides.Systems
             // by weapons that don't need anything beyond flat damage or a small hardcoded extra.
             if (card.ActionEffect != null)
             {
-                var context = new CardEffectContext(_gameState, handLayout, _secondaryDrawCallback, selectedTarget);
+                var context = new CardEffectContext(_gameState, handLayout, caster, _secondaryDrawCallback, selectedTarget);
                 card.ActionEffect.Execute(context);
                 return 0;
             }

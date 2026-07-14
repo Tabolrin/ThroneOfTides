@@ -203,21 +203,43 @@ namespace ThroneOfTides.Systems
                     _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
             }
 
-            CardSO playedCard = _enemyAI.PickCard(
-                _gameState.EnemyHand.CardsSO,
-                damageCardPlayed: false,
-                actionCardPlayed: false,
-                enemyMana: _gameState.EnemyMana);
+            bool attackPlayedThisTurn = false;
 
-            if (playedCard == null)
+            // Keeps playing cards until mana/HP/hand constraints leave nothing playable —
+            // mana is the only balancing lever now, so the enemy uses as much of its turn as
+            // it can afford rather than stopping after a single card.
+            while (true)
             {
-                Debug.Log("Enemy has no playable card — skipping turn");
-                _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
-                OnTurnChanged?.Invoke();
-                StartCoroutine(AutoDrawRoutine());
-                yield break;
+                CardSO playedCard = _enemyAI.PickCard(
+                    _gameState.EnemyHand.CardsSO,
+                    _gameState.EnemyMana,
+                    _gameState.EnemyHP);
+
+                if (playedCard == null) break;
+
+                bool isAttackCard = playedCard.CardType == CardType.Weapon ||
+                                    playedCard.CardType == CardType.Combo  ||
+                                    playedCard.CardType == CardType.DOT;
+                if (isAttackCard) attackPlayedThisTurn = true;
+
+                yield return StartCoroutine(PlayEnemyCard(playedCard, isAttackCard));
+
+                if (_gameState.IsGameOver()) { FireMatchResult(); yield break; }
             }
 
+            // Siren Song is only meaningful if consumed by an attack the same turn it's cast —
+            // mirrors the player-side clear in EndTurn() so a cast-but-unused Siren doesn't
+            // linger and incorrectly buff some future enemy attack.
+            if (_gameState.SirenSongActive && !attackPlayedThisTurn)
+                _gameState.ClearSiren(DamageTarget.Enemy);
+
+            _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
+            OnTurnChanged?.Invoke();
+            StartCoroutine(AutoDrawRoutine());
+        }
+
+        private IEnumerator PlayEnemyCard(CardSO playedCard, bool isAttackCard)
+        {
             _gameState.SpendEnemyMana(playedCard.ManaCost);
             _gameState.EnemyHand.RemoveCard(playedCard);
             _gameState.DiscardEnemyCard(playedCard);
@@ -228,28 +250,21 @@ namespace ThroneOfTides.Systems
             yield return new WaitUntil(() => animationDone);
             GameEventBus.OnEnemyCardAnimationComplete = null;
 
-            bool isAttackCard = playedCard.CardType == CardType.Weapon ||
-                                playedCard.CardType == CardType.Combo  ||
-                                playedCard.CardType == CardType.DOT;
-
             if (isAttackCard)
                 yield return StartCoroutine(ResolveEnemyAttack(playedCard));
+            else if (playedCard.CardType == CardType.Action && playedCard.AiPlayBeforeAttack)
+                _combatResolver.ResolveCard(playedCard, DamageTarget.Enemy, _handLayout);
 
             OnHPChanged?.Invoke();
-            if (_gameState.IsGameOver()) { FireMatchResult(); yield break; }
-
-            _stateMachine.TransitionTo(_stateMachine.PlayerTurn);
-            OnTurnChanged?.Invoke();
-            StartCoroutine(AutoDrawRoutine());
         }
 
         private IEnumerator ResolveEnemyAttack(CardSO attackCard)
         {
-            // Combo/DOT cards go through CombatResolver so enemy-side gunpowder stacking and
-            // damage-over-time tracking actually work (previously always dealt flat attackCard.Damage).
-            int damage = attackCard.CardType == CardType.Combo || attackCard.CardType == CardType.DOT
-                ? _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout)
-                : attackCard.Damage;
+            // Routed through CombatResolver for every attack type (not just Combo/DOT) so
+            // enemy-side gunpowder stacking, damage-over-time tracking, and HP-cost deduction
+            // (e.g. The Kraken's self-damage) all actually apply — previously Weapon cards
+            // bypassed this and dealt flat attackCard.Damage with no HP cost taken.
+            int damage = _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout);
 
             // A combo primer or a DOT application deals no immediate damage this play.
             if (damage <= 0) yield break;

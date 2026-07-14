@@ -3,10 +3,11 @@ using DG.Tweening;
 using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
+using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Systems.VFX
 {
-    public class SirenVFXController : MonoBehaviour
+    public class SirenVFXController : MonoBehaviour, ICardPlayEffect
     {
         // ── Inspector ─────────────────────────────────────────────────────────
 
@@ -40,6 +41,9 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully sunk. Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
+        /// <summary>ICardPlayEffect — fired when fully sunk, so CardPresentationPlayer destroys the instance.</summary>
+        public event Action Completed;
+
         // ── Private ───────────────────────────────────────────────────────────
 
         private RectTransform  _rectTransform;
@@ -58,7 +62,7 @@ namespace ThroneOfTides.Systems.VFX
         // ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Injected by CardVFXHandler after instantiation.
+        /// Injected by CardPresentationPlayer after instantiation.
         /// musicNoteParticles is a persistent scene-level world-space ParticleSystem —
         /// sized once in the editor and repositioned each use. Never destroyed.
         /// </summary>
@@ -67,6 +71,20 @@ namespace ThroneOfTides.Systems.VFX
             _rootCanvasRect     = canvasRect;
             _gameCamera         = gameCamera;
             _musicNoteParticles = musicNoteParticles;
+        }
+
+        /// <summary>
+        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Siren always rises at
+        /// the opponent's ship (bewitching the target), matching this card's authored
+        /// PresentationEntry (AnchorSide: Opponent). MusicNoteParticles is the persistent
+        /// scene-level ParticleSystem passed through the shared spawn context.
+        /// </summary>
+        public void Initialize(CardEffectSpawnContext context)
+        {
+            Inject(context.GameCanvas, context.GameCamera, context.MusicNoteParticles);
+            OnSirenReady  += GameEventBus.FireSirenSongActive;
+            OnSequenceEnd += () => Completed?.Invoke();
+            StartSequence(context.OpponentAnchor.position);
         }
 
         // Named StartSequence rather than Play to avoid conflict with DOTween's

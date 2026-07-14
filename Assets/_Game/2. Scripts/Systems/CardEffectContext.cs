@@ -18,14 +18,17 @@ namespace ThroneOfTides.Systems
         public int PlayerMana      => _gameState.PlayerMana;
         public int PlayerMaxMana   => _gameState.PlayerMaxMana;
         public int EnemyMana       => _gameState.EnemyMana;
+        public DamageTarget  Caster { get; }
         public DamageTarget? SelectedTarget { get; }
 
         public CardEffectContext(GameState gameState, IHandLayoutManager handLayout,
+                                 DamageTarget caster = DamageTarget.Player,
                                  System.Func<bool> secondaryDraw = null,
                                  DamageTarget? selectedTarget = null)
         {
             _gameState     = gameState;
             _handLayout    = handLayout;
+            Caster         = caster;
             _secondaryDraw = secondaryDraw;
             SelectedTarget = selectedTarget;
         }
@@ -37,7 +40,7 @@ namespace ThroneOfTides.Systems
             _gameState.HealPlayer(amount);
 
         public void SetSirenActive() =>
-            _gameState.SetSirenActive();
+            _gameState.SetSirenActive(Caster);
 
         public void ApplyDot(DamageTarget target, int damagePerTurn, int turns, ShipStatusType source = ShipStatusType.None) =>
             _gameState.AddDotEffect(new DotEffect(target, damagePerTurn, turns, source));
@@ -81,17 +84,34 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireCardDrawn(card);
         }
 
+        // Steals a random card from whoever did NOT cast this card, into the caster's own hand —
+        // works for either side so Monkey Grab behaves correctly when the enemy plays it too.
         public void StealFromEnemyHand()
         {
-            var enemyHand = _gameState.EnemyHand.CardsSO;
-            if (enemyHand.Count == 0) return;
+            if (Caster == DamageTarget.Player)
+            {
+                var enemyHand = _gameState.EnemyHand.CardsSO;
+                if (enemyHand.Count == 0) return;
 
-            int    index = UnityEngine.Random.Range(0, enemyHand.Count);
-            CardSO card  = enemyHand[index];
-            _gameState.EnemyHand.RemoveCard(card);
-            _gameState.PlayerHand.AddCard(card, _gameState.PlayerDeck.Count);
-            _handLayout.StealCardFromEnemyHand(card);
-            GameEventBus.FireCardDrawn(card);
+                int    index = UnityEngine.Random.Range(0, enemyHand.Count);
+                CardSO card  = enemyHand[index];
+                _gameState.EnemyHand.RemoveCard(card);
+                _gameState.PlayerHand.AddCard(card, _gameState.PlayerDeck.Count);
+                _handLayout.StealCardFromEnemyHand(card);
+                GameEventBus.FireCardDrawn(card);
+            }
+            else
+            {
+                var playerHand = _gameState.PlayerHand.CardsSO;
+                if (playerHand.Count == 0) return;
+
+                int    index = UnityEngine.Random.Range(0, playerHand.Count);
+                CardSO card  = playerHand[index];
+                _gameState.PlayerHand.RemoveCard(card);
+                _gameState.EnemyHand.AddCard(card, _gameState.EnemyDeck.Count);
+                _handLayout.RemoveCardFromPlayerHand(card);
+                _handLayout.AddCardToEnemyHand(card);
+            }
         }
 
         public void RetrieveFromDiscard(int count)

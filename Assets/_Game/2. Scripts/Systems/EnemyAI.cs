@@ -1,5 +1,6 @@
 // Assets/_Game/2. Scripts/Systems/EnemyAI.cs
 using System.Collections.Generic;
+using System.Linq;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
@@ -17,8 +18,12 @@ namespace ThroneOfTides.Systems
             _captain = captain;
         }
 
-        public CardSO PickCard(IReadOnlyList<CardSO> hand, bool damageCardPlayed,
-                               bool actionCardPlayed, int enemyMana)
+        /// <summary>
+        /// Picks the next card the enemy should play this turn, or null if nothing in hand is
+        /// currently playable (caller should end the turn). Called once per card played — the
+        /// caller re-invokes this after each play since hand/mana/HP change each time.
+        /// </summary>
+        public CardSO PickCard(IReadOnlyList<CardSO> hand, int enemyMana, int enemyHP)
         {
             if (hand.Count == 0) return null;
 
@@ -26,14 +31,6 @@ namespace ThroneOfTides.Systems
 
             foreach (var card in hand)
             {
-                bool isDamageCard = card.CardType == CardType.Weapon ||
-                                    card.CardType == CardType.Combo  ||
-                                    card.CardType == CardType.DOT;
-                bool isActionCard = card.CardType == CardType.Action;
-
-                if (isDamageCard && damageCardPlayed) continue;
-                if (isActionCard && (actionCardPlayed || !card.IsEligibleAsActionPair)) continue;
-
                 // Reaction cards are never played from hand by the enemy —
                 // enemy AI doesn't hold reaction cards in normal gameplay
                 if (card.CardType == CardType.Reaction) continue;
@@ -45,13 +42,26 @@ namespace ThroneOfTides.Systems
                 // Cannot play cards that cost more mana than currently available
                 if (card.ManaCost > enemyMana) continue;
 
+                // Never play a card that would reduce the enemy to 0 HP or below.
+                if (card.HPCost >= enemyHP) continue;
+
                 float weight = _captain.GetWeightForCard(card);
                 if (weight <= 0f) continue;
 
                 candidates.Add((card, weight));
             }
 
-            return candidates.Count == 0 ? null : WeightedRandom(candidates);
+            if (candidates.Count == 0) return null;
+
+            // Prefer cards that are more valuable played before an attack (Siren Song, Monkey
+            // Grab, etc.) — if any are still playable, restrict the pick to that group; only
+            // fall back to the full candidate pool (including attacks) once none remain. Still
+            // uses weighted-random selection within whichever pool is active, so the captain's
+            // weight table still governs which specific card gets picked.
+            var preferred = candidates.Where(c => c.card.AiPlayBeforeAttack).ToList();
+            var pool      = preferred.Count > 0 ? preferred : candidates;
+
+            return WeightedRandom(pool);
         }
 
         private static CardSO WeightedRandom(List<(CardSO card, float weight)> candidates)

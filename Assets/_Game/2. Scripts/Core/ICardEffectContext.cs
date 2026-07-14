@@ -13,6 +13,10 @@ namespace ThroneOfTides.Core
         int PlayerMaxMana   { get; }
         int EnemyMana       { get; }
 
+        /// Which side played the card that owns this effect — lets effects that benefit
+        /// "whoever cast this" (Siren Song, Monkey Grab) work correctly for either caster.
+        DamageTarget Caster { get; }
+
         /// The target the player explicitly chose via a targeting prompt (see
         /// CardSO.RequiresTargetSelection). Null for cards that don't require target selection.
         DamageTarget? SelectedTarget { get; }
