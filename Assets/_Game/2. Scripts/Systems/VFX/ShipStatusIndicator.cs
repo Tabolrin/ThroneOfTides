@@ -27,6 +27,15 @@ namespace ThroneOfTides.Systems
         [Tooltip("Fade tween duration in seconds.")]
         [SerializeField] private float _fadeDuration = 0.3f;
 
+        [Tooltip("If false, this indicator ignores the 0→active transition of OnShipStatusCountChanged and waits for an external RevealNow() call instead — for statuses whose activation is timed to a thrown-projectile VFX's impact (e.g. Gunpowder Barrel) rather than the instant the card is played. Fading back out on expiry still works normally either way.")]
+        [SerializeField] private bool _autoRevealOnActivate = true;
+
+        public ShipStatusType StatusType => _statusType;
+        public DamageTarget   Ship       => _ship;
+
+        /// <summary>True while the icon is at (or fading toward) full visibility.</summary>
+        public bool IsVisible => _icon != null && _icon.color.a > 0.01f;
+
         private void OnEnable()  => GameEventBus.OnShipStatusCountChanged += HandleStatusChanged;
         private void OnDisable() => GameEventBus.OnShipStatusCountChanged -= HandleStatusChanged;
 
@@ -34,9 +43,25 @@ namespace ThroneOfTides.Systems
         {
             if (type != _statusType || ship != _ship || _icon == null) return;
 
-            float targetAlpha = count > 0 ? 1f : 0f;
+            if (count > 0)
+            {
+                if (_autoRevealOnActivate) RevealNow();
+                return;
+            }
+
             _icon.DOKill();
-            _icon.DOFade(targetAlpha, _fadeDuration);
+            _icon.DOFade(0f, _fadeDuration);
+        }
+
+        /// <summary>
+        /// Fades the icon to fully visible right now, regardless of _autoRevealOnActivate —
+        /// called by a thrown-projectile VFX controller at its impact moment.
+        /// </summary>
+        public void RevealNow()
+        {
+            if (_icon == null) return;
+            _icon.DOKill();
+            _icon.DOFade(1f, _fadeDuration);
         }
     }
 }

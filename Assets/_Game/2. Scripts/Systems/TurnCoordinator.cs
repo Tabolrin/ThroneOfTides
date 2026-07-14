@@ -55,10 +55,15 @@ namespace ThroneOfTides.Systems
 
         public void EndTurn()
         {
-            if (!_gameState.IsPlayerTurn) return;
+            if (!_gameState.IsPlayerTurn)
+            {
+                Debug.Log("EndTurn ignored — not the player's turn (already ended, or match over).");
+                return;
+            }
 
-            if (_gameState.PlayerComboStackCount > 0 && !_gameState.DamageCardPlayedThisTurn)
-                _gameState.ResetCombo(DamageTarget.Player);
+            // Gunpowder the player primed lives on the Enemy ship (it's what Torch ignites there).
+            if (_gameState.EnemyComboStackCount > 0 && !_gameState.DamageCardPlayedThisTurn)
+                _gameState.ResetCombo(DamageTarget.Enemy);
 
             if (_gameState.SirenSongActive && !_gameState.DamageCardPlayedThisTurn)
                 _gameState.ClearSiren();
@@ -372,7 +377,12 @@ namespace ThroneOfTides.Systems
 
         private void FireMatchResult()
         {
-            if (_gameState.GetWinner() == Winner.Player)
+            Winner winner = _gameState.GetWinner();
+            Debug.Log($"Match over — winner: {winner} " +
+                $"(PlayerHP: {_gameState.PlayerHP}, PlayerDeck: {_gameState.PlayerDeck.Count}, PlayerHand: {_gameState.PlayerHand.Count}, " +
+                $"EnemyHP: {_gameState.EnemyHP}, EnemyDeck: {_gameState.EnemyDeck.Count}, EnemyHand: {_gameState.EnemyHand.Count})");
+
+            if (winner == Winner.Player)
                 GameEventBus.FireMatchWin();
             else
                 GameEventBus.FireMatchLoss();

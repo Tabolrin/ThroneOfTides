@@ -14,6 +14,7 @@ namespace ThroneOfTides.Systems
     public class ShipVfxAnchors : MonoBehaviour
     {
         private readonly Dictionary<VfxAnchorType, Transform> _anchors = new Dictionary<VfxAnchorType, Transform>();
+        private readonly Dictionary<ShipStatusType, ShipStatusIndicator> _statusIndicators = new Dictionary<ShipStatusType, ShipStatusIndicator>();
 
         private void Awake()
         {
@@ -29,6 +30,24 @@ namespace ThroneOfTides.Systems
 
                 _anchors.Add(marker.Type, marker.transform);
             }
+
+            foreach (var indicator in GetComponentsInChildren<ShipStatusIndicator>(true))
+            {
+                if (_statusIndicators.ContainsKey(indicator.StatusType)) continue;
+                _statusIndicators.Add(indicator.StatusType, indicator);
+            }
+        }
+
+        /// <summary>
+        /// Resolves this ship's persistent world-space status indicator for the given type (e.g.
+        /// the Gunpowder-barrel decoration), so a thrown-projectile effect can time its reveal
+        /// (or read its current active/inactive state) to its own impact moment instead of
+        /// relying purely on ShipStatusIndicator's own event-driven fade. Null if none placed.
+        /// </summary>
+        public ShipStatusIndicator GetStatusIndicator(ShipStatusType statusType)
+        {
+            _statusIndicators.TryGetValue(statusType, out var indicator);
+            return indicator;
         }
 
         /// <summary>
