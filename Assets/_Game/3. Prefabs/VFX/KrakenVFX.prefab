@@ -27,7 +27,7 @@ RectTransform:
   m_GameObject: {fileID: 3271371320943802326}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1175052277564344288}
@@ -55,7 +55,7 @@ MonoBehaviour:
   _tentacleImage: {fileID: 4218586593015917841}
   _tentacleAnimator: {fileID: 655662677245766779}
   _feedbackKrakenAttack: {fileID: 5071658678132411471}
-  _canvasSpawnOffset: {x: -80, y: 0}
+  _canvasSpawnOffset: {x: -90, y: 0}
   _bodyRiseDuration: 0.8
   _bodyRiseDistance: 200
   _bodyRiseEase: 9
