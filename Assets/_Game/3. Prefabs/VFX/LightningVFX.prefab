@@ -27,11 +27,11 @@ RectTransform:
   m_GameObject: {fileID: 173209585812815446}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 5574829848500599465}
   - {fileID: 4078191670725992882}
+  - {fileID: 5574829848500599465}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -56,7 +56,7 @@ MonoBehaviour:
   _strikeAnchor: {fileID: 2194116197731095762}
   _canvasGroup: {fileID: 8946072559563258366}
   _feedbackLightningStrike: {fileID: 0}
-  _canvasSpawnOffset: {x: -80, y: 0}
+  _canvasSpawnOffset: {x: 0, y: 0}
   _cloudFadeDuration: 0.4
   _cloudFadeEase: 6
   _holdBeforeStrike: 0.15

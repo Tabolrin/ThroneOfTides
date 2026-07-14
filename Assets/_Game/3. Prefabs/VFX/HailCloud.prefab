@@ -137,8 +137,8 @@ RectTransform:
   m_GameObject: {fileID: 7976536332362366758}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6828430302118243901}
   m_Father: {fileID: 0}
@@ -163,7 +163,7 @@ MonoBehaviour:
   _cloudImage: {fileID: 7281067152854895278}
   _hailAnchor: {fileID: 3201454299630096288}
   _feedbackHailstorm: {fileID: 0}
-  _canvasSpawnOffset: {x: -80, y: 0}
+  _canvasSpawnOffset: {x: 0, y: 0}
   _cloudFadeInDuration: 0.4
   _cloudFadeInEase: 6
   _holdBeforeHail: 0.3
