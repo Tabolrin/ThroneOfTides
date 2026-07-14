@@ -61,23 +61,28 @@ namespace ThroneOfTides.Systems
         private static DamageTarget Opponent(DamageTarget side) =>
             side == DamageTarget.Player ? DamageTarget.Enemy : DamageTarget.Player;
 
+        // Gunpowder sits on whichever ship is being attacked, not on the caster's own ship —
+        // Gunpowder Barrel primes the opponent's ship, and Torch (played by the same attacker)
+        // ignites that stack. Matches Tidal Wave's "removes Gunpowder from hit ship" wording.
         private int ResolveCombo(CardSO card, DamageTarget caster)
         {
+            DamageTarget target = Opponent(caster);
+
             if (card.ComboStackBonus > 0)
             {
-                _gameState.IncrementCombo(caster, card);
-                int stack = caster == DamageTarget.Player ? _gameState.PlayerComboStackCount : _gameState.EnemyComboStackCount;
-                Debug.Log($"Gunpowder primed ({caster}) — stack: {stack}");
+                _gameState.IncrementCombo(target, card);
+                int stack = target == DamageTarget.Player ? _gameState.PlayerComboStackCount : _gameState.EnemyComboStackCount;
+                Debug.Log($"Gunpowder primed on {target}'s ship — stack: {stack}");
                 return 0;
             }
 
-            int  activeStack = caster == DamageTarget.Player ? _gameState.PlayerComboStackCount : _gameState.EnemyComboStackCount;
-            CardSO activeCard  = caster == DamageTarget.Player ? _gameState.PlayerActiveComboCard  : _gameState.EnemyActiveComboCard;
+            int    activeStack = target == DamageTarget.Player ? _gameState.PlayerComboStackCount : _gameState.EnemyComboStackCount;
+            CardSO activeCard  = target == DamageTarget.Player ? _gameState.PlayerActiveComboCard  : _gameState.EnemyActiveComboCard;
 
             if (activeStack > 0 && activeCard != null)
             {
-                int damage = _gameState.ResolveCombo(caster);
-                Debug.Log($"Combo resolved ({caster}) — damage: {damage}");
+                int damage = _gameState.ResolveCombo(target);
+                Debug.Log($"Combo resolved on {target}'s ship — damage: {damage}");
                 return damage;
             }
 

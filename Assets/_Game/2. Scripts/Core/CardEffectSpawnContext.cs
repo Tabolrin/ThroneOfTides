@@ -49,6 +49,23 @@ namespace ThroneOfTides.Core
         /// <summary>Persistent scene-level ParticleSystem for Hail Storm's falling hail.</summary>
         public readonly ParticleSystem HailParticles;
 
+        /// <summary>Persistent scene-level ParticleSystem for Gunpowder Barrel's dust trail.</summary>
+        public readonly ParticleSystem GunpowderDustParticles;
+
+        /// <summary>
+        /// Reveals the opponent ship's persistent world-space status indicator for the given
+        /// type immediately (e.g. the Gunpowder-barrel decoration) — for thrown-projectile
+        /// effects that want the reveal timed to their own impact frame instead of firing the
+        /// instant GameState registers the effect. No-op if no such indicator is placed.
+        /// </summary>
+        public readonly Action<ShipStatusType> RevealOpponentStatusIndicator;
+
+        /// <summary>
+        /// True if the opponent ship's status indicator for the given type is currently visible
+        /// (e.g. Torch checking whether Gunpowder is active before deciding to explode).
+        /// </summary>
+        public readonly Func<ShipStatusType, bool> IsOpponentStatusVisible;
+
         public CardEffectSpawnContext(
             Transform casterAnchor,
             Transform opponentAnchor,
@@ -60,7 +77,10 @@ namespace ThroneOfTides.Core
             ParticleSystem musicNoteParticles = null,
             ParticleSystem lightningStrikeParticles = null,
             Image whiteoutImage = null,
-            ParticleSystem hailParticles = null)
+            ParticleSystem hailParticles = null,
+            Action<ShipStatusType> revealOpponentStatusIndicator = null,
+            Func<ShipStatusType, bool> isOpponentStatusVisible = null,
+            ParticleSystem gunpowderDustParticles = null)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -73,6 +93,9 @@ namespace ThroneOfTides.Core
             LightningStrikeParticles = lightningStrikeParticles;
             WhiteoutImage = whiteoutImage;
             HailParticles = hailParticles;
+            RevealOpponentStatusIndicator = revealOpponentStatusIndicator;
+            IsOpponentStatusVisible = isOpponentStatusVisible;
+            GunpowderDustParticles = gunpowderDustParticles;
         }
     }
 }

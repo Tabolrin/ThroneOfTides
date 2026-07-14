@@ -117,7 +117,7 @@ namespace ThroneOfTides.UI
         private static void Refresh(GameObject root, TextMeshProUGUI label, int charges)
         {
             if (root  != null) root.SetActive(charges > 0);
-            if (label != null) label.text = charges > 1 ? $"×{charges}" : string.Empty;
+            if (label != null) label.text = charges > 0 ? $"×{charges}" : string.Empty;
         }
     }
 }

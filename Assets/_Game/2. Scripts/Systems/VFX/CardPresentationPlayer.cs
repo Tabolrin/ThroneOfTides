@@ -45,6 +45,9 @@ namespace ThroneOfTides.Systems
         [Tooltip("Persistent scene-level ParticleSystem reused by Hail Storm's falling hail.")]
         [SerializeField] private ParticleSystem _hailParticles;
 
+        [Tooltip("Persistent scene-level ParticleSystem reused by Gunpowder Barrel's dust trail.")]
+        [SerializeField] private ParticleSystem _gunpowderDustParticles;
+
         [Tooltip("Parent RectTransform that spawned UI-mode sprite prefabs are instantiated under (e.g. a full-stretch child of the gameplay Canvas).")]
         [SerializeField] private Transform _uiEffectParent;
 
@@ -135,7 +138,10 @@ namespace ThroneOfTides.Systems
                     musicNoteParticles: _musicNoteParticles,
                     lightningStrikeParticles: _lightningStrikeParticles,
                     whiteoutImage: _whiteoutImage,
-                    hailParticles: _hailParticles);
+                    hailParticles: _hailParticles,
+                    revealOpponentStatusIndicator: type => opponentAnchors.GetStatusIndicator(type)?.RevealNow(),
+                    isOpponentStatusVisible: type => opponentAnchors.GetStatusIndicator(type)?.IsVisible ?? false,
+                    gunpowderDustParticles: _gunpowderDustParticles);
 
                 playEffect.Initialize(context);
                 playEffect.Completed += () => Destroy(spriteInstance);
