@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: ChainShotCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Chain Shot
+  _id: 3
   _cardType: 0
   _description: Blood for blood. Sacrifice 2 HP. Deal 8 damage.
   _manaCost: 1

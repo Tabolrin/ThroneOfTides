@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CannonBallCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Cannonball
+  _id: 2
   _cardType: 0
   _description: Iron through hull and bone. Deal 2 damage.
   _manaCost: 1
@@ -26,7 +27,20 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
-  _tags: []
+  _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
+  _statusType: 0
   _art: {fileID: 2884248648478627349, guid: 93076b58b67ee8a47bee38a4effd6341, type: 3}
-  _cardTypeSymbol: {fileID: 0}
-  _cardArtAnimator: {fileID: 0}
+  _presentationEntries:
+  - _casterFilter: 0
+    _presentationMode: 0
+    _anchorSide: 0
+    _positionType: 0
+    _spritePrefab: {fileID: 0}
+    _worldParticlePrefab: {fileID: 0}
+    _sfx:
+      _playlist: {fileID: 0}
+      _songName: 
+      _volumeMultiplier: 0
+      _pitchMultiplier: 0
+    _lifetime: 0

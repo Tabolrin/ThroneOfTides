@@ -274,22 +274,22 @@ namespace ThroneOfTides.Systems
             // A combo primer or a DOT application deals no immediate damage this play.
             if (damage <= 0) yield break;
 
-            bool isKraken      = attackCard.Name == "The Kraken";
+            bool isKraken      = attackCard.Id == CardId.Kraken;
             bool isUnblockable = _gameState.SirenSongActive || isKraken;
             bool hasDMT        = _gameState.DeadMansTurnCharges > 0;
-            bool hasBFB        = _gameState.BloodForBloodCharges > 0;
+            bool hasCounterGale = _gameState.CounterGaleCharges > 0;
 
-            bool playerHasKraken = _gameState.PlayerHand.CardsSO.Any(c => c.Name == "The Kraken");
+            bool playerHasKraken = _gameState.PlayerHand.CardsSO.Any(c => c.Id == CardId.Kraken);
             if (isKraken && playerHasKraken)
             {
                 yield return StartCoroutine(KrakenVsKrakenPrompt(attackCard));
                 yield break;
             }
 
-            bool canReact = !isUnblockable && (hasDMT || hasBFB);
+            bool canReact = !isUnblockable && (hasDMT || hasCounterGale);
 
             if (canReact)
-                yield return StartCoroutine(ReactionPrompt(attackCard, damage, hasDMT, hasBFB));
+                yield return StartCoroutine(ReactionPrompt(attackCard, damage, hasDMT, hasCounterGale));
             else
             {
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
@@ -313,7 +313,7 @@ namespace ThroneOfTides.Systems
             if (wasNegated)
             {
                 CardSO krakenCard = _gameState.PlayerHand.CardsSO
-                    .FirstOrDefault(c => c.Name == "The Kraken");
+                    .FirstOrDefault(c => c.Id == CardId.Kraken);
                 if (krakenCard != null)
                 {
                     _gameState.PlayerHand.RemoveCard(krakenCard);
@@ -330,12 +330,12 @@ namespace ThroneOfTides.Systems
             }
         }
 
-        private IEnumerator ReactionPrompt(CardSO attackCard, int damage, bool hasDMT, bool hasBFB)
+        private IEnumerator ReactionPrompt(CardSO attackCard, int damage, bool hasDMT, bool hasCounterGale)
         {
-            string label = hasDMT && hasBFB
-                ? "Dead Man's Turn (negate) | Blood for Blood (reflect half)"
+            string label = hasDMT && hasCounterGale
+                ? "Dead Man's Turn (negate) | Counter Gale (reflect half)"
                 : hasDMT ? "Dead Man's Turn (negate)"
-                         : "Blood for Blood (reflect half)";
+                         : "Counter Gale (reflect half)";
 
             bool usedReaction = false;
             bool usedDMT      = false;
@@ -358,12 +358,12 @@ namespace ThroneOfTides.Systems
             {
                 Debug.Log("Dead Man's Turn fired — attack negated");
             }
-            else if (_gameState.ConsumeBloodForBlood())
+            else if (_gameState.ConsumeCounterGale())
             {
-                int reflected = _combatResolver.ResolveBloodForBlood(damage);
+                int reflected = _combatResolver.ResolveCounterGale(damage);
                 _gameState.ApplyDamage(DamageTarget.Enemy, reflected);
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
-                Debug.Log($"Blood for Blood fired — reflected {reflected}, took {damage}");
+                Debug.Log($"Counter Gale fired — reflected {reflected}, took {damage}");
             }
         }
 
@@ -371,8 +371,8 @@ namespace ThroneOfTides.Systems
 
         private void ChargeReaction(CardSO card)
         {
-            if (card.Name == "Dead Man's Turn")      _gameState.AddDeadMansTurnCharge();
-            else if (card.Name == "Blood for Blood") _gameState.AddBloodForBloodCharge();
+            if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge();
+            else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge();
         }
 
         private void FireMatchResult()

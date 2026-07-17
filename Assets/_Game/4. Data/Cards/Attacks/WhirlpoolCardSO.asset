@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WhirlpoolCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Whirlpool
+  _id: 8
   _cardType: 3
   _description: The sea swallows the wicked. Deal 3 damage per turn for 3 turns.
   _manaCost: 3

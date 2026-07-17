@@ -49,10 +49,10 @@ namespace ThroneOfTides.Systems
         public int ResolvePlayerCard(CardSO card, IHandLayoutManager handLayout, DamageTarget? selectedTarget = null)
             => ResolveCard(card, DamageTarget.Player, handLayout, selectedTarget);
 
-        public int ResolveBloodForBlood(int incomingDamage)
+        public int ResolveCounterGale(int incomingDamage)
         {
             int reflected = Mathf.FloorToInt(incomingDamage * 0.5f);
-            Debug.Log($"Blood for Blood — reflecting {reflected} damage");
+            Debug.Log($"Counter Gale — reflecting {reflected} damage");
             return reflected;
         }
 
@@ -122,12 +122,12 @@ namespace ThroneOfTides.Systems
                 return 0;
             }
 
-            switch (card.Name)
+            switch (card.Id)
             {
-                case "Ram the Hull":
+                case CardId.RamTheHull:
                     // HP cost deducted above — ship shake TODO when VFX event defined
                     break;
-                case "Chain Shot":
+                case CardId.ChainShot:
                     DiscardRandomOpponentCard(caster);
                     break;
             }

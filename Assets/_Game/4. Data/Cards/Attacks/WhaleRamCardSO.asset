@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WhaleRamCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Whale Ram
+  _id: 4
   _cardType: 0
   _description: The deep answers your call. Deal 6 damage.
   _manaCost: 3

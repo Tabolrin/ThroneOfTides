@@ -32,7 +32,7 @@ namespace ThroneOfTides.Core
         void AddPlayerMaxMana(int amount);
         void StealEnemyMana(int amount);
         void AddDeadMansTurnCharge();
-        void AddBloodForBloodCharge();
+        void AddCounterGaleCharge();
         void ReturnFromSnapshot(int count);
         void DrawOneCard();
         void ClearComboStack(DamageTarget target);

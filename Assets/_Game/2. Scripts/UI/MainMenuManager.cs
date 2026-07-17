@@ -1,3 +1,4 @@
+using ThroneOfTides.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,17 +6,28 @@ namespace ThroneOfTides.UI
 {
     public class MainMenuManager : MonoBehaviour
     {
+        [Header("Save/Load")]
+        [Tooltip("Loaded once at game boot, before anything reads either asset.")]
+        [SerializeField] private PlayerInventory _playerInventory;
+        [SerializeField] private ProgressionSO   _progression;
+
+        [Header("Options")]
+        [SerializeField] private OptionsPanel _optionsPanel;
+
+        private void Awake()
+        {
+            if (_playerInventory != null) _playerInventory.LoadFromDisk();
+            if (_progression     != null) _progression.LoadFromDisk();
+        }
+
         public void OnPlayPressed() =>
             SceneManager.LoadScene("LevelSelect");
 
         public void OnPortPressed() =>
             SceneManager.LoadScene("Port");
 
-        public void OnOptionsPressed()
-        {
-            // TODO - replace with options panel when built
-            Debug.Log("Options - not yet implemented");
-        }
+        public void OnOptionsPressed() =>
+            _optionsPanel?.Show();
 
         public void OnQuitPressed()
         {

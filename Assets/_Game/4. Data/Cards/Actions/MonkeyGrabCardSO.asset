@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MonkeyGrabCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Monkey Grab
+  _id: 17
   _cardType: 2
   _description: Gone before they noticed. Steal 1 random card from the enemy's hand.
   _manaCost: 1

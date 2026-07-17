@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: ReconParrotCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Recon Parrot
+  _id: 13
   _cardType: 2
   _description: Eyes where yours cannot reach. Inspect 3 cards in the enemy's hand.
   _manaCost: 2

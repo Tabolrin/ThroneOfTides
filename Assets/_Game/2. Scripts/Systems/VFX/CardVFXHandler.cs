@@ -29,10 +29,6 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _hitImpactStandardPrefab;
         [SerializeField] private GameObject _hitImpactExplosionPrefab;
         [SerializeField] private GameObject _whirlpoolPrefab;
-        [SerializeField] private GameObject _tidalWavePrefab;
-        [SerializeField] private GameObject _gunpowderBarrelPrefab;
-        [SerializeField] private GameObject _torchPrefab;
-        [SerializeField] private GameObject _torchComboResolvePrefab;
         [SerializeField] private GameObject _ramTheHullPrefab;
 
         [Header("VFX Prefabs — Action")]
@@ -186,66 +182,53 @@ namespace ThroneOfTides.Systems
             Transform source = _playerShipHitPoint;
             Transform target = _enemyShipHitPoint;
 
-            switch (card.Name)
+            switch (card.Id)
             {
-                case "Pistol":
-                case "Canon Ball":
-                case "Whale Ram":
-                case "Chain Shot":
-                case "Tidal Wave":
+                case CardId.Pistol:
+                case CardId.Cannonball:
+                case CardId.WhaleRam:
+                case CardId.ChainShot:
                     yield return StartCoroutine(FireCannonball(source.position, target.position));
                     break;
 
-                case "Ram the Hull":
+                case CardId.RamTheHull:
                     SpawnVFX(_ramTheHullPrefab != null
                         ? _ramTheHullPrefab
                         : _hitImpactExplosionPrefab, target.position);
                     _feedbackHeavyHit?.PlayFeedbacks();
                     break;
 
-                case "Whirlpool":   SpawnVFX(_whirlpoolPrefab,  target.position); break;
+                case CardId.Whirlpool: SpawnVFX(_whirlpoolPrefab, target.position); break;
 
-                // "Hail Storm" and "Lightning" are migrated to CardPresentationPlayer
-                // (PresentationEntries + ICardPlayEffect) — no case needed here.
-                case "Lightning":
+                // Hail Storm/Lightning/Gunpowder Barrel/Torch/Kraken/Siren Song/Tidal Wave are
+                // migrated to CardPresentationPlayer (PresentationEntries + ICardPlayEffect) —
+                // no case needed here for their spawn logic.
+                case CardId.Lightning:
                     _feedbackLightningFlash?.PlayFeedbacks();
                     break;
 
-                case "Gunpowder Barrel":
-                    SpawnVFX(_gunpowderBarrelPrefab, source.position);
-                    break;
+                case CardId.ReconParrot:    SpawnVFX(_reconParrotPrefab,   target.position); break;
+                case CardId.LockersReturn:  SpawnVFX(_lockerReturnPrefab,  source.position); break;
+                case CardId.MonkeyGrab:     SpawnVFX(_monkeyGrabPrefab,    target.position); break;
+                case CardId.TreasureChest:  SpawnVFX(_treasureChestPrefab, source.position); break;
 
-                case "Torch":
-                    SpawnVFX(_torchComboResolvePrefab != null
-                        ? _torchComboResolvePrefab
-                        : _torchPrefab, target.position);
-                    break;
-
-                // "The Kraken" and "Siren Song" are migrated to CardPresentationPlayer
-                // (PresentationEntries + ICardPlayEffect) — no case needed here.
-
-                case "Recon Parrot":    SpawnVFX(_reconParrotPrefab,   target.position); break;
-                case "Locker's Return": SpawnVFX(_lockerReturnPrefab,  source.position); break;
-                case "Monkey Grab":     SpawnVFX(_monkeyGrabPrefab,    target.position); break;
-                case "Treasure Chest":  SpawnVFX(_treasureChestPrefab, source.position); break;
-
-                case "High Spirits":
+                case CardId.HighSpirits:
                     SpawnVFX(_highSpiritsPrefab, source.position);
                     _feedbackManaGained?.PlayFeedbacks();
                     break;
 
-                case "Rum":
+                case CardId.Rum:
                     SpawnVFX(_rumPrefab, source.position);
                     _feedbackHeal?.PlayFeedbacks();
                     break;
 
-                case "Stolen Wind":
+                case CardId.StolenWind:
                     SpawnVFX(_stolenWindPrefab, source.position);
                     break;
 
                 // Reactions are charged on draw — OnReactionCharged/Fired handle their VFX
-                case "Dead Man's Turn":
-                case "Blood for Blood":
+                case CardId.DeadMansTurn:
+                case CardId.CounterGale:
                     break;
             }
         }

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: HighSpiritsCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: High Spirits
+  _id: 15
   _cardType: 2
   _description: They didn't sail through hell to die here. Neither did you. Restore
     5 HP.

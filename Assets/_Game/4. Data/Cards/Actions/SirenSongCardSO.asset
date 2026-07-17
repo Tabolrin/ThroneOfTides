@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: SirenSongCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Siren Song
+  _id: 21
   _cardType: 2
   _description: Their will is not their own. The attack you play this turn is unblockable.
   _manaCost: 3

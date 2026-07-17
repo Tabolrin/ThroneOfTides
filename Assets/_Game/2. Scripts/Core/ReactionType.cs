@@ -3,5 +3,5 @@ namespace ThroneOfTides.Core
 {
     // Distinguishes reaction card subtypes within the Reaction CardType.
     // Used by GameEventBus and ActiveEffectsBar to track charges per reaction.
-    public enum ReactionType { DeadMansTurn, BloodForBlood }
+    public enum ReactionType { DeadMansTurn, CounterGale }
 }

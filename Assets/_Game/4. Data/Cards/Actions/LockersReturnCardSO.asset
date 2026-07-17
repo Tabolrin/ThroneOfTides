@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: LockersReturnCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Locker's Return
+  _id: 16
   _cardType: 2
   _description: Davy Jones collects debts, not weapons. Recover 3 random cards from
     your discard pile. Cannot recover The Kraken

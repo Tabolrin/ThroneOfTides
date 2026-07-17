@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: KrakenCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: The Kraken
+  _id: 10
   _cardType: 0
   _description: Sacrifice 3 HP and 33% of your materials. Deal 15 unblockable damage.
     You called. It answered.

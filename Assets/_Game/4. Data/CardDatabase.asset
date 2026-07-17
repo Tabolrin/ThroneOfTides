@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42cd237b024092d4cb377e2410a8d9ef, type: 3}
+  m_Name: CardDatabase
+  m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardDatabaseSO
+  _allCards:
+  - {fileID: 11400000, guid: 3707c0de5dcf96640b7f4b19e88ff62f, type: 2}
+  - {fileID: 11400000, guid: 592ab224bc8beba4d952d7f6361e2d27, type: 2}
+  - {fileID: 11400000, guid: b70463cb921192144855faee858f1708, type: 2}
+  - {fileID: 11400000, guid: 1255c9689b6719641a3967c758fef008, type: 2}
+  - {fileID: 11400000, guid: 13836fc428319484a8d71e56c073ab25, type: 2}
+  - {fileID: 11400000, guid: d603a27bb8523524fb8f81b910e1a703, type: 2}
+  - {fileID: 11400000, guid: 626df873eb0d28b4392e7cfd5ee85308, type: 2}
+  - {fileID: 11400000, guid: 113e21d82ac278c4581bbabd9b16e962, type: 2}
+  - {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
+  - {fileID: 11400000, guid: 526f9f49f80f32a44b68ff440369494f, type: 2}
+  - {fileID: 11400000, guid: 1c453b3302beb194e9543d518fc3373d, type: 2}
+  - {fileID: 11400000, guid: beb41d5072d4d9345b4546ce29b41294, type: 2}
+  - {fileID: 11400000, guid: baa5bc3625ad5f0439300dcff4bebb68, type: 2}
+  - {fileID: 11400000, guid: 55de937facfeb224ba1434ee90a9aea9, type: 2}
+  - {fileID: 11400000, guid: e99ae19356c0e414daec202d36f21506, type: 2}
+  - {fileID: 11400000, guid: 586d3281a4fb0424fabfc04b1a26a5f4, type: 2}
+  - {fileID: 11400000, guid: c1db74e802e87e348a52b35bc55cfc88, type: 2}
+  - {fileID: 11400000, guid: f2b5e2fbe6bf8fe43a80040ddee1b5f1, type: 2}

@@ -28,6 +28,7 @@ namespace ThroneOfTides.Tools
         private SerializedProperty _requiresTargetSelection;
         private SerializedProperty _statusType;
         private SerializedProperty _aiPlayBeforeAttack;
+        private SerializedProperty _id;
 
         private static readonly Color WeaponColor   = new Color(0.22f, 0.38f, 0.62f, 0.18f);
         private static readonly Color ComboColor    = new Color(0.72f, 0.62f, 0.10f, 0.18f);
@@ -56,6 +57,7 @@ namespace ThroneOfTides.Tools
             _requiresTargetSelection = serializedObject.FindProperty("_requiresTargetSelection");
             _statusType              = serializedObject.FindProperty("_statusType");
             _aiPlayBeforeAttack      = serializedObject.FindProperty("_aiPlayBeforeAttack");
+            _id                      = serializedObject.FindProperty("_id");
         }
 
         public override void OnInspectorGUI()
@@ -152,6 +154,7 @@ namespace ThroneOfTides.Tools
             // ── Identity ──────────────────────────────────────────────────────
             EditorGUILayout.LabelField("Identity", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_name,        Label(_name, "Card Name"));
+            EditorGUILayout.PropertyField(_id,          Label(_id, "Card Id (code identity — leave None only for unused/generic cards)"));
             EditorGUILayout.PropertyField(_description, Label(_description, "Description"));
             EditorGUILayout.PropertyField(_cardType,    Label(_cardType, "Card Type"));
             EditorGUILayout.Space(6);

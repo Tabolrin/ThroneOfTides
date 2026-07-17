@@ -1,0 +1,217 @@
+// Assets/_Game/2. Scripts/UI/OptionsPanel.cs
+using System;
+using System.Collections.Generic;
+using MoreMountains.Tools;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace ThroneOfTides.UI
+{
+    /// <summary>
+    /// Simple options panel: Master/Music/Sfx volume (Sfx slider drives both the Sfx and UI
+    /// mixer tracks together — the game only ever exposes one combined "sound effects" slider
+    /// to the player), fullscreen, resolution, and VSync. Audio volumes are persisted by
+    /// MMSoundManager's own settings system; display settings persist via their own small save
+    /// file here, independent of everything else.
+    /// </summary>
+    public class OptionsPanel : MonoBehaviour
+    {
+        [Header("Audio")]
+        [SerializeField] private Slider _masterVolumeSlider;
+        [SerializeField] private Slider _musicVolumeSlider;
+        [SerializeField] private Slider _sfxVolumeSlider;
+
+        [Header("Display")]
+        [SerializeField] private Toggle _fullscreenToggle;
+        [SerializeField] private TMP_Dropdown _resolutionDropdown;
+        [SerializeField] private Toggle _vsyncToggle;
+
+        [Header("Panel")]
+        [SerializeField] private Button _closeButton;
+
+        [Serializable]
+        private class DisplaySaveData
+        {
+            public bool Fullscreen = true;
+            public int  ResolutionIndex = -1; // -1 = not set yet, keep whatever's current
+            public bool VSync = true;
+        }
+
+        private const string SaveFileName   = "display.save";
+        private const string SaveFolderName = "ThroneOfTides/";
+
+        private List<Resolution> _resolutions = new List<Resolution>();
+        private bool _initialising;
+
+        private void Awake()
+        {
+            gameObject.SetActive(false);
+
+            if (_closeButton != null) _closeButton.onClick.AddListener(Hide);
+
+            if (_masterVolumeSlider != null) _masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+            if (_musicVolumeSlider  != null) _musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            if (_sfxVolumeSlider    != null) _sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
+
+            if (_fullscreenToggle   != null) _fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+            if (_vsyncToggle        != null) _vsyncToggle.onValueChanged.AddListener(OnVSyncChanged);
+            if (_resolutionDropdown != null) _resolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
+
+            BuildDistinctResolutions();
+            ApplySavedDisplaySettings();
+        }
+
+        // ── Public API ────────────────────────────────────────────────────────
+
+        public void Show()
+        {
+            gameObject.SetActive(true);
+            RefreshFromCurrentState();
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
+        // ── Init / Refresh ────────────────────────────────────────────────────
+
+        private void RefreshFromCurrentState()
+        {
+            _initialising = true;
+
+            if (MMSoundManager.HasInstance)
+            {
+                if (_masterVolumeSlider != null) _masterVolumeSlider.value = MMSoundManager.Instance.GetTrackVolume(MMSoundManager.MMSoundManagerTracks.Master, false);
+                if (_musicVolumeSlider  != null) _musicVolumeSlider.value  = MMSoundManager.Instance.GetTrackVolume(MMSoundManager.MMSoundManagerTracks.Music, false);
+                if (_sfxVolumeSlider    != null) _sfxVolumeSlider.value    = MMSoundManager.Instance.GetTrackVolume(MMSoundManager.MMSoundManagerTracks.Sfx, false);
+            }
+
+            if (_fullscreenToggle != null) _fullscreenToggle.isOn = Screen.fullScreen;
+            if (_vsyncToggle      != null) _vsyncToggle.isOn      = QualitySettings.vSyncCount > 0;
+
+            PopulateResolutionDropdown();
+
+            _initialising = false;
+        }
+
+        // Screen.resolutions repeats each size once per supported refresh rate — collapse to
+        // one entry per width/height. Built once and reused so the saved dropdown index and
+        // Screen.resolutions' index never disagree with each other.
+        private void BuildDistinctResolutions()
+        {
+            _resolutions.Clear();
+            foreach (var res in Screen.resolutions)
+            {
+                if (_resolutions.Count > 0)
+                {
+                    var last = _resolutions[_resolutions.Count - 1];
+                    if (last.width == res.width && last.height == res.height) continue;
+                }
+                _resolutions.Add(res);
+            }
+        }
+
+        private void PopulateResolutionDropdown()
+        {
+            if (_resolutionDropdown == null) return;
+
+            if (_resolutions.Count == 0) BuildDistinctResolutions();
+
+            var options = new List<string>();
+            int currentIndex = 0;
+
+            for (int i = 0; i < _resolutions.Count; i++)
+            {
+                var res = _resolutions[i];
+                options.Add($"{res.width} x {res.height}");
+
+                if (res.width == Screen.width && res.height == Screen.height)
+                    currentIndex = i;
+            }
+
+            _resolutionDropdown.ClearOptions();
+            _resolutionDropdown.AddOptions(options);
+            _resolutionDropdown.SetValueWithoutNotify(currentIndex);
+        }
+
+        // ── Audio Callbacks ───────────────────────────────────────────────────
+
+        private void OnMasterVolumeChanged(float value)
+        {
+            MMSoundManagerTrackEvent.Trigger(MMSoundManagerTrackEventTypes.SetVolumeTrack, MMSoundManager.MMSoundManagerTracks.Master, value);
+            SaveAudioSettings();
+        }
+
+        private void OnMusicVolumeChanged(float value)
+        {
+            MMSoundManagerTrackEvent.Trigger(MMSoundManagerTrackEventTypes.SetVolumeTrack, MMSoundManager.MMSoundManagerTracks.Music, value);
+            SaveAudioSettings();
+        }
+
+        // One slider drives both the Sfx and UI mixer tracks together.
+        private void OnSfxVolumeChanged(float value)
+        {
+            MMSoundManagerTrackEvent.Trigger(MMSoundManagerTrackEventTypes.SetVolumeTrack, MMSoundManager.MMSoundManagerTracks.Sfx, value);
+            MMSoundManagerTrackEvent.Trigger(MMSoundManagerTrackEventTypes.SetVolumeTrack, MMSoundManager.MMSoundManagerTracks.UI, value);
+            SaveAudioSettings();
+        }
+
+        private static void SaveAudioSettings()
+        {
+            if (MMSoundManager.HasInstance) MMSoundManager.Instance.SaveSettings();
+        }
+
+        // ── Display Callbacks ─────────────────────────────────────────────────
+
+        private void OnFullscreenChanged(bool isFullscreen)
+        {
+            Screen.fullScreen = isFullscreen;
+            if (!_initialising) SaveDisplaySettings();
+        }
+
+        private void OnVSyncChanged(bool isOn)
+        {
+            QualitySettings.vSyncCount = isOn ? 1 : 0;
+            if (!_initialising) SaveDisplaySettings();
+        }
+
+        private void OnResolutionChanged(int index)
+        {
+            if (index < 0 || index >= _resolutions.Count) return;
+            var res = _resolutions[index];
+            Screen.SetResolution(res.width, res.height, Screen.fullScreen);
+            if (!_initialising) SaveDisplaySettings();
+        }
+
+        // ── Display Save/Load ─────────────────────────────────────────────────
+
+        private void SaveDisplaySettings()
+        {
+            var data = new DisplaySaveData
+            {
+                Fullscreen      = Screen.fullScreen,
+                ResolutionIndex = _resolutionDropdown != null ? _resolutionDropdown.value : -1,
+                VSync           = QualitySettings.vSyncCount > 0,
+            };
+            MMSaveLoadManager.Save(data, SaveFileName, SaveFolderName);
+        }
+
+        // Applied once at Awake so display prefs take effect even before the panel is opened.
+        private void ApplySavedDisplaySettings()
+        {
+            var data = (DisplaySaveData)MMSaveLoadManager.Load(typeof(DisplaySaveData), SaveFileName, SaveFolderName);
+            if (data == null) return;
+
+            Screen.fullScreen         = data.Fullscreen;
+            QualitySettings.vSyncCount = data.VSync ? 1 : 0;
+
+            if (data.ResolutionIndex >= 0 && data.ResolutionIndex < _resolutions.Count)
+            {
+                var res = _resolutions[data.ResolutionIndex];
+                Screen.SetResolution(res.width, res.height, data.Fullscreen);
+            }
+        }
+    }
+}

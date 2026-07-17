@@ -12,6 +12,9 @@ namespace ThroneOfTides.Data
         [Tooltip("Display name shown on the card and used to look it up in the deck builder/inventory.")]
         [SerializeField] private string _name;
 
+        [Tooltip("Stable identity for code that needs to recognize this specific card (e.g. Kraken's negate rule, Torch's AI weighting, reaction charge routing) without depending on the editable display Name — renaming Name never breaks a CardId check, unlike a card.Name == \"...\" string comparison.")]
+        [SerializeField] private CardId _id = CardId.None;
+
         [Tooltip("Determines how this card is resolved: Weapon deals flat damage, Combo needs a Partner, Action/Reaction run an Effect SO, DOT applies damage over time.")]
         [SerializeField] private CardType _cardType;
 
@@ -73,6 +76,8 @@ namespace ThroneOfTides.Data
         [Header("Play Presentation")]
         [Tooltip("What spawns when this card is played — sprite-only effects or paired UI-sprite + world-particle effects, per caster side. See CardPresentationPlayer.")]
         [SerializeField] private List<CardPresentationEntry> _presentationEntries = new List<CardPresentationEntry>();
+
+        public CardId Id => _id;
 
         // ── ICard ──────────────────────────────────────────────────────────────
         public string   Name             => _name;

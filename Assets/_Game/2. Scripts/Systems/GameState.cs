@@ -56,8 +56,8 @@ namespace ThroneOfTides.Systems
         public bool HasDrawnThisTurn         { get; private set; }
 
         // ── Reaction Charges ──────────────────────────────────────────────────
-        public int DeadMansTurnCharges  { get; private set; }
-        public int BloodForBloodCharges { get; private set; }
+        public int DeadMansTurnCharges { get; private set; }
+        public int CounterGaleCharges  { get; private set; }
 
         // ── Discard & Snapshot ────────────────────────────────────────────────
         private readonly List<CardSO>    _playerDiscard       = new List<CardSO>();
@@ -114,6 +114,13 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
+        // Mirror of HealPlayer for when the Enemy is the one casting the heal (e.g. Rum).
+        public void HealEnemy(int amount)
+        {
+            EnemyHP = Mathf.Min(EnemyHP + amount, EnemyMaxHP);
+            GameEventBus.FireHPChanged(EnemyHP);
+        }
+
         // ── Mana ──────────────────────────────────────────────────────────────
 
         public void ResetPlayerMana()
@@ -151,7 +158,7 @@ namespace ThroneOfTides.Systems
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
-        // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind
+        // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind/Essence Plunder
         public void StealEnemyMana(int amount)
         {
             int actual = Mathf.Min(amount, EnemyMana - 1);
@@ -162,6 +169,18 @@ namespace ThroneOfTides.Systems
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
+        // Mirror of StealEnemyMana for when the Enemy is the one casting the steal — Player
+        // mana floor is 1, same rule reversed.
+        public void StealPlayerMana(int amount)
+        {
+            int actual = Mathf.Min(amount, PlayerMana - 1);
+            if (actual <= 0) return;
+            PlayerMana -= actual;
+            EnemyMana  += actual;
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+        }
+
         // ── Reactions ─────────────────────────────────────────────────────────
 
         public void AddDeadMansTurnCharge()
@@ -170,10 +189,10 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireReactionCharged(ReactionType.DeadMansTurn, DeadMansTurnCharges);
         }
 
-        public void AddBloodForBloodCharge()
+        public void AddCounterGaleCharge()
         {
-            BloodForBloodCharges++;
-            GameEventBus.FireReactionCharged(ReactionType.BloodForBlood, BloodForBloodCharges);
+            CounterGaleCharges++;
+            GameEventBus.FireReactionCharged(ReactionType.CounterGale, CounterGaleCharges);
         }
 
         public bool ConsumeDeadMansTurn()
@@ -184,16 +203,16 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
-        public bool ConsumeBloodForBlood()
+        public bool ConsumeCounterGale()
         {
-            if (BloodForBloodCharges <= 0) return false;
-            BloodForBloodCharges--;
-            GameEventBus.FireReactionFired(ReactionType.BloodForBlood);
+            if (CounterGaleCharges <= 0) return false;
+            CounterGaleCharges--;
+            GameEventBus.FireReactionFired(ReactionType.CounterGale);
             return true;
         }
 
         public bool HasAnyReaction() =>
-            DeadMansTurnCharges > 0 || BloodForBloodCharges > 0;
+            DeadMansTurnCharges > 0 || CounterGaleCharges > 0;
 
         // ── Status Effects ────────────────────────────────────────────────────
 
@@ -343,7 +362,7 @@ namespace ThroneOfTides.Systems
 
         public List<CardSO> RetrieveFromPlayerDiscard(int count)
         {
-            var eligible  = _playerDiscard.Where(c => c.Name != "The Kraken").ToList();
+            var eligible  = _playerDiscard.Where(c => c.Id != CardId.Kraken).ToList();
             var retrieved = new List<CardSO>();
 
             for (int i = 0; i < count && eligible.Count > 0; i++)

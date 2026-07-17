@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GunpowderBarrelCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Gunpowder Barrel
+  _id: 6
   _cardType: 1
   _description: "Let it build. Let it burn. Prime the combo \u2014 stack each turn
     to increase Torch damage."

@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: EssencePlunderCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Essence Plunder
+  _id: 20
   _cardType: 2
-  _description: Their will is not their own. The attack you play this turn is unblockable.
+  _description: Fair wind, ill-gotten. Steal 2 mana from the enemy this turn.
   _manaCost: 0
   _storageCost: 6
   _hpCost: 2
@@ -24,7 +25,7 @@ MonoBehaviour:
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
-  _actionEffect: {fileID: 11400000, guid: 73758203ea0d834468175f4dae195624, type: 2}
+  _actionEffect: {fileID: 11400000, guid: f826e96d9dd24dfb92aec6718a97da53, type: 2}
   _isEligibleAsActionPair: 1
   _aiPlayBeforeAttack: 1
   _art: {fileID: 21300000, guid: 03f76c77f779a264c931ab0a9ab3cbe5, type: 3}

@@ -62,7 +62,7 @@ namespace ThroneOfTides.Data
 
             return card.CardType switch
             {
-                CardType.Combo   => card.Name.Contains("Torch") ? _weightComboFollowUp : _weightComboInitiator,
+                CardType.Combo   => card.Id == CardId.Torch ? _weightComboFollowUp : _weightComboInitiator,
                 CardType.DOT     => _weightDOT,
                 CardType.Action  => GetActionWeight(card),
                 CardType.Weapon  => GetWeaponWeight(card),
@@ -72,20 +72,20 @@ namespace ThroneOfTides.Data
 
         private float GetWeaponWeight(CardSO card)
         {
-            if (card.Name == "The Kraken")      return _weightKraken;
-            if (card.Name == "Boarding Party")  return _weightBoardingParty;
-            if (card.Damage >= 5)               return _weightHighDamageWeapon;
-            return card.Damage <= 2             ? _weightLowDamageWeapon : 1f;
+            if (card.Id == CardId.Kraken)        return _weightKraken;
+            if (card.Id == CardId.BoardingParty) return _weightBoardingParty;
+            if (card.Damage >= 5)                return _weightHighDamageWeapon;
+            return card.Damage <= 2              ? _weightLowDamageWeapon : 1f;
         }
 
-        private float GetActionWeight(CardSO card) => card.Name switch
+        private float GetActionWeight(CardSO card) => card.Id switch
         {
-            "Recon Parrot"   => _weightActionIntel,
-            "Siren Song"     => _weightActionDisrupt,
-            "Treasure Chest" => _weightActionDraw,
-            "High Spirits"   => _weightActionHeal,
-            "Dead Man's Turn"=> _weightActionDefense,
-            _                => 1f
+            CardId.ReconParrot   => _weightActionIntel,
+            CardId.SirenSong     => _weightActionDisrupt,
+            CardId.TreasureChest => _weightActionDraw,
+            CardId.HighSpirits   => _weightActionHeal,
+            CardId.DeadMansTurn  => _weightActionDefense,
+            _                    => 1f
         };
     }
 }

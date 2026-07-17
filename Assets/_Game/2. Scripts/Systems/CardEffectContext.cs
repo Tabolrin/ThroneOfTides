@@ -36,8 +36,15 @@ namespace ThroneOfTides.Systems
         public void ApplyDamage(DamageTarget target, int amount) =>
             _gameState.ApplyDamage(target, amount);
 
-        public void HealPlayer(int amount) =>
-            _gameState.HealPlayer(amount);
+        // Heals whichever side cast this card — works for either side so Rum behaves
+        // correctly when the enemy plays it too.
+        public void HealPlayer(int amount)
+        {
+            if (Caster == DamageTarget.Player)
+                _gameState.HealPlayer(amount);
+            else
+                _gameState.HealEnemy(amount);
+        }
 
         public void SetSirenActive() =>
             _gameState.SetSirenActive(Caster);
@@ -57,14 +64,21 @@ namespace ThroneOfTides.Systems
         public void AddPlayerMaxMana(int amount) =>
             _gameState.AddPlayerMaxMana(amount);
 
-        public void StealEnemyMana(int amount) =>
-            _gameState.StealEnemyMana(amount);
+        // Steals mana from whoever did NOT cast this card, into the caster's own pool — works
+        // for either side so Stolen Wind/Essence Plunder behave correctly when the enemy plays them.
+        public void StealEnemyMana(int amount)
+        {
+            if (Caster == DamageTarget.Player)
+                _gameState.StealEnemyMana(amount);
+            else
+                _gameState.StealPlayerMana(amount);
+        }
 
         public void AddDeadMansTurnCharge() =>
             _gameState.AddDeadMansTurnCharge();
 
-        public void AddBloodForBloodCharge() =>
-            _gameState.AddBloodForBloodCharge();
+        public void AddCounterGaleCharge() =>
+            _gameState.AddCounterGaleCharge();
 
         public void ReturnFromSnapshot(int count)
         {

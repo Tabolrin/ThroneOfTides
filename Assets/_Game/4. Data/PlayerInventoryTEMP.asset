@@ -19,3 +19,4 @@ MonoBehaviour:
   _hullReinforcementLevel: 0
   _expandedCargoHoldLevel: 0
   _manaCrystalLevel: 0
+  _cardDatabase: {fileID: 11400000, guid: 3be754decfe47b64f9f980e516cc35cd, type: 2}

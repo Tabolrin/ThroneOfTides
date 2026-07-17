@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DaedMan'sTurnCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Dead Man's Turn
+  _id: 22
   _cardType: 2
   _description: Legends don't dodge. They were never there to begin with. React in
     time to negate the next incoming attack.
@@ -27,5 +28,8 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 11400000, guid: c17fc0c546c84944a9af8ad1a0e248a1, type: 2}
   _isEligibleAsActionPair: 1
-  _art: {fileID: 21300000, guid: 57148d38e31ee534983cd75ae27a9fa9, type: 3}
-  _cardArtAnimator: {fileID: 0}
+  _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
+  _statusType: 0
+  _art: {fileID: 21300000, guid: d666ccb1948f6c44c99b7ffd064a9bf0, type: 3}
+  _presentationEntries: []

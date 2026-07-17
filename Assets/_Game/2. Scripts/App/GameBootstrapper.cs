@@ -167,8 +167,8 @@ namespace ThroneOfTides.App
 
         private void ChargeReactionCard(CardSO card)
         {
-            if (card.Name == "Dead Man's Turn")      _gameState.AddDeadMansTurnCharge();
-            else if (card.Name == "Blood for Blood") _gameState.AddBloodForBloodCharge();
+            if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge();
+            else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge();
         }
 
         private void Update() => _stateMachine?.Tick();

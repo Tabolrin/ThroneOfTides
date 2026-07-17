@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: TorchCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Torch
+  _id: 7
   _cardType: 1
   _description: Now we end this. If Gunpowder is on the enemy ship, ignite it. Deals
     8 damage +2 per stacked Barrel.

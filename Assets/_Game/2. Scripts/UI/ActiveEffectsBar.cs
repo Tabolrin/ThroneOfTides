@@ -35,15 +35,15 @@ namespace ThroneOfTides.UI
         [SerializeField] private TextMeshProUGUI _dmtChargesLabel;
 
         [Header("Reactions — Counter Gale")]
-        [SerializeField] private GameObject      _bfbRoot;
-        [SerializeField] private TextMeshProUGUI _bfbChargesLabel;
+        [SerializeField] private GameObject      _counterGaleRoot;
+        [SerializeField] private TextMeshProUGUI _counterGaleChargesLabel;
 
         [Header("Status Badges")]
         [Tooltip("One entry per pre-placed status badge in the scene.")]
         [SerializeField] private List<StatusBadge> _badges = new List<StatusBadge>();
 
         private int _dmtCharges;
-        private int _bfbCharges;
+        private int _counterGaleCharges;
 
         private void OnEnable()
         {
@@ -74,8 +74,8 @@ namespace ThroneOfTides.UI
             }
             else
             {
-                _bfbCharges = charges;
-                Refresh(_bfbRoot, _bfbChargesLabel, _bfbCharges);
+                _counterGaleCharges = charges;
+                Refresh(_counterGaleRoot, _counterGaleChargesLabel, _counterGaleCharges);
             }
         }
 
@@ -90,8 +90,8 @@ namespace ThroneOfTides.UI
             }
             else
             {
-                _bfbCharges = Mathf.Max(0, _bfbCharges - 1);
-                Refresh(_bfbRoot, _bfbChargesLabel, _bfbCharges);
+                _counterGaleCharges = Mathf.Max(0, _counterGaleCharges - 1);
+                Refresh(_counterGaleRoot, _counterGaleChargesLabel, _counterGaleCharges);
             }
         }
 
@@ -108,7 +108,7 @@ namespace ThroneOfTides.UI
         private void OnMatchEnd()
         {
             _dmtCharges = 0;
-            _bfbCharges = 0;
+            _counterGaleCharges = 0;
 
             foreach (var badge in _badges)
                 Refresh(badge.Root, badge.CountLabel, 0);
