@@ -23,6 +23,7 @@ namespace ThroneOfTides.UI
         // ── Identity ───────────────────────────────────────────────────────────
         [Header("Card Identity")]
         [SerializeField] private TextMeshProUGUI _nameLabel;
+        [SerializeField] private TextMeshProUGUI _descriptionLabel;
         [SerializeField] private Image           _cardArt;
 
         // ── Cost banner badges (bottom strip) ──────────────────────────────────
@@ -76,6 +77,7 @@ namespace ThroneOfTides.UI
             if (_cardBack != null) _cardBack.gameObject.SetActive(false);
 
             _nameLabel.text = card.Name;
+            if (_descriptionLabel != null) _descriptionLabel.text = card.Description;
 
             if (_cardArt != null && card.Art != null)
                 _cardArt.sprite = card.Art;

@@ -354,17 +354,17 @@ RectTransform:
   m_GameObject: {fileID: 1838155713895299062}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1404799274128906195}
   - {fileID: 1555764717863038188}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 300, y: 300}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8803106016087924963
 MonoBehaviour:
@@ -382,6 +382,7 @@ MonoBehaviour:
   _cardBack: {fileID: 5689307574751581862}
   _typeSymbolIcon: {fileID: 259379820917826940}
   _nameLabel: {fileID: 2303582297856683896}
+  _descriptionLabel: {fileID: 2614796831750179974}
   _cardArt: {fileID: 1672190662367763131}
   _manaCostBadge: {fileID: 7216658194800261984}
   _manaCostLabel: {fileID: 9085054357942356191}
