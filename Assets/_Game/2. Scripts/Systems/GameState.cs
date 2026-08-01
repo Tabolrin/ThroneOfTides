@@ -17,33 +17,31 @@ namespace ThroneOfTides.Systems
         public Deck PlayerDeck { get; private set; }
         public Deck EnemyDeck  { get; private set; }
 
-        public int  PlayerHP     { get; private set; }
-        public int  EnemyHP      { get; private set; }
+        // Per-side HP/Mana/Combo state — GameState forwards its Player*/Enemy* API to these
+        // instead of duplicating the underlying math (see ShipState.cs).
+        public ShipState Player { get; private set; }
+        public ShipState Enemy  { get; private set; }
+
+        public ShipState GetSide(DamageTarget target) => target == DamageTarget.Player ? Player : Enemy;
+
+        public int  PlayerHP     => Player.HP;
+        public int  EnemyHP      => Enemy.HP;
         public bool IsPlayerTurn { get; set; }
 
-        public int PlayerMaxHP { get; private set; }
-        public int EnemyMaxHP  { get; private set; }
+        public int PlayerMaxHP => Player.MaxHP;
+        public int EnemyMaxHP  => Enemy.MaxHP;
 
         // ── Mana ──────────────────────────────────────────────────────────────
-        public int PlayerMana    { get; private set; }
-        public int PlayerMaxMana { get; private set; }
-        public int EnemyMana     { get; private set; }
-        public int EnemyMaxMana  { get; private set; }
+        public int PlayerMana    => Player.Mana;
+        public int PlayerMaxMana => Player.MaxMana;
+        public int EnemyMana     => Enemy.Mana;
+        public int EnemyMaxMana  => Enemy.MaxMana;
 
         // ── Combo (per side — gunpowder priming/resolving works independently on each ship) ──
-        private readonly ComboState _playerCombo = new ComboState();
-        private readonly ComboState _enemyCombo  = new ComboState();
-
-        public int    PlayerComboStackCount => _playerCombo.StackCount;
-        public CardSO PlayerActiveComboCard => _playerCombo.ActiveCard;
-        public int    EnemyComboStackCount  => _enemyCombo.StackCount;
-        public CardSO EnemyActiveComboCard  => _enemyCombo.ActiveCard;
-
-        private class ComboState
-        {
-            public int    StackCount;
-            public CardSO ActiveCard;
-        }
+        public int    PlayerComboStackCount => Player.ComboStackCount;
+        public CardSO PlayerActiveComboCard => Player.ActiveComboCard;
+        public int    EnemyComboStackCount  => Enemy.ComboStackCount;
+        public CardSO EnemyActiveComboCard  => Enemy.ActiveComboCard;
 
         // ── Status Effects ────────────────────────────────────────────────────
         public bool SirenSongActive    { get; private set; }
@@ -71,26 +69,23 @@ namespace ThroneOfTides.Systems
 
         public Action OnEnemyTurnReady;
 
-        public GameState(int startingHP, int startingMaxMana,
+        public int MaxHandSize { get; private set; }
+
+        public GameState(int startingHP, int startingMaxMana, int maxHandSize,
                          Deck playerDeck, Deck enemyDeck,
                          List<CardSO> originalDeckSnapshot)
         {
-            PlayerMaxHP = startingHP;
-            EnemyMaxHP  = startingHP;
-            PlayerHP    = startingHP;
-            EnemyHP     = startingHP;
+            // Both sides start with a full mana pool — previously only the player's mana was
+            // implicitly filled (as a side effect of PlayerTurnState.Enter() firing on the very
+            // first state-machine transition); the enemy had no equivalent until its first turn.
+            Player = new ShipState(startingHP, startingMaxMana);
+            Enemy  = new ShipState(startingHP, startingMaxMana);
+
+            MaxHandSize = maxHandSize;
             PlayerDeck  = playerDeck;
             EnemyDeck   = enemyDeck;
             PlayerHand  = new Hand();
             EnemyHand   = new Hand();
-
-            PlayerMaxMana = startingMaxMana;
-            EnemyMaxMana  = startingMaxMana;
-            // Both sides start with a full mana pool — previously only the player's mana was
-            // implicitly filled (as a side effect of PlayerTurnState.Enter() firing on the very
-            // first state-machine transition); the enemy had no equivalent until its first turn.
-            PlayerMana = startingMaxMana;
-            EnemyMana  = startingMaxMana;
 
             _originalDeckSnapshot = new List<CardSO>(originalDeckSnapshot);
         }
@@ -99,25 +94,21 @@ namespace ThroneOfTides.Systems
 
         public void ApplyDamage(DamageTarget target, int amount)
         {
-            if (target == DamageTarget.Player)
-                PlayerHP = Mathf.Max(0, PlayerHP - amount);
-            else
-                EnemyHP  = Mathf.Max(0, EnemyHP  - amount);
-
+            GetSide(target).ApplyDamage(amount);
             GameEventBus.FireDamageDealt(target, amount);
             GameEventBus.FireHPChanged(target == DamageTarget.Player ? PlayerHP : EnemyHP);
         }
 
         public void HealPlayer(int amount)
         {
-            PlayerHP = Mathf.Min(PlayerHP + amount, PlayerMaxHP);
+            Player.Heal(amount);
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
         // Mirror of HealPlayer for when the Enemy is the one casting the heal (e.g. Rum).
         public void HealEnemy(int amount)
         {
-            EnemyHP = Mathf.Min(EnemyHP + amount, EnemyMaxHP);
+            Enemy.Heal(amount);
             GameEventBus.FireHPChanged(EnemyHP);
         }
 
@@ -125,46 +116,41 @@ namespace ThroneOfTides.Systems
 
         public void ResetPlayerMana()
         {
-            PlayerMana = PlayerMaxMana;
+            Player.ResetMana();
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
         public void ResetEnemyMana()
         {
-            EnemyMana = EnemyMaxMana;
+            Enemy.ResetMana();
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
         }
 
         public bool SpendPlayerMana(int amount)
         {
-            if (PlayerMana < amount) return false;
-            PlayerMana -= amount;
+            if (!Player.SpendMana(amount)) return false;
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
             return true;
         }
 
         public bool SpendEnemyMana(int amount)
         {
-            if (EnemyMana < amount) return false;
-            EnemyMana -= amount;
+            if (!Enemy.SpendMana(amount)) return false;
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
             return true;
         }
 
         public void AddPlayerMaxMana(int amount)
         {
-            PlayerMaxMana += amount;
-            PlayerMana    += amount;
+            Player.AddMaxMana(amount);
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
         // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind/Essence Plunder
         public void StealEnemyMana(int amount)
         {
-            int actual = Mathf.Min(amount, EnemyMana - 1);
+            int actual = Enemy.TransferManaTo(Player, amount);
             if (actual <= 0) return;
-            EnemyMana  -= actual;
-            PlayerMana += actual;
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
@@ -173,10 +159,8 @@ namespace ThroneOfTides.Systems
         // mana floor is 1, same rule reversed.
         public void StealPlayerMana(int amount)
         {
-            int actual = Mathf.Min(amount, PlayerMana - 1);
+            int actual = Player.TransferManaTo(Enemy, amount);
             if (actual <= 0) return;
-            PlayerMana -= actual;
-            EnemyMana  += actual;
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
         }
@@ -307,23 +291,19 @@ namespace ThroneOfTides.Systems
 
         // ── Combo (per side) ──────────────────────────────────────────────────
 
-        private ComboState GetCombo(DamageTarget side) =>
-            side == DamageTarget.Player ? _playerCombo : _enemyCombo;
-
         public void IncrementCombo(DamageTarget side, CardSO card)
         {
-            var combo = GetCombo(side);
-            combo.ActiveCard = card;
-            combo.StackCount++;
-            GameEventBus.FireComboStackChanged(side, combo.StackCount);
-            GameEventBus.FireShipStatusCountChanged(ShipStatusType.Gunpowder, side, combo.StackCount);
+            var combo = GetSide(side);
+            combo.IncrementCombo(card);
+            GameEventBus.FireComboStackChanged(side, combo.ComboStackCount);
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.Gunpowder, side, combo.ComboStackCount);
         }
 
         public int ResolveCombo(DamageTarget side)
         {
-            var combo = GetCombo(side);
-            int damage = combo.ActiveCard.ComboDamage +
-                         ((combo.StackCount - 1) * combo.ActiveCard.ComboStackBonus);
+            var combo = GetSide(side);
+            int damage = combo.ActiveComboCard.ComboDamage +
+                         ((combo.ComboStackCount - 1) * combo.ActiveComboCard.ComboStackBonus);
             ResetCombo(side);
             GameEventBus.FireComboResolved();
             return damage;
@@ -331,9 +311,7 @@ namespace ThroneOfTides.Systems
 
         public void ResetCombo(DamageTarget side)
         {
-            var combo = GetCombo(side);
-            combo.StackCount = 0;
-            combo.ActiveCard = null;
+            GetSide(side).ResetCombo();
             GameEventBus.FireComboStackChanged(side, 0);
             GameEventBus.FireShipStatusCountChanged(ShipStatusType.Gunpowder, side, 0);
         }
@@ -399,25 +377,25 @@ namespace ThroneOfTides.Systems
 
         public void CheatAddPlayerHP(int amount)
         {
-            PlayerHP = Mathf.Clamp(PlayerHP + amount, 0, PlayerMaxHP);
+            Player.CheatAddHP(amount);
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
         public void CheatAddEnemyHP(int amount)
         {
-            EnemyHP = Mathf.Clamp(EnemyHP + amount, 0, EnemyMaxHP);
+            Enemy.CheatAddHP(amount);
             GameEventBus.FireHPChanged(EnemyHP);
         }
 
         public void CheatAddPlayerMana(int amount)
         {
-            PlayerMana = Mathf.Clamp(PlayerMana + amount, 0, PlayerMaxMana);
+            Player.CheatAddMana(amount);
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
         public void CheatAddEnemyMana(int amount)
         {
-            EnemyMana = Mathf.Clamp(EnemyMana + amount, 0, EnemyMaxMana);
+            Enemy.CheatAddMana(amount);
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
         }
 
@@ -425,29 +403,25 @@ namespace ThroneOfTides.Systems
         // otherwise exceed the new max. Follow with the matching Add cheat to fill it back up.
         public void CheatSetPlayerMaxHP(int amount)
         {
-            PlayerMaxHP = Mathf.Max(1, amount);
-            PlayerHP    = Mathf.Min(PlayerHP, PlayerMaxHP);
+            Player.SetMaxHP(amount);
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
         public void CheatSetEnemyMaxHP(int amount)
         {
-            EnemyMaxHP = Mathf.Max(1, amount);
-            EnemyHP    = Mathf.Min(EnemyHP, EnemyMaxHP);
+            Enemy.SetMaxHP(amount);
             GameEventBus.FireHPChanged(EnemyHP);
         }
 
         public void CheatSetPlayerMaxMana(int amount)
         {
-            PlayerMaxMana = Mathf.Max(0, amount);
-            PlayerMana    = Mathf.Min(PlayerMana, PlayerMaxMana);
+            Player.SetMaxMana(amount);
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
         public void CheatSetEnemyMaxMana(int amount)
         {
-            EnemyMaxMana = Mathf.Max(0, amount);
-            EnemyMana    = Mathf.Min(EnemyMana, EnemyMaxMana);
+            Enemy.SetMaxMana(amount);
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
         }
     }
