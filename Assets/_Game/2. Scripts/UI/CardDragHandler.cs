@@ -54,11 +54,11 @@ namespace ThroneOfTides.UI
             _canvasGroup.blocksRaycasts = true;
             _canvasGroup.alpha          = 1f;
 
-            // Card was accepted by play zone — destroy handled by caller
+            // Card was accepted by play zone — release-to-pool handled by HandLayoutManager
+            // via OnDragEnded (it owns the CardView pool and knows the card's release state).
             if (_cardView != null && _cardView.WasPlayed)
             {
                 OnDragEnded?.Invoke(_cardView);
-                Destroy(gameObject);
                 return;
             }
 

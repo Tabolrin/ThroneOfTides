@@ -6,6 +6,7 @@ using MoreMountains.Feedbacks;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace ThroneOfTides.UI
 {
@@ -15,6 +16,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private RectTransform _enemyHandContainer;
         [SerializeField] private CardView      _cardPrefab;
         [SerializeField] private Canvas        _dragCanvas;
+        [SerializeField] private CardInspectController _inspectController;
 
         [Header("Player Hand Layout")]
         [SerializeField] private float _cardSpacing = -18f;
@@ -48,6 +50,60 @@ namespace ThroneOfTides.UI
         private readonly List<CardView> _playerCards = new List<CardView>();
         private readonly List<CardView> _enemyCards  = new List<CardView>();
 
+        private ObjectPool<CardView> _cardViewPool;
+
+        private void Awake()
+        {
+            // One-time fallback if the scene/prefab hasn't had this new field wired up in the
+            // Inspector yet — avoids silently breaking card inspect after this refactor.
+            if (_inspectController == null)
+                _inspectController = FindFirstObjectByType<CardInspectController>();
+
+            // Pools card view instances instead of Instantiate/Destroy per draw/play — hands
+            // churn cards constantly (every draw, every enemy play, every discard).
+            _cardViewPool = new ObjectPool<CardView>(
+                createFunc: () => Instantiate(_cardPrefab),
+                actionOnGet: view =>
+                {
+                    view.gameObject.SetActive(true);
+                    view.transform.localScale = Vector3.one;
+                    var canvasGroup = view.GetComponent<CanvasGroup>();
+                    if (canvasGroup != null) canvasGroup.alpha = 1f;
+                },
+                actionOnRelease: view =>
+                {
+                    // Destroy() used to clean up in-flight DOTween tweens automatically —
+                    // pooled objects only get deactivated, so kill tweens explicitly.
+                    view.transform.DOKill();
+                    var canvasGroup = view.GetComponent<CanvasGroup>();
+                    if (canvasGroup != null) canvasGroup.DOKill();
+
+                    view.gameObject.SetActive(false);
+                    view.transform.SetParent(transform, false);
+                },
+                actionOnDestroy: view => Destroy(view.gameObject),
+                collectionCheck: false);
+        }
+
+        private CardView SpawnCardView(Transform parent)
+        {
+            CardView view = _cardViewPool.Get();
+            view.transform.SetParent(parent, false);
+            view.OnInspectRequested = ShowCardInspect;
+            return view;
+        }
+
+        private void ShowCardInspect(CardView card)
+        {
+            if (_inspectController != null) _inspectController.Show(card);
+        }
+
+        private void ReleaseCardView(CardView view)
+        {
+            if (view == null) return;
+            _cardViewPool.Release(view);
+        }
+
         // ── IHandLayoutManager ──────────────────────────────────────────────
 
         void IHandLayoutManager.AddCardToPlayerHand(ICard card) =>
@@ -70,7 +126,7 @@ namespace ThroneOfTides.UI
 
         public void AddCardToPlayerHand(CardSO card)
         {
-            CardView view = Instantiate(_cardPrefab, _playerHandContainer);
+            CardView view = SpawnCardView(_playerHandContainer);
             view.Setup(card);
             view.HandYOffset = Random.Range(-_maxYOffset, _maxYOffset);
 
@@ -95,6 +151,21 @@ namespace ThroneOfTides.UI
         private void OnCardDragEnded(CardView card)
         {
             if (card == null) return;
+
+            if (card.WasPlayed)
+            {
+                _playerCards.Remove(card);
+                var drag = card.GetComponent<CardDragHandler>();
+                if (drag != null)
+                {
+                    drag.OnDragStarted -= OnCardDragStarted;
+                    drag.OnDragEnded   -= OnCardDragEnded;
+                }
+                ReleaseCardView(card);
+                RefreshPlayerLayout(animated: true);
+                return;
+            }
+
             if (!_playerCards.Contains(card))
             {
                 card.HandYOffset = Random.Range(-_maxYOffset, _maxYOffset);
@@ -121,7 +192,7 @@ namespace ThroneOfTides.UI
             }
 
             _playerCards.Remove(view);
-            Destroy(view.gameObject);
+            ReleaseCardView(view);
             RefreshPlayerLayout(animated: true);
         }
 
@@ -136,7 +207,7 @@ namespace ThroneOfTides.UI
                     drag.OnDragStarted -= OnCardDragStarted;
                     drag.OnDragEnded   -= OnCardDragEnded;
                 }
-                Destroy(c.gameObject);
+                ReleaseCardView(c);
             }
             _playerCards.Clear();
         }
@@ -174,7 +245,7 @@ namespace ThroneOfTides.UI
         {
             foreach (var card in cards)
             {
-                CardView view = Instantiate(_cardPrefab, _playerHandContainer);
+                CardView view = SpawnCardView(_playerHandContainer);
                 view.Setup(card);
                 view.HandYOffset = Random.Range(-_maxYOffset, _maxYOffset);
 
@@ -217,7 +288,7 @@ namespace ThroneOfTides.UI
         : Vector3.zero);
 
     // Spawn directly in playerHandContainer to get correct native size
-    CardView view = Instantiate(_cardPrefab, _playerHandContainer);
+    CardView view = SpawnCardView(_playerHandContainer);
     view.Setup(card);
     view.HandYOffset = Random.Range(-_maxYOffset, _maxYOffset);
 
@@ -269,7 +340,7 @@ namespace ThroneOfTides.UI
 
         public void AddCardToEnemyHand(CardSO card)
         {
-            CardView view = Instantiate(_cardPrefab, _enemyHandContainer);
+            CardView view = SpawnCardView(_enemyHandContainer);
             view.SetFaceDown(card);
             _enemyCards.Add(view);
             RefreshEnemyLayout();
@@ -280,7 +351,7 @@ namespace ThroneOfTides.UI
             CardView view = _enemyCards.Find(v => v != null && v.CardData == card);
             if (view == null) return;
             _enemyCards.Remove(view);
-            Destroy(view.gameObject);
+            ReleaseCardView(view);
             RefreshEnemyLayout();
         }
 
@@ -380,9 +451,9 @@ namespace ThroneOfTides.UI
 
             yield return new WaitForSeconds(_cardFadeDuration);
 
-            // Reset scale before destroying — avoids DOTween leaving dirty state
+            // Reset scale before releasing — avoids DOTween leaving dirty state
             rect.localScale = startScale;
-            Destroy(view.gameObject);
+            ReleaseCardView(view);
             onComplete?.Invoke();
         }
         

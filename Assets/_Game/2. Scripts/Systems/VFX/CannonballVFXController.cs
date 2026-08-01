@@ -5,6 +5,7 @@ using MoreMountains.Feedbacks;
 using UnityEngine;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using ThroneOfTides.Systems.VFX;
 
 namespace ThroneOfTides.Systems
 {
@@ -82,11 +83,7 @@ namespace ThroneOfTides.Systems
         {
             gameObject.SetActive(false);
 
-            if (_explosionPrefab != null)
-            {
-                var explosion = Instantiate(_explosionPrefab, _context.OpponentAnchor.position, Quaternion.identity);
-                Destroy(explosion, _explosionLifetime);
-            }
+            ExplosionEffectPool.PlayAt(_explosionPrefab, _context.OpponentAnchor.position, _explosionLifetime);
 
             _feedbackOnImpact?.PlayFeedbacks();
             _shakeOnImpact?.PlayFeedbacks();

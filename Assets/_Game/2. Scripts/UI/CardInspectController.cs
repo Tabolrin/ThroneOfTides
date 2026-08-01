@@ -28,11 +28,8 @@ namespace ThroneOfTides.UI
         private Vector2       _inspectPosition;
         private CanvasGroup   _descriptionCanvasGroup;
 
-        public static CardInspectController Instance { get; private set; }
-
         private void Awake()
         {
-            Instance = this;
             _descriptionCanvasGroup = _descriptionPanel.GetComponent<CanvasGroup>();
             if (_descriptionCanvasGroup == null)
                 _descriptionCanvasGroup = _descriptionPanel.gameObject.AddComponent<CanvasGroup>();

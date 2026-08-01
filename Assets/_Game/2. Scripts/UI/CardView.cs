@@ -53,6 +53,10 @@ namespace ThroneOfTides.UI
         public bool   WasPlayed     { get; set; }
         public bool   IsBeingPlayed { get; set; }
 
+        // Wired by whoever spawns this CardView (HandLayoutManager) instead of reaching into a
+        // static CardInspectController.Instance singleton.
+        public System.Action<CardView> OnInspectRequested;
+
         // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void OnEnable()  => GameEventBus.OnCardPlayAccepted += OnCardPlayAccepted;
@@ -71,7 +75,9 @@ namespace ThroneOfTides.UI
 
         public void Setup(CardSO card)
         {
-            CardData = card;
+            CardData      = card;
+            WasPlayed     = false;
+            IsBeingPlayed = false;
 
             _cardFront.SetActive(true);
             if (_cardBack != null) _cardBack.gameObject.SetActive(false);
@@ -88,19 +94,17 @@ namespace ThroneOfTides.UI
 
         public void SetFaceDown(CardSO card)
         {
-            CardData = card;
+            CardData      = card;
+            WasPlayed     = false;
+            IsBeingPlayed = false;
             _cardFront.SetActive(false);
             if (_cardBack != null) _cardBack.gameObject.SetActive(true);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (eventData.button == PointerEventData.InputButton.Right
-                && CardData != null
-                && CardInspectController.Instance != null)
-            {
-                CardInspectController.Instance.Show(this);
-            }
+            if (eventData.button == PointerEventData.InputButton.Right && CardData != null)
+                OnInspectRequested?.Invoke(this);
         }
 
         // ── Private setup ──────────────────────────────────────────────────────

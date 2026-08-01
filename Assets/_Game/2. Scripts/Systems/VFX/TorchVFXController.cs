@@ -89,11 +89,7 @@ namespace ThroneOfTides.Systems.VFX
 
             if (gunpowderActive)
             {
-                if (_explosionPrefab != null)
-                {
-                    var explosion = Instantiate(_explosionPrefab, _context.OpponentAnchor.position, Quaternion.identity);
-                    Destroy(explosion, _explosionLifetime);
-                }
+                ExplosionEffectPool.PlayAt(_explosionPrefab, _context.OpponentAnchor.position, _explosionLifetime);
 
                 CardSfxPlayer.Play(_explosionSfx, _context.OpponentAnchor.position);
                 _feedbackExplosion?.PlayFeedbacks();
