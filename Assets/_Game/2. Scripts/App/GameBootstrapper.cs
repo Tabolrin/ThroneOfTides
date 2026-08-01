@@ -242,7 +242,7 @@ namespace ThroneOfTides.App
             yield return StartCoroutine(
                 _handLayoutManager.PlayEnemyCardAnimation(
                     card, _playZone,
-                    () => GameEventBus.OnEnemyCardAnimationComplete?.Invoke()));
+                    GameEventBus.FireEnemyCardAnimationComplete));
         }
 
         private void ShowReactionPrompt(CardSO card, int damage, string blockCost,

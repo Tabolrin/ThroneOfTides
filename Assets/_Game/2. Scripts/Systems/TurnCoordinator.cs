@@ -250,10 +250,11 @@ namespace ThroneOfTides.Systems
             _gameState.DiscardEnemyCard(playedCard);
 
             bool animationDone = false;
-            GameEventBus.OnEnemyCardAnimationComplete += () => animationDone = true;
+            void OnAnimationComplete() => animationDone = true;
+            GameEventBus.OnEnemyCardAnimationComplete += OnAnimationComplete;
             GameEventBus.FireEnemyCardPlayed(playedCard);
             yield return new WaitUntil(() => animationDone);
-            GameEventBus.OnEnemyCardAnimationComplete = null;
+            GameEventBus.OnEnemyCardAnimationComplete -= OnAnimationComplete;
 
             if (isAttackCard)
                 yield return StartCoroutine(ResolveEnemyAttack(playedCard));

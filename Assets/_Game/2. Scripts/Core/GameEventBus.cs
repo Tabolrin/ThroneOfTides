@@ -16,7 +16,7 @@ namespace ThroneOfTides.Core
         public static event Action<ICard, DamageTarget?> OnCardPlayAccepted;
         public static event Action<ICard> OnPlayerCardRemoved;
         public static event Action<ICard, DamageTarget?> OnEnemyCardPlayed;
-        public static Action             OnEnemyCardAnimationComplete;
+        public static event Action       OnEnemyCardAnimationComplete;
 
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
@@ -62,6 +62,7 @@ namespace ThroneOfTides.Core
         public static void FireCardPlayAccepted(ICard card, DamageTarget? target = null) => OnCardPlayAccepted?.Invoke(card, target);
         public static void FirePlayerCardRemoved(ICard card)                 => OnPlayerCardRemoved?.Invoke(card);
         public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
+        public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
         public static void FireDamageDealt(DamageTarget target, int amount)  => OnDamageDealt?.Invoke(target, amount);
         public static void FireHPChanged(int hp)                             => OnHPChanged?.Invoke(hp);
         public static void FireComboResolved()                               => OnComboResolved?.Invoke();
