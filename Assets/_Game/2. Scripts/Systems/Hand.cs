@@ -12,12 +12,23 @@ namespace ThroneOfTides.Systems
     {
         private readonly List<CardSO> _cards = new List<CardSO>();
         private HandState             _currentState = HandState.Empty;
+        private List<ICard>           _cachedCards;
 
         public int       Count => _cards.Count;
         public HandState State => _currentState;
 
-        // ICard for cross-assembly access - UI holds CardSO refs directly via CardView
-        public IReadOnlyList<ICard>  Cards   => _cards.Cast<ICard>().ToList().AsReadOnly();
+        // ICard for cross-assembly access - UI holds CardSO refs directly via CardView.
+        // Cached and only rebuilt when the hand actually changes, since this is read on
+        // every card-effect hand query (CardEffectContext.GetEnemyHand/GetPlayerHand).
+        public IReadOnlyList<ICard> Cards
+        {
+            get
+            {
+                if (_cachedCards == null)
+                    _cachedCards = _cards.Cast<ICard>().ToList();
+                return _cachedCards;
+            }
+        }
 
         // CardSO for internal Systems use only
         public IReadOnlyList<CardSO> CardsSO => _cards.AsReadOnly();
@@ -29,12 +40,14 @@ namespace ThroneOfTides.Systems
         {
             if (_cards.Count >= maxHandSize) return;
             _cards.Add(card);
+            _cachedCards = null;
             CheckHandState(maxHandSize);
         }
 
         public bool RemoveCard(CardSO card)
         {
             bool removed = _cards.Remove(card);
+            if (removed) _cachedCards = null;
             // maxHandSize irrelevant on removal - Full cannot trigger here
             if (removed) CheckHandState(0);
             return removed;
