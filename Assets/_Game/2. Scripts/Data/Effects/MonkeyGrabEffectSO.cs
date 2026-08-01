@@ -4,12 +4,12 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/MonkeyGrab")]
-    public class MonkeyGrabEffectSO : ActionEffectSO
+    public class MonkeyGrabEffectSO : ActionEffectSO<IHandEffects>
     {
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IHandEffects context)
         {
             context.StealFromEnemyHand();
-            Debug.Log("Monkey Grab - stole 1 card from enemy hand");
+            GameDebug.Log("Monkey Grab - stole 1 card from enemy hand");
         }
     }
 }

@@ -78,14 +78,20 @@ namespace ThroneOfTides.Data
             return card.Damage <= 2              ? _weightLowDamageWeapon : 1f;
         }
 
-        private float GetActionWeight(CardSO card) => card.Id switch
+        // Weighted by the effect's declared Role (see EffectRole/ActionEffectSO) rather than by
+        // CardId — a new Action card just needs its effect SO to declare a Role, no edit here.
+        private float GetActionWeight(CardSO card)
         {
-            CardId.ReconParrot   => _weightActionIntel,
-            CardId.SirenSong     => _weightActionDisrupt,
-            CardId.TreasureChest => _weightActionDraw,
-            CardId.HighSpirits   => _weightActionHeal,
-            CardId.DeadMansTurn  => _weightActionDefense,
-            _                    => 1f
-        };
+            EffectRole role = card.ActionEffect != null ? card.ActionEffect.Role : EffectRole.None;
+            return role switch
+            {
+                EffectRole.Intel   => _weightActionIntel,
+                EffectRole.Disrupt => _weightActionDisrupt,
+                EffectRole.Draw    => _weightActionDraw,
+                EffectRole.Heal    => _weightActionHeal,
+                EffectRole.Defense => _weightActionDefense,
+                _                  => 1f
+            };
+        }
     }
 }

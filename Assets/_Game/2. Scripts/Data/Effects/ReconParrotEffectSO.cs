@@ -4,18 +4,18 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/ReconParrot")]
-    public class ReconParrotEffectSO : ActionEffectSO
+    public class ReconParrotEffectSO : ActionEffectSO<IHandEffects>
     {
         [SerializeField] private int _cardsToReveal = 3;
 
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IHandEffects context)
         {
             var enemyHand   = context.GetEnemyHand();
             int revealCount = Mathf.Min(_cardsToReveal, enemyHand.Count);
 
             // TODO - wire ReconParrot reveal UI when inspect system is extended
             for (int i = 0; i < revealCount; i++)
-                Debug.Log($"Recon Parrot revealed: {enemyHand[i].Name}");
+                GameDebug.Log($"Recon Parrot revealed: {enemyHand[i].Name}");
         }
     }
 }

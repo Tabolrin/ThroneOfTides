@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14ac237a8847744449d2b5014559a077, type: 3}
   m_Name: High Spirits Effect SO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.HighSpiritsEffectSO
+  _role: 4
   _healAmount: 5

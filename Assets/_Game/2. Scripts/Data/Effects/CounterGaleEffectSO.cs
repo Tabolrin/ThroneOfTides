@@ -5,12 +5,12 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/CounterGale")]
-    public class CounterGaleEffectSO : ActionEffectSO
+    public class CounterGaleEffectSO : ActionEffectSO<IReactionChargeEffects>
     {
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IReactionChargeEffects context)
         {
             context.AddCounterGaleCharge();
-            Debug.Log("Counter Gale — reaction charge added");
+            GameDebug.Log("Counter Gale — reaction charge added");
         }
     }
 }

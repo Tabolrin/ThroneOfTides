@@ -39,6 +39,11 @@ namespace ThroneOfTides.App
         [SerializeField] private ResultsPanel          _resultsPanel;
         [SerializeField] private TurnCoordinator       _turnCoordinator;
         [SerializeField] private CheatsPanel           _cheatsPanel;
+        [SerializeField] private CardCheatPanel        _cardCheatPanel;
+
+        [Header("Debug — Card Registry")]
+        [Tooltip("Flat registry of every CardSO — required for CardCheatPanel to list all cards.")]
+        [SerializeField] private CardDatabaseSO _cardDatabase;
 
         [Header("Captain — fallback for testing without level select")]
         [SerializeField] private CaptainSO _fallbackCaptain;
@@ -89,7 +94,7 @@ namespace ThroneOfTides.App
                 _activeCaptain.DeckDefinition.BuildDeck(), _config.LowDeckThreshold);
 
             // ── Construct game systems ──────────────────────────────────────
-            _gameState    = new GameState(effectiveMaxHP, effectiveMaxMana,
+            _gameState    = new GameState(effectiveMaxHP, effectiveMaxMana, _config.MaxHandSize,
                                           playerDeck, enemyDeck, originalSnapshot);
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
@@ -106,6 +111,9 @@ namespace ThroneOfTides.App
             _turnCoordinator.OnShowTargetSelection  += ShowTargetSelectionPrompt;
 
             if (_cheatsPanel != null) _cheatsPanel.Initialise(_gameState, RefreshHUD);
+
+            if (_cardCheatPanel != null && _cardDatabase != null)
+                _cardCheatPanel.Initialise(_gameState, _handLayoutManager, _cardDatabase, _config.MaxHandSize);
 
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 

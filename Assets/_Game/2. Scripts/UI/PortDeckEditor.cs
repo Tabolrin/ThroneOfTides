@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using ThroneOfTides.Data;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
@@ -35,7 +36,25 @@ namespace ThroneOfTides.UI
         private DeckDefinitionSO _deck;
         public  int              MaxStorage { get; private set; }
 
+        private ObjectPool<PortCardRow> _rowPool;
+
         // ── Init ───────────────────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            // Pools deck rows instead of Instantiate/Destroy per add/remove — Refresh() rebuilds
+            // the whole list on every single card add/remove/storage-upgrade.
+            _rowPool = new ObjectPool<PortCardRow>(
+                createFunc: () => Instantiate(_cardRowPrefab),
+                actionOnGet: row => row.gameObject.SetActive(true),
+                actionOnRelease: row =>
+                {
+                    row.gameObject.SetActive(false);
+                    row.transform.SetParent(transform, false);
+                },
+                actionOnDestroy: row => Destroy(row.gameObject),
+                collectionCheck: false);
+        }
 
         public void Initialise(DeckDefinitionSO deck, int maxStorage)
         {
@@ -118,8 +137,11 @@ namespace ThroneOfTides.UI
 
         private void ClearRows()
         {
-            foreach (Transform child in _deckContent)
-                Destroy(child.gameObject);
+            // Snapshot first — releasing reparents each row out of _deckContent immediately,
+            // which would corrupt a live `foreach (Transform child in _deckContent)` iteration.
+            var rows = new List<PortCardRow>(_deckContent.GetComponentsInChildren<PortCardRow>(true));
+            foreach (var row in rows)
+                _rowPool.Release(row);
         }
 
         private void BuildRows()
@@ -140,7 +162,8 @@ namespace ThroneOfTides.UI
                 var cardRef = entry.Card;
                 for (int i = 0; i < entry.Count; i++)
                 {
-                    var row = Instantiate(_cardRowPrefab, _deckContent);
+                    var row = _rowPool.Get();
+                    row.transform.SetParent(_deckContent, false);
                     row.Setup(cardRef, _palette, () => RemoveCard(cardRef));
                 }
             }

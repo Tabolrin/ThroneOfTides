@@ -8,7 +8,7 @@ namespace ThroneOfTides.Data
     {
         [Header("Player")]
         public int   StartingHP          = 30;
-        public int   MaxHandSize         = 5;
+        public int   MaxHandSize         = 4;
 
         [Header("Mana")]
         public int   StartingMaxMana     = 3;

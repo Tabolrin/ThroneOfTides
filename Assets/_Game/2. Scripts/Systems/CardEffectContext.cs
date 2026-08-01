@@ -128,6 +128,29 @@ namespace ThroneOfTides.Systems
             }
         }
 
+        // Discards a random card from whoever did NOT cast this card's hand — works for either
+        // side so Chain Shot behaves correctly when the enemy plays it too.
+        public void DiscardRandomFromOpponentHand()
+        {
+            bool opponentIsEnemy = Caster == DamageTarget.Player;
+            var hand = opponentIsEnemy ? _gameState.EnemyHand.CardsSO : _gameState.PlayerHand.CardsSO;
+            if (hand.Count == 0) return;
+
+            int    index = UnityEngine.Random.Range(0, hand.Count);
+            CardSO card  = hand[index];
+
+            if (opponentIsEnemy)
+            {
+                _gameState.EnemyHand.RemoveCard(card);
+                _gameState.DiscardEnemyCard(card);
+            }
+            else
+            {
+                _gameState.PlayerHand.RemoveCard(card);
+                _gameState.DiscardPlayerCard(card);
+            }
+        }
+
         public void RetrieveFromDiscard(int count)
         {
             var retrieved = _gameState.RetrieveFromPlayerDiscard(count);

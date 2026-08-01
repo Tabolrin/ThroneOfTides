@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2b448b8d9b441f40bf7ab8b0dd43463, type: 3}
   m_Name: Siren Song Effect SO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.SirenSongEffectSO
+  _role: 2

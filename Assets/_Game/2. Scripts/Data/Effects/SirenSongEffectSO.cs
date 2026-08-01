@@ -4,14 +4,14 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/SirenSong")]
-    public class SirenSongEffectSO : ActionEffectSO
+    public class SirenSongEffectSO : ActionEffectSO<IStatusEffects>
     {
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IStatusEffects context)
         {
             // Marks next attack this turn as unblockable
             // Cleared at end of turn if no attack played
             context.SetSirenActive();
-            Debug.Log("Siren Song - next attack is unblockable");
+            GameDebug.Log("Siren Song - next attack is unblockable");
         }
     }
 }

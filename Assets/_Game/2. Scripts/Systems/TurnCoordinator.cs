@@ -176,13 +176,40 @@ namespace ThroneOfTides.Systems
         // ── Auto Draw ─────────────────────────────────────────────────────────
 
         // Called at the end of each enemy turn. Short delay lets the turn
-        // transition visual settle before the card animates in.
+        // transition visual settle before the cards animate in.
         // Not called on turn 1 — GameBootstrapper handles the opening hand deal.
         private IEnumerator AutoDrawRoutine()
         {
             yield return new WaitForSeconds(0.3f);
-            TryDrawCard();
+            yield return StartCoroutine(RefillPlayerHandRoutine());
             OnHPChanged?.Invoke();
+        }
+
+        // Draws until the hand is full (or the deck runs out) — the hand fully refills at the
+        // start of each player turn rather than drawing a single card. Reaction cards are
+        // charged instead of occupying a hand slot and don't count toward the fill target,
+        // matching TryDrawCard's existing per-card handling.
+        private IEnumerator RefillPlayerHandRoutine()
+        {
+            while (_gameState.PlayerHand.Count < _config.MaxHandSize && _gameState.PlayerDeck.Count > 0)
+            {
+                CardSO drawn = _gameState.PlayerDeck.Draw();
+                if (drawn == null) break;
+
+                if (drawn.CardType == CardType.Reaction)
+                {
+                    ChargeReaction(drawn);
+                    yield return StartCoroutine(_handLayout.AnimateReactionDraw(drawn));
+                    continue;
+                }
+
+                _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
+                GameEventBus.FireCardDrawn(drawn);
+                OnCardDrawn?.Invoke(drawn);
+                yield return StartCoroutine(_handLayout.AnimateManualDraw(drawn));
+            }
+
+            _gameState.SetHasDrawnThisTurn();
         }
 
         // ── Enemy Turn ────────────────────────────────────────────────────────
@@ -201,11 +228,14 @@ namespace ThroneOfTides.Systems
 
             _gameState.ResetEnemyMana();
 
-            if (_gameState.EnemyHand.Count < _config.MaxHandSize)
+            // The enemy hand fully refills at the start of its turn too, mirroring the player.
+            while (_gameState.EnemyHand.Count < _config.MaxHandSize && _gameState.EnemyDeck.Count > 0)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
-                if (enemyDrawn != null)
-                    _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
+                if (enemyDrawn == null) break;
+
+                _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
+                _handLayout.AddCardToEnemyHand(enemyDrawn);
             }
 
             bool attackPlayedThisTurn = false;

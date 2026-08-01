@@ -109,9 +109,10 @@ namespace ThroneOfTides.Systems
 
         private int ResolveWeapon(CardSO card, DamageTarget caster, IHandLayoutManager handLayout, DamageTarget? selectedTarget)
         {
-            // Weapons with an assigned effect (e.g. Tidal Wave) fully own their own resolution,
-            // including applying their own damage — the legacy name-switch below is only reached
-            // by weapons that don't need anything beyond flat damage or a small hardcoded extra.
+            // Weapons with an assigned effect (e.g. Tidal Wave, Chain Shot) fully own their own
+            // resolution, including applying their own damage. Weapons with none just deal flat
+            // CardSO.Damage — every special case is now expressed as an effect SO, not a switch
+            // here (Ram The Hull was cut content with no asset; its case was already a no-op).
             if (card.ActionEffect != null)
             {
                 var context = new CardEffectContext(_gameState, handLayout, caster, _secondaryDrawCallback, selectedTarget);
@@ -119,39 +120,7 @@ namespace ThroneOfTides.Systems
                 return 0;
             }
 
-            switch (card.Id)
-            {
-                case CardId.RamTheHull:
-                    // HP cost deducted above — ship shake TODO when VFX event defined
-                    break;
-                case CardId.ChainShot:
-                    DiscardRandomOpponentCard(caster);
-                    break;
-            }
             return card.Damage;
-        }
-
-        private void DiscardRandomOpponentCard(DamageTarget caster)
-        {
-            bool targetIsEnemy = caster == DamageTarget.Player;
-            var hand = targetIsEnemy ? _gameState.EnemyHand.CardsSO : _gameState.PlayerHand.CardsSO;
-            if (hand.Count == 0) return;
-
-            int    index = UnityEngine.Random.Range(0, hand.Count);
-            CardSO card  = hand[index];
-
-            if (targetIsEnemy)
-            {
-                _gameState.EnemyHand.RemoveCard(card);
-                _gameState.DiscardEnemyCard(card);
-            }
-            else
-            {
-                _gameState.PlayerHand.RemoveCard(card);
-                _gameState.DiscardPlayerCard(card);
-            }
-
-            Debug.Log($"Chain Shot — discarded 1 {(targetIsEnemy ? "enemy" : "player")} card");
         }
     }
 }

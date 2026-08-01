@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acff9150c1b3acc44b09d75e8dbc5d08, type: 3}
   m_Name: Recon Parrot Effect SO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.ReconParrotEffectSO
+  _role: 1
   _cardsToReveal: 3

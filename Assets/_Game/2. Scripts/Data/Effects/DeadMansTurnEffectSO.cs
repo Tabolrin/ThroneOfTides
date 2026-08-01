@@ -5,12 +5,12 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/DeadMansTurn")]
-    public class DeadMansTurnEffectSO : ActionEffectSO
+    public class DeadMansTurnEffectSO : ActionEffectSO<IReactionChargeEffects>
     {
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IReactionChargeEffects context)
         {
             context.AddDeadMansTurnCharge();
-            Debug.Log("Dead Man's Turn — reaction charge added");
+            GameDebug.Log("Dead Man's Turn — reaction charge added");
         }
     }
 }

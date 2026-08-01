@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: GameConfigSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.GameConfigSO
   StartingHP: 30
-  MaxHandSize: 5
+  MaxHandSize: 4
+  StartingMaxMana: 3
   LowDeckThreshold: 3
+  BaseStorageCapacity: 20
   CardSpacing: 1
   EnemyThinkTimeMin: 1
   EnemyThinkTimeMax: 1
+  CannonballPreShotDelay: 0.65

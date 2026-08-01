@@ -5,16 +5,16 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/StolenWind")]
-    public class StolenWindEffectSO : ActionEffectSO
+    public class StolenWindEffectSO : ActionEffectSO<IManaEffects>
     {
         [SerializeField] private int _manaToSteal = 1;
 
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IManaEffects context)
         {
             // HP cost is paid by CombatResolver before Execute is called,
             // using CardSO.HPCost — no HP deduction here
             context.StealEnemyMana(_manaToSteal);
-            Debug.Log($"Stolen Wind — stole {_manaToSteal} mana from enemy");
+            GameDebug.Log($"Stolen Wind — stole {_manaToSteal} mana from enemy");
         }
     }
 }

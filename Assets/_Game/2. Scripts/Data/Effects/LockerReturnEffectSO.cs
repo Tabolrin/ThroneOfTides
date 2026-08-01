@@ -4,14 +4,14 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/LockerReturn")]
-    public class LockerReturnEffectSO : ActionEffectSO
+    public class LockerReturnEffectSO : ActionEffectSO<IDiscardEffects>
     {
         [SerializeField] private int _cardsToRetrieve = 3;
 
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IDiscardEffects context)
         {
             context.RetrieveFromDiscard(_cardsToRetrieve);
-            Debug.Log($"Locker's Return - retrieved {_cardsToRetrieve} cards from discard");
+            GameDebug.Log($"Locker's Return - retrieved {_cardsToRetrieve} cards from discard");
         }
     }
 }

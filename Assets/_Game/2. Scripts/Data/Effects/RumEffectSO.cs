@@ -5,14 +5,14 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     [CreateAssetMenu(menuName = "ThroneOfTides/Effects/Rum")]
-    public class RumEffectSO : ActionEffectSO
+    public class RumEffectSO : ActionEffectSO<IHealEffects>
     {
         [SerializeField] private int _healAmount = 5;
 
-        public override void Execute(ICardEffectContext context)
+        protected override void Execute(IHealEffects context)
         {
             context.HealPlayer(_healAmount);
-            Debug.Log($"Rum — healed {_healAmount} HP");
+            GameDebug.Log($"Rum — healed {_healAmount} HP");
         }
     }
 }

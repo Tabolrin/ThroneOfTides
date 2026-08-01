@@ -4,6 +4,7 @@ using TMPro;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
@@ -31,7 +32,25 @@ namespace ThroneOfTides.UI
         private PortDeckEditor  _deckEditor;
         private CardType?       _activeFilter = null;
 
+        private ObjectPool<PortInventoryCard> _cardPool;
+
         // ── Init ───────────────────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            // Pools inventory card panels instead of Instantiate/Destroy per refresh — Refresh()
+            // rebuilds the whole grid on every filter click and every add-to-deck.
+            _cardPool = new ObjectPool<PortInventoryCard>(
+                createFunc: () => Instantiate(_cardPanelPrefab),
+                actionOnGet: card => card.gameObject.SetActive(true),
+                actionOnRelease: card =>
+                {
+                    card.gameObject.SetActive(false);
+                    card.transform.SetParent(transform, false);
+                },
+                actionOnDestroy: card => Destroy(card.gameObject),
+                collectionCheck: false);
+        }
 
         public void Initialise(PlayerInventory inventory, PortDeckEditor deckEditor)
         {
@@ -64,8 +83,12 @@ namespace ThroneOfTides.UI
 
         public void Refresh()
         {
-            foreach (Transform child in _inventoryContent)
-                Destroy(child.gameObject);
+            // Snapshot first — releasing reparents each card out of _inventoryContent
+            // immediately, which would corrupt a live `foreach (Transform child in ...)`.
+            var existing = new List<PortInventoryCard>(
+                _inventoryContent.GetComponentsInChildren<PortInventoryCard>(true));
+            foreach (var card in existing)
+                _cardPool.Release(card);
 
             var groups = BuildCardGroups();
 
@@ -78,7 +101,8 @@ namespace ThroneOfTides.UI
                 bool canAdd      = _deckEditor.GetStorageUsed() + card.StorageCost <= _deckEditor.MaxStorage
                                    && inDeckCount < ownedCount;
 
-                var panel   = Instantiate(_cardPanelPrefab, _inventoryContent);
+                var panel   = _cardPool.Get();
+                panel.transform.SetParent(_inventoryContent, false);
                 var cardRef = card; // capture for lambda
 
                 panel.Setup(card, ownedCount, inDeckCount, canAdd,

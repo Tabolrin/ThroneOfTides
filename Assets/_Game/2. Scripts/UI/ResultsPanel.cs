@@ -1,5 +1,4 @@
 // Assets/_Game/2. Scripts/UI/ResultsPanel.cs
-using System.Collections.Generic;
 using TMPro;
 using ThroneOfTides.Systems;
 using ThroneOfTides.Data;
@@ -42,19 +41,15 @@ namespace ThroneOfTides.UI
             gameObject.SetActive(true);
             _titleLabel.text = "Victory!";
 
-            _progression.SetLevelBeaten(GameSession.SelectedLevelIndex);
+            var result = MatchRewardGranter.GrantWin(
+                _progression, _playerInventory, reward, GameSession.SelectedLevelIndex, playerHP);
 
-            var rewardCards = new List<CardSO>(reward.RewardCards);
-            _playerInventory.AddCards(rewardCards);
-
-            int coins = reward.GetCoinReward(playerHP, isWin: true);
-            _playerInventory.AddCoins(coins);
-            _coinRewardLabel.text = $"+{coins} Coins";
+            _coinRewardLabel.text = $"+{result.Coins} Coins";
 
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);
 
-            foreach (var card in rewardCards)
+            foreach (var card in result.RewardCards)
             {
                 var label = Instantiate(_rewardCardNamePrefab, _rewardCardsContainer);
                 label.text = card.Name;
@@ -66,10 +61,8 @@ namespace ThroneOfTides.UI
             gameObject.SetActive(true);
             _titleLabel.text = "Defeated";
 
-            // Loss — coins only at 50%, no card reward
-            int coins = reward.GetCoinReward(playerHP, isWin: false);
-            _playerInventory.AddCoins(coins);
-            _coinRewardLabel.text = $"+{coins} Coins";
+            var result = MatchRewardGranter.GrantLoss(_playerInventory, reward, playerHP);
+            _coinRewardLabel.text = $"+{result.Coins} Coins";
 
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);

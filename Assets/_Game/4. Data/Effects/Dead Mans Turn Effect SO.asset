@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d43dfe86496787a44bec76048a02bfb6, type: 3}
   m_Name: Dead Mans Turn Effect SO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.DeadMansTurnEffectSO
+  _role: 5

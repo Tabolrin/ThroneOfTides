@@ -269,7 +269,7 @@ namespace ThroneOfTides.Systems
         public bool CanDraw() =>
             !HasDrawnThisTurn &&
             IsPlayerTurn      &&
-            PlayerHand.Count < 5 &&
+            PlayerHand.Count < MaxHandSize &&
             PlayerDeck.Count > 0;
 
         public void RegisterCardPlayed(CardSO card)

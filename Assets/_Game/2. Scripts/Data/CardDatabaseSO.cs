@@ -18,6 +18,10 @@ namespace ThroneOfTides.Data
 
         private Dictionary<CardId, CardSO> _byId;
 
+        // Read-only enumeration of the full registry — used by dev tooling (e.g. the card
+        // cheat panel) that needs to list every known card rather than look one up by id.
+        public IReadOnlyList<CardSO> AllCards => _allCards.AsReadOnly();
+
         public CardSO GetById(CardId id)
         {
             if (_byId == null) BuildLookup();
