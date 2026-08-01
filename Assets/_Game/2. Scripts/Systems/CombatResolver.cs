@@ -31,7 +31,7 @@ namespace ThroneOfTides.Systems
             if (card.HPCost > 0)
             {
                 _gameState.ApplyDamage(caster, card.HPCost);
-                Debug.Log($"{card.Name} — paid {card.HPCost} HP");
+                GameDebug.Log($"{card.Name} — paid {card.HPCost} HP");
             }
 
             switch (card.CardType)
@@ -52,7 +52,7 @@ namespace ThroneOfTides.Systems
         public int ResolveCounterGale(int incomingDamage)
         {
             int reflected = Mathf.FloorToInt(incomingDamage * 0.5f);
-            Debug.Log($"Counter Gale — reflecting {reflected} damage");
+            GameDebug.Log($"Counter Gale — reflecting {reflected} damage");
             return reflected;
         }
 
@@ -94,7 +94,7 @@ namespace ThroneOfTides.Systems
         {
             DamageTarget target = Opponent(caster);
             _gameState.AddDotEffect(new DotEffect(target, card.DotDamagePerTurn, card.DotDuration, card.StatusType));
-            Debug.Log($"DOT applied ({target}) — {card.DotDamagePerTurn} dmg × {card.DotDuration} turns");
+            GameDebug.Log($"DOT applied ({target}) — {card.DotDamagePerTurn} dmg × {card.DotDuration} turns");
             return 0;
         }
 

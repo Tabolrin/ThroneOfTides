@@ -12,16 +12,16 @@ namespace ThroneOfTides.Data
         public override void Execute(ICardEffectContext context)
         {
             context.ReturnFromSnapshot(_cardsToReturn);
-            Debug.Log($"Treasure Chest — returned {_cardsToReturn} cards from original deck");
+            GameDebug.Log($"Treasure Chest — returned {_cardsToReturn} cards from original deck");
 
             if (UnityEngine.Random.value >= 0.5f)
             {
                 context.AddPlayerMaxMana(1);
-                Debug.Log("Treasure Chest — coin toss won: +1 max mana");
+                GameDebug.Log("Treasure Chest — coin toss won: +1 max mana");
             }
             else
             {
-                Debug.Log("Treasure Chest — coin toss lost: no mana bonus");
+                GameDebug.Log("Treasure Chest — coin toss lost: no mana bonus");
             }
 
             context.DrawOneCard();

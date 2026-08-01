@@ -57,7 +57,7 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.IsPlayerTurn)
             {
-                Debug.Log("EndTurn ignored — not the player's turn (already ended, or match over).");
+                GameDebug.Log("EndTurn ignored — not the player's turn (already ended, or match over).");
                 return;
             }
 
@@ -122,13 +122,13 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.CanPlayCard(cardSO))
             {
-                Debug.Log($"Cannot play {cardSO.Name} — check draw, mana, or play limit");
+                GameDebug.Log($"Cannot play {cardSO.Name} — check draw, mana, or play limit");
                 return;
             }
 
             if (!_gameState.SpendPlayerMana(cardSO.ManaCost))
             {
-                Debug.Log($"Cannot play {cardSO.Name} — insufficient mana");
+                GameDebug.Log($"Cannot play {cardSO.Name} — insufficient mana");
                 return;
             }
 
@@ -169,7 +169,7 @@ namespace ThroneOfTides.Systems
 
         public void Concede()
         {
-            Debug.Log("Player conceded");
+            GameDebug.Log("Player conceded");
             GameEventBus.FireMatchLoss();
         }
 
@@ -294,7 +294,7 @@ namespace ThroneOfTides.Systems
             else
             {
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
-                Debug.Log($"Enemy attack — {attackCard.Name}: {damage} dmg");
+                GameDebug.Log($"Enemy attack — {attackCard.Name}: {damage} dmg");
             }
         }
 
@@ -323,7 +323,7 @@ namespace ThroneOfTides.Systems
                     _gameState.ApplyDamage(DamageTarget.Player, 3);
                     // TODO: deduct 33% materials when material system is built
                 }
-                Debug.Log("Kraken negated by player Kraken");
+                GameDebug.Log("Kraken negated by player Kraken");
             }
             else
             {
@@ -357,14 +357,14 @@ namespace ThroneOfTides.Systems
 
             if (usedDMT && _gameState.ConsumeDeadMansTurn())
             {
-                Debug.Log("Dead Man's Turn fired — attack negated");
+                GameDebug.Log("Dead Man's Turn fired — attack negated");
             }
             else if (_gameState.ConsumeCounterGale())
             {
                 int reflected = _combatResolver.ResolveCounterGale(damage);
                 _gameState.ApplyDamage(DamageTarget.Enemy, reflected);
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
-                Debug.Log($"Counter Gale fired — reflected {reflected}, took {damage}");
+                GameDebug.Log($"Counter Gale fired — reflected {reflected}, took {damage}");
             }
         }
 
@@ -379,7 +379,7 @@ namespace ThroneOfTides.Systems
         private void FireMatchResult()
         {
             Winner winner = _gameState.GetWinner();
-            Debug.Log($"Match over — winner: {winner} " +
+            GameDebug.Log($"Match over — winner: {winner} " +
                 $"(PlayerHP: {_gameState.PlayerHP}, PlayerDeck: {_gameState.PlayerDeck.Count}, PlayerHand: {_gameState.PlayerHand.Count}, " +
                 $"EnemyHP: {_gameState.EnemyHP}, EnemyDeck: {_gameState.EnemyDeck.Count}, EnemyHand: {_gameState.EnemyHand.Count})");
 

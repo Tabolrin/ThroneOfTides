@@ -24,7 +24,7 @@ namespace ThroneOfTides.Data
             DamageTarget target = context.SelectedTarget.Value;
             context.ApplyDamage(target, _damage);
             context.ClearComboStack(target);
-            Debug.Log($"Tidal Wave — {_damage} dmg to {target}, gunpowder cleared");
+            GameDebug.Log($"Tidal Wave — {_damage} dmg to {target}, gunpowder cleared");
         }
     }
 }
