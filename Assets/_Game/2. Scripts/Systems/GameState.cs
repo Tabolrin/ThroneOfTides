@@ -53,9 +53,11 @@ namespace ThroneOfTides.Systems
         public bool ActionCardPlayedThisTurn { get; private set; }
         public bool HasDrawnThisTurn         { get; private set; }
 
-        // ── Reaction Charges ──────────────────────────────────────────────────
-        public int DeadMansTurnCharges { get; private set; }
-        public int CounterGaleCharges  { get; private set; }
+        // ── Reaction Charges (per side) ────────────────────────────────────────
+        public int PlayerDeadMansTurnCharges => Player.DeadMansTurnCharges;
+        public int EnemyDeadMansTurnCharges  => Enemy.DeadMansTurnCharges;
+        public int PlayerCounterGaleCharges  => Player.CounterGaleCharges;
+        public int EnemyCounterGaleCharges   => Enemy.CounterGaleCharges;
 
         // ── Discard & Snapshot ────────────────────────────────────────────────
         private readonly List<CardSO>    _playerDiscard       = new List<CardSO>();
@@ -73,13 +75,16 @@ namespace ThroneOfTides.Systems
 
         public GameState(int startingHP, int startingMaxMana, int maxHandSize,
                          Deck playerDeck, Deck enemyDeck,
-                         List<CardSO> originalDeckSnapshot)
+                         List<CardSO> originalDeckSnapshot,
+                         int? enemyStartingHP = null, int? enemyStartingMaxMana = null)
         {
             // Both sides start with a full mana pool — previously only the player's mana was
             // implicitly filled (as a side effect of PlayerTurnState.Enter() firing on the very
             // first state-machine transition); the enemy had no equivalent until its first turn.
+            // enemyStartingHP/enemyStartingMaxMana let a Captain be tougher (or weaker) than the
+            // player's own base stats — null falls back to the shared starting values.
             Player = new ShipState(startingHP, startingMaxMana);
-            Enemy  = new ShipState(startingHP, startingMaxMana);
+            Enemy  = new ShipState(enemyStartingHP ?? startingHP, enemyStartingMaxMana ?? startingMaxMana);
 
             MaxHandSize = maxHandSize;
             PlayerDeck  = playerDeck;
@@ -102,6 +107,7 @@ namespace ThroneOfTides.Systems
         public void HealPlayer(int amount)
         {
             Player.Heal(amount);
+            GameEventBus.FireHealApplied(DamageTarget.Player, amount);
             GameEventBus.FireHPChanged(PlayerHP);
         }
 
@@ -109,6 +115,7 @@ namespace ThroneOfTides.Systems
         public void HealEnemy(int amount)
         {
             Enemy.Heal(amount);
+            GameEventBus.FireHealApplied(DamageTarget.Enemy, amount);
             GameEventBus.FireHPChanged(EnemyHP);
         }
 
@@ -146,6 +153,12 @@ namespace ThroneOfTides.Systems
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
+        public void AddEnemyMaxMana(int amount)
+        {
+            Enemy.AddMaxMana(amount);
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+        }
+
         // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind/Essence Plunder
         public void StealEnemyMana(int amount)
         {
@@ -167,36 +180,35 @@ namespace ThroneOfTides.Systems
 
         // ── Reactions ─────────────────────────────────────────────────────────
 
-        public void AddDeadMansTurnCharge()
+        public void AddDeadMansTurnCharge(DamageTarget side = DamageTarget.Player)
         {
-            DeadMansTurnCharges++;
-            GameEventBus.FireReactionCharged(ReactionType.DeadMansTurn, DeadMansTurnCharges);
+            var ship = GetSide(side);
+            ship.AddDeadMansTurnCharge();
+            GameEventBus.FireReactionCharged(ReactionType.DeadMansTurn, side, ship.DeadMansTurnCharges);
         }
 
-        public void AddCounterGaleCharge()
+        public void AddCounterGaleCharge(DamageTarget side = DamageTarget.Player)
         {
-            CounterGaleCharges++;
-            GameEventBus.FireReactionCharged(ReactionType.CounterGale, CounterGaleCharges);
+            var ship = GetSide(side);
+            ship.AddCounterGaleCharge();
+            GameEventBus.FireReactionCharged(ReactionType.CounterGale, side, ship.CounterGaleCharges);
         }
 
-        public bool ConsumeDeadMansTurn()
+        public bool ConsumeDeadMansTurn(DamageTarget side = DamageTarget.Player)
         {
-            if (DeadMansTurnCharges <= 0) return false;
-            DeadMansTurnCharges--;
-            GameEventBus.FireReactionFired(ReactionType.DeadMansTurn);
+            if (!GetSide(side).ConsumeDeadMansTurn()) return false;
+            GameEventBus.FireReactionFired(ReactionType.DeadMansTurn, side);
             return true;
         }
 
-        public bool ConsumeCounterGale()
+        public bool ConsumeCounterGale(DamageTarget side = DamageTarget.Player)
         {
-            if (CounterGaleCharges <= 0) return false;
-            CounterGaleCharges--;
-            GameEventBus.FireReactionFired(ReactionType.CounterGale);
+            if (!GetSide(side).ConsumeCounterGale()) return false;
+            GameEventBus.FireReactionFired(ReactionType.CounterGale, side);
             return true;
         }
 
-        public bool HasAnyReaction() =>
-            DeadMansTurnCharges > 0 || CounterGaleCharges > 0;
+        public bool HasAnyReaction(DamageTarget side = DamageTarget.Player) => GetSide(side).HasAnyReaction();
 
         // ── Status Effects ────────────────────────────────────────────────────
 

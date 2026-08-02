@@ -86,5 +86,29 @@ namespace ThroneOfTides.Systems
             ComboStackCount = 0;
             ActiveComboCard = null;
         }
+
+        // ── Reaction Charges ─────────────────────────────────────────────────
+
+        public int DeadMansTurnCharges { get; private set; }
+        public int CounterGaleCharges  { get; private set; }
+
+        public void AddDeadMansTurnCharge() => DeadMansTurnCharges++;
+        public void AddCounterGaleCharge()  => CounterGaleCharges++;
+
+        public bool ConsumeDeadMansTurn()
+        {
+            if (DeadMansTurnCharges <= 0) return false;
+            DeadMansTurnCharges--;
+            return true;
+        }
+
+        public bool ConsumeCounterGale()
+        {
+            if (CounterGaleCharges <= 0) return false;
+            CounterGaleCharges--;
+            return true;
+        }
+
+        public bool HasAnyReaction() => DeadMansTurnCharges > 0 || CounterGaleCharges > 0;
     }
 }

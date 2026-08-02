@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd2dc4d4aeeb0f04da38d9eb64e50a2b, type: 3}
+  m_Name: Captain_Loreley
+  m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CaptainSO
+  _captainName: Captain Loreley
+  _portrait: {fileID: 0}
+  _archetypeDescription: Action-heavy sustain. Spams Siren Song, chips away HP with
+    DOT and medium attacks, prolongs the fight.
+  _hp: 0
+  _maxMana: 0
+  _deckDefinition: {fileID: 11400000, guid: 58ae9c76c66141f4bb8d0e91f15ee1c8, type: 2}
+  _levelReward: {fileID: 0}
+  _weightHighDamageWeapon: 0.7
+  _weightLowDamageWeapon: 0.6
+  _weightBlockHoldForDefense: 1
+  _weightComboInitiator: 1
+  _weightComboFollowUp: 1
+  _weightActionIntel: 1
+  _weightActionDisrupt: 2
+  _weightActionDraw: 1.3
+  _weightActionHeal: 1.5
+  _weightActionDefense: 1.8
+  _weightActionManaSteal: 1
+  _weightKraken: 0
+  _weightBoardingParty: 0
+  _weightDOT: 2
+  _weightReactionCounter: 1.2

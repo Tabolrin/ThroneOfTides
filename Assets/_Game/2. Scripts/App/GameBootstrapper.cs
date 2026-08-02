@@ -19,6 +19,13 @@ namespace ThroneOfTides.App
 
         [Header("Decks")]
         [SerializeField] private DeckDefinitionSO _playerDeckDefinition;
+        [Tooltip("Build-time only. Set by ThroneOfTidesBuildPipeline.ApplySceneOverrides via a " +
+                 "BuildDeckProfileSO before building, then restored afterward — takes priority " +
+                 "over the Port-configured deck when assigned. Leave empty for normal Editor play.")]
+        [SerializeField] private DeckDefinitionSO _playerDeckOverride;
+        [Tooltip("Build-time only. Same as above but for the enemy — takes priority over the " +
+                 "active Captain's own deck when assigned.")]
+        [SerializeField] private DeckDefinitionSO _enemyDeckOverride;
 
         [Header("Player")]
         // Optional — when assigned, upgrade levels are applied to HP and Mana at match start.
@@ -86,16 +93,24 @@ namespace ThroneOfTides.App
             // Use the player's Port-configured deck if available, fall back to
             // the serialized fallback deck definition for testing
             DeckDefinitionSO deckToUse =
+                _playerDeckOverride != null ? _playerDeckOverride :
                 _playerInventory?.PlayerDeck ?? _playerDeckDefinition;
+            DeckDefinitionSO enemyDeckToUse =
+                _enemyDeckOverride != null ? _enemyDeckOverride : _activeCaptain.DeckDefinition;
 
             var originalSnapshot = deckToUse.BuildDeck();
             var playerDeck       = new Deck(originalSnapshot, _config.LowDeckThreshold);
-            var enemyDeck        = new Deck(
-                _activeCaptain.DeckDefinition.BuildDeck(), _config.LowDeckThreshold);
+            var enemyDeck        = new Deck(enemyDeckToUse.BuildDeck(), _config.LowDeckThreshold);
+
+            // A Captain with HP/MaxMana left at 0 (unconfigured) falls back to the shared config
+            // base values, so half-configured Captains don't accidentally get 0 HP.
+            int enemyMaxHP   = _activeCaptain.HP      > 0 ? _activeCaptain.HP      : _config.StartingHP;
+            int enemyMaxMana = _activeCaptain.MaxMana > 0 ? _activeCaptain.MaxMana : _config.StartingMaxMana;
 
             // ── Construct game systems ──────────────────────────────────────
             _gameState    = new GameState(effectiveMaxHP, effectiveMaxMana, _config.MaxHandSize,
-                                          playerDeck, enemyDeck, originalSnapshot);
+                                          playerDeck, enemyDeck, originalSnapshot,
+                                          enemyMaxHP, enemyMaxMana);
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
             var combatResolver = new CombatResolver(_gameState);
@@ -110,7 +125,7 @@ namespace ThroneOfTides.App
             _turnCoordinator.OnShowReactionPrompt   += ShowReactionPrompt;
             _turnCoordinator.OnShowTargetSelection  += ShowTargetSelectionPrompt;
 
-            if (_cheatsPanel != null) _cheatsPanel.Initialise(_gameState, RefreshHUD);
+            if (_cheatsPanel != null) _cheatsPanel.Initialise(_gameState, OnCheatApplied);
 
             if (_cardCheatPanel != null && _cardDatabase != null)
                 _cardCheatPanel.Initialise(_gameState, _handLayoutManager, _cardDatabase, _config.MaxHandSize);
@@ -130,6 +145,13 @@ namespace ThroneOfTides.App
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
                 if (card == null) break;
+
+                if (card.CardType == CardType.Reaction)
+                {
+                    ChargeReactionCard(card, DamageTarget.Enemy);
+                    continue;
+                }
+
                 _gameState.EnemyHand.AddCard(card, _config.MaxHandSize);
                 _handLayoutManager.AddCardToEnemyHand(card);
             }
@@ -173,10 +195,10 @@ namespace ThroneOfTides.App
             RefreshHUD();
         }
 
-        private void ChargeReactionCard(CardSO card)
+        private void ChargeReactionCard(CardSO card, DamageTarget side = DamageTarget.Player)
         {
-            if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge();
-            else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge();
+            if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge(side);
+            else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge(side);
         }
 
         private void Update() => _stateMachine?.Tick();
@@ -262,6 +284,14 @@ namespace ThroneOfTides.App
         private void ShowTargetSelectionPrompt(CardSO card, System.Action<DamageTarget> onTargetChosen)
         {
             _targetSelectionPrompt.Show(card, onTargetChosen);
+        }
+
+        // CheatsPanel's HP/mana buttons bypass the normal turn flow, so unlike a real card play
+        // or enemy attack, nothing would otherwise check whether the change just ended the match.
+        private void OnCheatApplied()
+        {
+            RefreshHUD();
+            _turnCoordinator.CheckGameOver();
         }
 
         private void RefreshHUD()

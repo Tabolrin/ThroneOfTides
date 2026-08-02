@@ -7,8 +7,9 @@ using ThroneOfTides.Core;
 
 namespace ThroneOfTides.UI
 {
-    // Shows reaction charges (player side only — reactions are player-only under current rules)
-    // and active per-ship status badges (Gunpowder/Whirlpool/Hail Storm/High Spirits/Siren Song).
+    // Shows reaction charges and active per-ship status badges (Gunpowder/Whirlpool/Hail Storm/
+    // High Spirits/Siren Song) for one ship. Reactions are tracked per side — this instance only
+    // reacts to events for whichever side its own Side field is set to.
     // Unlike a dynamic instantiate-a-prefab system, this drives a fixed set of pre-placed badge
     // GameObjects authored per status type — toggling visibility and updating a count label rather
     // than spawning/destroying instances. One instance per ship — set Side to which ship this
@@ -27,7 +28,7 @@ namespace ThroneOfTides.UI
         }
 
         [Header("Side")]
-        [Tooltip("Which ship this bar displays status for. Reaction charges only ever show on the Player instance.")]
+        [Tooltip("Which ship this bar displays status for.")]
         [SerializeField] private DamageTarget _side = DamageTarget.Player;
 
         [Header("Reactions — Dead Man's Turn")]
@@ -63,9 +64,9 @@ namespace ThroneOfTides.UI
             GameEventBus.OnMatchLoss              -= OnMatchEnd;
         }
 
-        private void OnReactionCharged(ReactionType type, int charges)
+        private void OnReactionCharged(ReactionType type, DamageTarget side, int charges)
         {
-            if (_side != DamageTarget.Player) return;
+            if (side != _side) return;
 
             if (type == ReactionType.DeadMansTurn)
             {
@@ -79,9 +80,9 @@ namespace ThroneOfTides.UI
             }
         }
 
-        private void OnReactionFired(ReactionType type)
+        private void OnReactionFired(ReactionType type, DamageTarget side)
         {
-            if (_side != DamageTarget.Player) return;
+            if (side != _side) return;
 
             if (type == ReactionType.DeadMansTurn)
             {

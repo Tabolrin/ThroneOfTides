@@ -4,6 +4,7 @@ using DG.Tweening;
 using MoreMountains.Feedbacks;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using ThroneOfTides.Systems.VFX;
 using UnityEngine;
 
 namespace ThroneOfTides.Systems
@@ -75,20 +76,28 @@ namespace ThroneOfTides.Systems
         [Header("FEEL — Damage Numbers")]
         [SerializeField] private MMF_Player _feedbackDamageNumber;
 
+        [Header("Floating Combat Text")]
+        [SerializeField] private FloatingCombatText _floatingTextPrefab;
+        private static readonly Color DamageColor = new Color(0.90f, 0.15f, 0.15f);
+        private static readonly Color HealColor   = new Color(0.25f, 0.85f, 0.30f);
+        private static readonly Color ManaColor   = new Color(0.45f, 0.75f, 1.00f);
+
         [Header("Timing")]
         [SerializeField] private float _vfxLifetime      = 2f;
         [SerializeField] private float _winSlowDuration  = 0.8f;
         [SerializeField] private float _lossSlowDuration = 0.5f;
 
-        // Tracks previous mana value so OnPlayerManaChanged can distinguish
-        // spend from gain without requiring additional event parameters.
+        // Tracks previous mana value per side so OnPlayerManaChanged/OnEnemyManaChanged can
+        // distinguish spend from gain without requiring additional event parameters.
         private int _previousPlayerMana = -1;
+        private int _previousEnemyMana  = -1;
 
         // ── Unity ─────────────────────────────────────────────────────────────
 
         private void OnEnable()
         {
             GameEventBus.OnDamageDealt       += OnDamageDealt;
+            GameEventBus.OnHealApplied       += OnHealApplied;
             GameEventBus.OnCardPlayed        += OnCardPlayed;
             GameEventBus.OnCardPlayAccepted  += OnCardPlayAccepted;
             GameEventBus.OnCardDrawn         += OnCardDrawn;
@@ -99,6 +108,7 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnMatchLoss         += OnMatchLoss;
             GameEventBus.OnTurnPhaseChanged  += OnTurnPhaseChanged;
             GameEventBus.OnPlayerManaChanged += OnPlayerManaChanged;
+            GameEventBus.OnEnemyManaChanged  += OnEnemyManaChanged;
             GameEventBus.OnReactionCharged   += OnReactionCharged;
             GameEventBus.OnReactionFired     += OnReactionFired;
         }
@@ -106,6 +116,7 @@ namespace ThroneOfTides.Systems
         private void OnDisable()
         {
             GameEventBus.OnDamageDealt       -= OnDamageDealt;
+            GameEventBus.OnHealApplied       -= OnHealApplied;
             GameEventBus.OnCardPlayed        -= OnCardPlayed;
             GameEventBus.OnCardPlayAccepted  -= OnCardPlayAccepted;
             GameEventBus.OnCardDrawn         -= OnCardDrawn;
@@ -116,6 +127,7 @@ namespace ThroneOfTides.Systems
             GameEventBus.OnMatchLoss         -= OnMatchLoss;
             GameEventBus.OnTurnPhaseChanged  -= OnTurnPhaseChanged;
             GameEventBus.OnPlayerManaChanged -= OnPlayerManaChanged;
+            GameEventBus.OnEnemyManaChanged  -= OnEnemyManaChanged;
             GameEventBus.OnReactionCharged   -= OnReactionCharged;
             GameEventBus.OnReactionFired     -= OnReactionFired;
         }
@@ -126,10 +138,18 @@ namespace ThroneOfTides.Systems
         {
             Transform hit = GetHitPoint(target);
             _feedbackDamageNumber?.PlayFeedbacks(hit.position, amount);
+            SpawnFloatingNumber($"-{amount}", DamageColor, hit.position);
 
             if      (amount >= 8) { SpawnVFX(_hitImpactExplosionPrefab, hit.position); _feedbackHeavyHit?.PlayFeedbacks(); }
             else if (amount >= 4) { SpawnVFX(_hitImpactStandardPrefab,  hit.position); _feedbackMediumHit?.PlayFeedbacks(); }
             else if (amount > 0)  { SpawnVFX(_hitImpactStandardPrefab,  hit.position); _feedbackLightHit?.PlayFeedbacks(); }
+        }
+
+        private void OnHealApplied(DamageTarget target, int amount)
+        {
+            Transform hit = GetHitPoint(target);
+            SpawnFloatingNumber($"+{amount}", HealColor, hit.position);
+            _feedbackHeal?.PlayFeedbacks();
         }
 
         private void OnCardPlayed(ICard card)   => _feedbackCardPlay?.PlayFeedbacks();
@@ -155,17 +175,34 @@ namespace ThroneOfTides.Systems
 
         private void OnPlayerManaChanged(int current, int max)
         {
-            bool wasSpent = _previousPlayerMana >= 0 && current < _previousPlayerMana;
+            bool hadPrevious = _previousPlayerMana >= 0;
+            bool wasSpent     = hadPrevious && current < _previousPlayerMana;
+            bool wasGained    = hadPrevious && current > _previousPlayerMana;
+
+            if (wasGained)
+                SpawnFloatingNumber($"+{current - _previousPlayerMana}", ManaColor, GetHitPoint(DamageTarget.Player).position);
+
             _previousPlayerMana = current;
 
             if (wasSpent) _feedbackManaSpent?.PlayFeedbacks();
             else          _feedbackManaGained?.PlayFeedbacks();
         }
 
-        private void OnReactionCharged(ReactionType type, int charges) =>
+        private void OnEnemyManaChanged(int current, int max)
+        {
+            bool hadPrevious = _previousEnemyMana >= 0;
+            bool wasGained    = hadPrevious && current > _previousEnemyMana;
+
+            if (wasGained)
+                SpawnFloatingNumber($"+{current - _previousEnemyMana}", ManaColor, GetHitPoint(DamageTarget.Enemy).position);
+
+            _previousEnemyMana = current;
+        }
+
+        private void OnReactionCharged(ReactionType type, DamageTarget side, int charges) =>
             _feedbackReactionCharged?.PlayFeedbacks();
 
-        private void OnReactionFired(ReactionType type) =>
+        private void OnReactionFired(ReactionType type, DamageTarget side) =>
             _feedbackReactionFired?.PlayFeedbacks();
 
         private void OnCardPlayAccepted(ICard card, DamageTarget? selectedTarget)
@@ -280,6 +317,13 @@ namespace ThroneOfTides.Systems
         {
             if (prefab == null) return;
             Destroy(Instantiate(prefab, position, Quaternion.identity), _vfxLifetime);
+        }
+
+        private void SpawnFloatingNumber(string text, Color color, Vector3 position)
+        {
+            if (_floatingTextPrefab == null) return;
+            var instance = Instantiate(_floatingTextPrefab, position, Quaternion.identity);
+            instance.Setup(text, color);
         }
     }
 }

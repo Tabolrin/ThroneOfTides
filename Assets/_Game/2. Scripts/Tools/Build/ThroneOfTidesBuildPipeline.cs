@@ -3,7 +3,9 @@ using System.Text;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using ThroneOfTides.App;
 using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Tools
@@ -21,6 +23,9 @@ namespace ThroneOfTides.Tools
 
         private const int PlaytestStartingHP  = 40;
         private const int PlaytestMaxHandSize = 6;
+
+        private const string MatchScenePath       = "Assets/_Game/7. Scenes/Match.unity";
+        private const string BuildProfilesAssetPath = "Assets/_Game/4. Data/BuildDeckProfiles.asset";
 
         // ── IPreprocessBuildWithReport ──────────────────────────────────────────
 
@@ -93,7 +98,16 @@ namespace ThroneOfTides.Tools
                                  | BuildOptions.AllowDebugging
             };
 
-            var report = BuildPipeline.BuildPlayer(options);
+            var backup = ApplySceneOverrides(BuildProfileType.Development, disableCheats: false);
+            BuildReport report;
+            try
+            {
+                report = BuildPipeline.BuildPlayer(options);
+            }
+            finally
+            {
+                backup.Restore();
+            }
 
             if (report.summary.result == BuildResult.Succeeded)
                 EditorUtility.DisplayDialog("Dev Build Complete",
@@ -127,7 +141,16 @@ namespace ThroneOfTides.Tools
                 options          = BuildOptions.None
             };
 
-            var report = BuildPipeline.BuildPlayer(options);
+            var backup = ApplySceneOverrides(BuildProfileType.Release, disableCheats: true);
+            BuildReport report;
+            try
+            {
+                report = BuildPipeline.BuildPlayer(options);
+            }
+            finally
+            {
+                backup.Restore();
+            }
 
             if (report.summary.result == BuildResult.Succeeded)
                 EditorUtility.DisplayDialog("Release Build Complete",
@@ -175,6 +198,7 @@ namespace ThroneOfTides.Tools
             int originalHand = config.MaxHandSize;
 
             ApplyConfigOverride(config, PlaytestStartingHP, PlaytestMaxHandSize);
+            var backup = ApplySceneOverrides(BuildProfileType.Playtest, disableCheats: false);
 
             BuildReport report;
             try
@@ -194,6 +218,7 @@ namespace ThroneOfTides.Tools
                 // Restore executes regardless of whether the build succeeded, failed,
                 // or threw an exception — the asset will never be left dirty on disk.
                 ApplyConfigOverride(config, originalHP, originalHand);
+                backup.Restore();
             }
 
             if (report.summary.result == BuildResult.Succeeded)
@@ -232,7 +257,16 @@ namespace ThroneOfTides.Tools
                 options          = BuildOptions.None
             };
 
-            var report = BuildPipeline.BuildPlayer(options);
+            var backup = ApplySceneOverrides(BuildProfileType.WebGL, disableCheats: true);
+            BuildReport report;
+            try
+            {
+                report = BuildPipeline.BuildPlayer(options);
+            }
+            finally
+            {
+                backup.Restore();
+            }
 
             if (report.summary.result == BuildResult.Succeeded)
                 EditorUtility.DisplayDialog("WebGL Build Complete",
@@ -285,5 +319,78 @@ namespace ThroneOfTides.Tools
 
         private static string PickOutputPath(string defaultName, string extension)
             => EditorUtility.SaveFilePanel("Choose Build Location", "", defaultName, extension);
+
+        // ── Per-Build-Type Scene Overrides ──────────────────────────────────────
+        // Unity's BuildPipeline reads scenes from disk, not the in-memory Editor state, so any
+        // build-specific customization (which deck each side uses, whether Cheats is reachable)
+        // has to be written into Match.unity before the build and reverted after — otherwise the
+        // override would leak into the next Editor session or the next, differently-typed build.
+
+        private class SceneOverrideBackup
+        {
+            public GameBootstrapper Bootstrapper;
+            public DeckDefinitionSO OriginalPlayerDeckOverride;
+            public DeckDefinitionSO OriginalEnemyDeckOverride;
+            public Component        CheatsPanelComponent;
+            public bool             OriginalCheatsActive;
+
+            public void Restore()
+            {
+                if (Bootstrapper == null) return;
+
+                var so = new SerializedObject(Bootstrapper);
+                so.FindProperty("_playerDeckOverride").objectReferenceValue = OriginalPlayerDeckOverride;
+                so.FindProperty("_enemyDeckOverride").objectReferenceValue  = OriginalEnemyDeckOverride;
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                if (CheatsPanelComponent != null)
+                    CheatsPanelComponent.gameObject.SetActive(OriginalCheatsActive);
+
+                EditorSceneManager.MarkAllScenesDirty();
+                EditorSceneManager.SaveOpenScenes();
+            }
+        }
+
+        private static SceneOverrideBackup ApplySceneOverrides(BuildProfileType profileType, bool disableCheats)
+        {
+            EditorSceneManager.OpenScene(MatchScenePath, OpenSceneMode.Single);
+
+            var bootstrapper = Object.FindAnyObjectByType<GameBootstrapper>(FindObjectsInactive.Include);
+            if (bootstrapper == null)
+            {
+                Debug.LogWarning("[ThroneOfTides] No GameBootstrapper found in Match.unity — build profile overrides skipped.");
+                return new SceneOverrideBackup();
+            }
+
+            var so         = new SerializedObject(bootstrapper);
+            var playerProp = so.FindProperty("_playerDeckOverride");
+            var enemyProp  = so.FindProperty("_enemyDeckOverride");
+            var cheatsProp = so.FindProperty("_cheatsPanel");
+
+            var backup = new SceneOverrideBackup
+            {
+                Bootstrapper                = bootstrapper,
+                OriginalPlayerDeckOverride  = playerProp.objectReferenceValue as DeckDefinitionSO,
+                OriginalEnemyDeckOverride   = enemyProp.objectReferenceValue as DeckDefinitionSO,
+                CheatsPanelComponent        = cheatsProp.objectReferenceValue as Component,
+            };
+            backup.OriginalCheatsActive = backup.CheatsPanelComponent != null
+                && backup.CheatsPanelComponent.gameObject.activeSelf;
+
+            var profiles = AssetDatabase.LoadAssetAtPath<BuildDeckProfileSO>(BuildProfilesAssetPath);
+            var profile  = profiles != null ? profiles.GetProfile(profileType) : null;
+
+            if (profile?.PlayerDeck != null) playerProp.objectReferenceValue = profile.PlayerDeck;
+            if (profile?.EnemyDeck  != null) enemyProp.objectReferenceValue  = profile.EnemyDeck;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            if (disableCheats && backup.CheatsPanelComponent != null)
+                backup.CheatsPanelComponent.gameObject.SetActive(false);
+
+            EditorSceneManager.MarkAllScenesDirty();
+            EditorSceneManager.SaveOpenScenes();
+
+            return backup;
+        }
     }
 }

@@ -28,8 +28,6 @@ namespace ThroneOfTides.UI
 
         private void Awake()
         {
-            gameObject.SetActive(false);
-
             _retryButton.onClick.AddListener(OnRetryPressed);
             _mainMenuButton.onClick.AddListener(OnMainMenuPressed);
             _portButton.onClick.AddListener(OnPortPressed);

@@ -19,6 +19,14 @@ namespace ThroneOfTides.Systems
         }
 
         /// <summary>
+        /// Decides whether the enemy uses a charged reaction to defend against an incoming
+        /// attack, and which one. Thin wrapper — the actual weighted decision lives on the
+        /// Captain, same as every other card-choice weight.
+        /// </summary>
+        public ReactionType? ChooseReaction(bool hasDeadMansTurn, bool hasCounterGale) =>
+            _captain.ChooseReaction(hasDeadMansTurn, hasCounterGale);
+
+        /// <summary>
         /// Picks the next card the enemy should play this turn, or null if nothing in hand is
         /// currently playable (caller should end the turn). Called once per card played — the
         /// caller re-invokes this after each play since hand/mana/HP change each time.

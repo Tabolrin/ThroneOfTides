@@ -10,15 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8f548b34a6fce246aadd09ea35a84d5, type: 3}
-  m_Name: DaedMan'sTurnCardSO
+  m_Name: RumCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
-  _name: Dead Man's Turn
-  _id: 22
-  _cardType: 4
-  _description: Legends don't dodge. They were never there to begin with. React in
-    time to negate the next incoming attack.
+  _name: Rum
+  _id: 19
+  _cardType: 2
+  _description: Restore 5 HP.
   _manaCost: 1
-  _storageCost: 0
+  _storageCost: 2
   _hpCost: 0
   _damage: 0
   _comboDamage: 0
@@ -26,10 +25,10 @@ MonoBehaviour:
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
-  _actionEffect: {fileID: 11400000, guid: c17fc0c546c84944a9af8ad1a0e248a1, type: 2}
+  _actionEffect: {fileID: 11400000, guid: 054b57bd41d82ff45bd9938b149b1d4b, type: 2}
   _isEligibleAsActionPair: 1
   _requiresTargetSelection: 0
   _aiPlayBeforeAttack: 0
   _statusType: 0
-  _art: {fileID: 21300000, guid: d666ccb1948f6c44c99b7ffd064a9bf0, type: 3}
+  _art: {fileID: 21300000, guid: 82fb0fc9e4a722547865ca5cf292b586, type: 3}
   _presentationEntries: []

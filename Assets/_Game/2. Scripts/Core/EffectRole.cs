@@ -13,5 +13,6 @@ namespace ThroneOfTides.Core
         Draw,
         Heal,
         Defense,
+        ManaSteal,
     }
 }

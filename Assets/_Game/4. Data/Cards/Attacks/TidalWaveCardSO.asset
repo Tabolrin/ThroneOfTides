@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: TidalWaveCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Tidal Wave
+  _id: 24
   _cardType: 0
   _description: The sea obeys no one. Deal 3 damage. Removes Gunpowder from the hit
     ship - use on your own ship to break an active Gunpowder stack.

@@ -20,6 +20,7 @@ namespace ThroneOfTides.Core
 
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
+        public static event Action<DamageTarget, int> OnHealApplied;
         public static event Action<int>               OnHPChanged;
         public static event Action                    OnComboResolved;
         public static event Action<DamageTarget, int> OnComboStackChanged;
@@ -39,8 +40,8 @@ namespace ThroneOfTides.Core
         // ── Reactions ─────────────────────────────────────────────────────────
         // ReactionType distinguishes DMT from BFB so subscribers can update
         // the correct charge indicator without needing to query GameState directly.
-        public static event Action<ReactionType, int> OnReactionCharged; // type, charges remaining
-        public static event Action<ReactionType>      OnReactionFired;   // type consumed
+        public static event Action<ReactionType, DamageTarget, int> OnReactionCharged; // type, side, charges remaining
+        public static event Action<ReactionType, DamageTarget>      OnReactionFired;   // type, side consumed
 
         // ── Action Cards ──────────────────────────────────────────────────────
         public static event Action       OnDeadMansTurnPrompt;
@@ -64,6 +65,7 @@ namespace ThroneOfTides.Core
         public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
         public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
         public static void FireDamageDealt(DamageTarget target, int amount)  => OnDamageDealt?.Invoke(target, amount);
+        public static void FireHealApplied(DamageTarget target, int amount) => OnHealApplied?.Invoke(target, amount);
         public static void FireHPChanged(int hp)                             => OnHPChanged?.Invoke(hp);
         public static void FireComboResolved()                               => OnComboResolved?.Invoke();
         public static void FireComboStackChanged(DamageTarget side, int count) => OnComboStackChanged?.Invoke(side, count);
@@ -73,8 +75,8 @@ namespace ThroneOfTides.Core
             => OnShipStatusCountChanged?.Invoke(type, ship, count);
         public static void FirePlayerManaChanged(int current, int max)       => OnPlayerManaChanged?.Invoke(current, max);
         public static void FireEnemyManaChanged(int current, int max)        => OnEnemyManaChanged?.Invoke(current, max);
-        public static void FireReactionCharged(ReactionType type, int charges) => OnReactionCharged?.Invoke(type, charges);
-        public static void FireReactionFired(ReactionType type)              => OnReactionFired?.Invoke(type);
+        public static void FireReactionCharged(ReactionType type, DamageTarget side, int charges) => OnReactionCharged?.Invoke(type, side, charges);
+        public static void FireReactionFired(ReactionType type, DamageTarget side)                => OnReactionFired?.Invoke(type, side);
         public static void FireDeadMansTurnPrompt()                          => OnDeadMansTurnPrompt?.Invoke();
         public static void FireDeadMansTurnResolved(bool negated)            => OnDeadMansTurnResolved?.Invoke(negated);
         public static void FirePowerUpUsed()                                 => OnPowerUpUsed?.Invoke();
@@ -93,6 +95,7 @@ namespace ThroneOfTides.Core
             OnEnemyCardPlayed            = null;
             OnEnemyCardAnimationComplete = null;
             OnDamageDealt                = null;
+            OnHealApplied                = null;
             OnHPChanged                  = null;
             OnComboResolved              = null;
             OnComboStackChanged          = null;

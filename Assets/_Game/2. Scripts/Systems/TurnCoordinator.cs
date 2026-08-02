@@ -43,6 +43,7 @@ namespace ThroneOfTides.Systems
             _config         = config;
 
             _gameState.OnEnemyTurnReady += OnEnemyTurnReady;
+            _combatResolver.SetSecondaryDrawCallback(TryDrawCardSecondary, TryDrawCardSecondaryEnemy);
         }
 
         private void OnDestroy()
@@ -118,6 +119,27 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
+        // Enemy-side mirror of TryDrawCardSecondary — used by caster-relative Action effects
+        // (e.g. Treasure Chest) so an enemy-cast draw goes into the enemy's own hand.
+        public bool TryDrawCardSecondaryEnemy()
+        {
+            if (_gameState.EnemyDeck.Count == 0) return false;
+            if (_gameState.EnemyHand.Count >= _config.MaxHandSize) return false;
+
+            CardSO drawn = _gameState.EnemyDeck.Draw();
+            if (drawn == null) return false;
+
+            if (drawn.CardType == CardType.Reaction)
+            {
+                ChargeReaction(drawn, DamageTarget.Enemy);
+                return true;
+            }
+
+            _gameState.EnemyHand.AddCard(drawn, _config.MaxHandSize);
+            _handLayout.AddCardToEnemyHand(drawn);
+            return true;
+        }
+
         public void HandleCardPlayed(CardSO cardSO)
         {
             if (!_gameState.CanPlayCard(cardSO))
@@ -156,21 +178,58 @@ namespace ThroneOfTides.Systems
             _gameState.PlayerHand.RemoveCard(cardSO);
             _gameState.DiscardPlayerCard(cardSO);
 
-            _combatResolver.SetSecondaryDrawCallback(TryDrawCardSecondary);
-
             int damage = _combatResolver.ResolvePlayerCard(cardSO, _handLayout, selectedTarget);
             if (damage > 0)
-                _gameState.ApplyDamage(DamageTarget.Enemy, damage);
+                ApplyPlayerAttackToEnemy(cardSO, damage);
 
             OnHPChanged?.Invoke();
 
             if (_gameState.IsGameOver()) FireMatchResult();
         }
 
+        // Enemy-side mirror of ResolveEnemyAttack/ReactionPrompt — the enemy has no UI to prompt,
+        // so EnemyAI.ChooseReaction (a weighted decision, same idea as picking which card to
+        // play) decides whether it negates or reflects instead of a player button click.
+        private void ApplyPlayerAttackToEnemy(CardSO attackCard, int damage)
+        {
+            bool isUnblockable = _gameState.SirenSongActive;
+            bool hasDMT         = _gameState.EnemyDeadMansTurnCharges > 0;
+            bool hasCounterGale = _gameState.EnemyCounterGaleCharges  > 0;
+
+            ReactionType? chosen = !isUnblockable
+                ? _enemyAI.ChooseReaction(hasDMT, hasCounterGale)
+                : null;
+
+            if (chosen == ReactionType.DeadMansTurn && _gameState.ConsumeDeadMansTurn(DamageTarget.Enemy))
+            {
+                GameDebug.Log("Enemy used Dead Man's Turn — attack negated");
+                return;
+            }
+
+            if (chosen == ReactionType.CounterGale && _gameState.ConsumeCounterGale(DamageTarget.Enemy))
+            {
+                int reflected = _combatResolver.ResolveCounterGale(damage);
+                _gameState.ApplyDamage(DamageTarget.Player, reflected);
+                _gameState.ApplyDamage(DamageTarget.Enemy, damage);
+                GameDebug.Log($"Enemy used Counter Gale — reflected {reflected}, took {damage}");
+                return;
+            }
+
+            _gameState.ApplyDamage(DamageTarget.Enemy, damage);
+        }
+
         public void Concede()
         {
             GameDebug.Log("Player conceded");
             GameEventBus.FireMatchLoss();
+        }
+
+        // Lets callers outside the normal turn flow (e.g. CheatsPanel's HP buttons) trigger the
+        // win/loss check — IsGameOver() is otherwise only evaluated at specific points in the
+        // normal card-play/enemy-turn flow, so a cheat-driven HP change would never show results.
+        public void CheckGameOver()
+        {
+            if (_gameState.IsGameOver()) FireMatchResult();
         }
 
         // ── Auto Draw ─────────────────────────────────────────────────────────
@@ -229,10 +288,19 @@ namespace ThroneOfTides.Systems
             _gameState.ResetEnemyMana();
 
             // The enemy hand fully refills at the start of its turn too, mirroring the player.
+            // Reaction cards charge the enemy's own counter instead of occupying a hand slot —
+            // EnemyAI.PickCard never plays Reaction-type cards, so leaving one in hand would
+            // strand it there permanently unplayable.
             while (_gameState.EnemyHand.Count < _config.MaxHandSize && _gameState.EnemyDeck.Count > 0)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
                 if (enemyDrawn == null) break;
+
+                if (enemyDrawn.CardType == CardType.Reaction)
+                {
+                    ChargeReaction(enemyDrawn, DamageTarget.Enemy);
+                    continue;
+                }
 
                 _gameState.EnemyHand.AddCard(enemyDrawn, _config.MaxHandSize);
                 _handLayout.AddCardToEnemyHand(enemyDrawn);
@@ -307,8 +375,8 @@ namespace ThroneOfTides.Systems
 
             bool isKraken      = attackCard.Id == CardId.Kraken;
             bool isUnblockable = _gameState.SirenSongActive || isKraken;
-            bool hasDMT        = _gameState.DeadMansTurnCharges > 0;
-            bool hasCounterGale = _gameState.CounterGaleCharges > 0;
+            bool hasDMT        = _gameState.PlayerDeadMansTurnCharges > 0;
+            bool hasCounterGale = _gameState.PlayerCounterGaleCharges > 0;
 
             bool playerHasKraken = _gameState.PlayerHand.CardsSO.Any(c => c.Id == CardId.Kraken);
             if (isKraken && playerHasKraken)
@@ -400,10 +468,10 @@ namespace ThroneOfTides.Systems
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        private void ChargeReaction(CardSO card)
+        private void ChargeReaction(CardSO card, DamageTarget side = DamageTarget.Player)
         {
-            if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge();
-            else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge();
+            if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge(side);
+            else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge(side);
         }
 
         private void FireMatchResult()

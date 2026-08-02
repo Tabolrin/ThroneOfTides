@@ -61,8 +61,15 @@ namespace ThroneOfTides.Systems
         public void SpendPlayerMana(int amount) =>
             _gameState.SpendPlayerMana(amount);
 
-        public void AddPlayerMaxMana(int amount) =>
-            _gameState.AddPlayerMaxMana(amount);
+        // Grants max mana to whoever cast this card — works for either side so Treasure
+        // Chest/High Spirits behave correctly when the enemy plays them too.
+        public void AddPlayerMaxMana(int amount)
+        {
+            if (Caster == DamageTarget.Player)
+                _gameState.AddPlayerMaxMana(amount);
+            else
+                _gameState.AddEnemyMaxMana(amount);
+        }
 
         // Steals mana from whoever did NOT cast this card, into the caster's own pool — works
         // for either side so Stolen Wind/Essence Plunder behave correctly when the enemy plays them.
@@ -74,17 +81,23 @@ namespace ThroneOfTides.Systems
                 _gameState.StealPlayerMana(amount);
         }
 
+        // Charges whichever side cast this card — works for either side so an enemy-drawn
+        // reaction card charges the enemy's own counter, not the player's.
         public void AddDeadMansTurnCharge() =>
-            _gameState.AddDeadMansTurnCharge();
+            _gameState.AddDeadMansTurnCharge(Caster);
 
         public void AddCounterGaleCharge() =>
-            _gameState.AddCounterGaleCharge();
+            _gameState.AddCounterGaleCharge(Caster);
 
+        // Draws from the shared original-deck snapshot pool but returns the cards into whoever
+        // cast this card's own deck — works for either side so Treasure Chest behaves correctly
+        // when the enemy plays it too.
         public void ReturnFromSnapshot(int count)
         {
             var cards = _gameState.GetRandomFromSnapshot(count);
+            var deck  = Caster == DamageTarget.Player ? _gameState.PlayerDeck : _gameState.EnemyDeck;
             foreach (var card in cards)
-                _gameState.PlayerDeck.ReturnCard(card);
+                deck.ReturnCard(card);
         }
 
         public void DrawOneCard() => _secondaryDraw?.Invoke();

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Counter Gale
   _id: 23
-  _cardType: 2
+  _cardType: 4
   _description: Enemy cannot cancel. React in time to deal back half the incoming
     damage, rounded down.
   _manaCost: 1

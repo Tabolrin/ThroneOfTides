@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dbea4c8aa1458e41898634341ade7a2, type: 3}
-  m_Name: Essence Plunder Effect SO
-  m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.StolenWindEffectSO
-  _role: 6
-  _manaToSteal: 2
+  m_Script: {fileID: 11500000, guid: c2768b7ff9c615f41b2ffaf13d716a5c, type: 3}
+  m_Name: Rum Effect SO
+  m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.RumEffectSO
+  _role: 4
+  _healAmount: 5

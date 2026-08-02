@@ -9,12 +9,17 @@ namespace ThroneOfTides.Systems
     {
         private readonly GameState _gameState;
 
-        // Set by TurnCoordinator before each card resolution.
-        // Allows effect SOs to trigger secondary draws without assembly boundary issues.
-        private System.Func<bool> _secondaryDrawCallback;
+        // Set once by TurnCoordinator during setup. Allows effect SOs to trigger secondary
+        // draws (e.g. Treasure Chest) without assembly boundary issues. Kept per-side so a
+        // caster-relative effect draws into its own hand, not always the player's.
+        private System.Func<bool> _secondaryDrawCallbackPlayer;
+        private System.Func<bool> _secondaryDrawCallbackEnemy;
 
-        public void SetSecondaryDrawCallback(System.Func<bool> callback)
-            => _secondaryDrawCallback = callback;
+        public void SetSecondaryDrawCallback(System.Func<bool> playerCallback, System.Func<bool> enemyCallback)
+        {
+            _secondaryDrawCallbackPlayer = playerCallback;
+            _secondaryDrawCallbackEnemy  = enemyCallback;
+        }
 
         public CombatResolver(GameState gameState)
         {
@@ -102,7 +107,8 @@ namespace ThroneOfTides.Systems
                 Debug.LogWarning($"{card.Name} has no ActionEffect assigned");
                 return 0;
             }
-            var context = new CardEffectContext(_gameState, handLayout, caster, _secondaryDrawCallback, selectedTarget);
+            var secondaryDraw = caster == DamageTarget.Player ? _secondaryDrawCallbackPlayer : _secondaryDrawCallbackEnemy;
+            var context = new CardEffectContext(_gameState, handLayout, caster, secondaryDraw, selectedTarget);
             card.ActionEffect.Execute(context);
             return 0;
         }
@@ -115,7 +121,8 @@ namespace ThroneOfTides.Systems
             // here (Ram The Hull was cut content with no asset; its case was already a no-op).
             if (card.ActionEffect != null)
             {
-                var context = new CardEffectContext(_gameState, handLayout, caster, _secondaryDrawCallback, selectedTarget);
+                var secondaryDraw = caster == DamageTarget.Player ? _secondaryDrawCallbackPlayer : _secondaryDrawCallbackEnemy;
+            var context = new CardEffectContext(_gameState, handLayout, caster, secondaryDraw, selectedTarget);
                 card.ActionEffect.Execute(context);
                 return 0;
             }

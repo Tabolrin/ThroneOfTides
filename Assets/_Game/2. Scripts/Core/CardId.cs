@@ -42,6 +42,11 @@ namespace ThroneOfTides.Core
 
         // Reactions
         DeadMansTurn,
-        CounterGale
+        CounterGale,
+
+        // Appended at the end (not inserted alphabetically/by category) so it doesn't shift the
+        // int values of every card defined after it — those ints are already serialized into
+        // existing CardSO assets as _id.
+        TidalWave
     }
 }

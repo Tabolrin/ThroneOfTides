@@ -421,6 +421,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8216219965337063301}
   - component: {fileID: 8911065699822210073}
+  - component: {fileID: 5346236215495155720}
+  - component: {fileID: 7550528573107304444}
   m_Layer: 5
   m_Name: PortCardRow
   m_TagString: Untagged
@@ -478,6 +480,43 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &5346236215495155720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041322309304317785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 100
+  m_PreferredWidth: -1
+  m_PreferredHeight: 100
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
+--- !u!114 &7550528573107304444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041322309304317785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0364fc97c5c5b3e48830637e305383d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ThroneOfTides.UI::ThroneOfTides.UI.PortCardRow
+  _typeBand: {fileID: 5418367316913812330}
+  _nameLabel: {fileID: 1020154693225218474}
+  _manaCostLabel: {fileID: 8494112601315912768}
+  _storageCostLabel: {fileID: 4266743921666360389}
+  _removeButton: {fileID: 5855772626991559794}
 --- !u!1 &4142492459650085378
 GameObject:
   m_ObjectHideFlags: 0
