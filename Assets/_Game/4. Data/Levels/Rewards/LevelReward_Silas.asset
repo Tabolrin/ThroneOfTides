@@ -12,13 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b16c844d8275f2a4586816c326dc23be, type: 3}
   m_Name: LevelReward_Silas
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.LevelRewardSO
-  _rewardCards: []
-  _highHPReward:
-    Rum: 0
-    Shipwrecks: 0
-  _midHPReward:
-    Rum: 0
-    Shipwrecks: 0
-  _lowHPReward:
-    Rum: 0
-    Shipwrecks: 0
+  _rewardCards:
+  - {fileID: 11400000, guid: 526f9f49f80f32a44b68ff440369494f, type: 2}
+  - {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
+  _highHPCoinReward: 50
+  _midHPCoinReward: 35
+  _lowHPCoinReward: 15

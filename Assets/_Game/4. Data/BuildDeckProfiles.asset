@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: BuildDeckProfiles
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.BuildDeckProfileSO
   _profiles:
-  - Type: 0
-    PlayerDeck: {fileID: 0}
+  - Type: 2
+    PlayerDeck: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
     EnemyDeck: {fileID: 0}
   - Type: 1
-    PlayerDeck: {fileID: 0}
+    PlayerDeck: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
     EnemyDeck: {fileID: 0}
-  - Type: 2
-    PlayerDeck: {fileID: 0}
+  - Type: 0
+    PlayerDeck: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
     EnemyDeck: {fileID: 0}
   - Type: 3
-    PlayerDeck: {fileID: 0}
+    PlayerDeck: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
     EnemyDeck: {fileID: 0}

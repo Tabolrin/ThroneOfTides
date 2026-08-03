@@ -2669,6 +2669,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: OptionsPanel
       objectReference: {fileID: 0}
+    - target: {fileID: 149059599815726450, guid: b0ecaa13e84749f408547fbde329ba62, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 587269174054075994, guid: b0ecaa13e84749f408547fbde329ba62, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

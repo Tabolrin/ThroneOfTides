@@ -24,7 +24,7 @@ MonoBehaviour:
   - Card: {fileID: 11400000, guid: 626df873eb0d28b4392e7cfd5ee85308, type: 2}
     Count: 3
   - Card: {fileID: 11400000, guid: e99ae19356c0e414daec202d36f21506, type: 2}
-    Count: 3
+    Count: 7
   - Card: {fileID: 11400000, guid: beb41d5072d4d9345b4546ce29b41294, type: 2}
     Count: 3
   - Card: {fileID: 11400000, guid: 592ab224bc8beba4d952d7f6361e2d27, type: 2}
@@ -33,3 +33,7 @@ MonoBehaviour:
     Count: 5
   - Card: {fileID: 11400000, guid: f2b5e2fbe6bf8fe43a80040ddee1b5f1, type: 2}
     Count: 5
+  - Card: {fileID: 11400000, guid: a7fb26fd80a57044f926f3e40ef45306, type: 2}
+    Count: 6
+  - Card: {fileID: 11400000, guid: 586d3281a4fb0424fabfc04b1a26a5f4, type: 2}
+    Count: 2

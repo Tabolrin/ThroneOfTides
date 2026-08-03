@@ -13,15 +13,33 @@ MonoBehaviour:
   m_Name: PlayerDeck
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.DeckDefinitionSO
   Cards:
-  - Card: {fileID: 11400000, guid: 586d3281a4fb0424fabfc04b1a26a5f4, type: 2}
-    Count: 1
-  - Card: {fileID: 11400000, guid: 526f9f49f80f32a44b68ff440369494f, type: 2}
-    Count: 1
+  - Card: {fileID: 11400000, guid: beb41d5072d4d9345b4546ce29b41294, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: baa5bc3625ad5f0439300dcff4bebb68, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: a7fb26fd80a57044f926f3e40ef45306, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: 779ca79aa7bb2c348a42f9868232ca0c, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: d603a27bb8523524fb8f81b910e1a703, type: 2}
+    Count: 5
+  - Card: {fileID: 11400000, guid: 626df873eb0d28b4392e7cfd5ee85308, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: 13836fc428319484a8d71e56c073ab25, type: 2}
+    Count: 2
   - Card: {fileID: 11400000, guid: 113e21d82ac278c4581bbabd9b16e962, type: 2}
     Count: 1
-  - Card: {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
-    Count: 1
-  - Card: {fileID: 11400000, guid: 13836fc428319484a8d71e56c073ab25, type: 2}
-    Count: 1
-  - Card: {fileID: 11400000, guid: d603a27bb8523524fb8f81b910e1a703, type: 2}
-    Count: 1
+  - Card: {fileID: 11400000, guid: f2b5e2fbe6bf8fe43a80040ddee1b5f1, type: 2}
+    Count: 4
+  - Card: {fileID: 11400000, guid: c1db74e802e87e348a52b35bc55cfc88, type: 2}
+    Count: 4
+  - Card: {fileID: 11400000, guid: 592ab224bc8beba4d952d7f6361e2d27, type: 2}
+    Count: 5
+  - Card: {fileID: 11400000, guid: b70463cb921192144855faee858f1708, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: 3707c0de5dcf96640b7f4b19e88ff62f, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: 2453aca1d0a07a04f96d6509f2418018, type: 2}
+    Count: 3
+  - Card: {fileID: 11400000, guid: 1255c9689b6719641a3967c758fef008, type: 2}
+    Count: 2

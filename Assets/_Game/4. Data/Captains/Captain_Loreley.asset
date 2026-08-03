@@ -16,10 +16,10 @@ MonoBehaviour:
   _portrait: {fileID: 0}
   _archetypeDescription: Action-heavy sustain. Spams Siren Song, chips away HP with
     DOT and medium attacks, prolongs the fight.
-  _hp: 0
-  _maxMana: 0
+  _hp: 50
+  _maxMana: 4
   _deckDefinition: {fileID: 11400000, guid: 58ae9c76c66141f4bb8d0e91f15ee1c8, type: 2}
-  _levelReward: {fileID: 0}
+  _levelReward: {fileID: 11400000, guid: 3297d3363832d454f827a403db776fc2, type: 2}
   _weightHighDamageWeapon: 0.7
   _weightLowDamageWeapon: 0.6
   _weightBlockHoldForDefense: 1

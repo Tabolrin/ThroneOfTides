@@ -16,10 +16,10 @@ MonoBehaviour:
   _portrait: {fileID: 0}
   _archetypeDescription: Aggressive. Spams Kraken even at HP cost, builds mana with
     Essence Plunder and High Spirits then attacks in bursts.
-  _hp: 0
-  _maxMana: 0
+  _hp: 60
+  _maxMana: 5
   _deckDefinition: {fileID: 11400000, guid: f47345d5e1af41c6b2cb724ea80e6981, type: 2}
-  _levelReward: {fileID: 0}
+  _levelReward: {fileID: 11400000, guid: 6ec320d32275647438ec484c84dd8ea4, type: 2}
   _weightHighDamageWeapon: 0.8
   _weightLowDamageWeapon: 1
   _weightBlockHoldForDefense: 1
