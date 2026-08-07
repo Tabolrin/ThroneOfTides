@@ -1,124 +1,137 @@
 // Assets/_Game/2. Scripts/UI/ActiveEffectsBar.cs
-using System;
 using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 using ThroneOfTides.Core;
+using ThroneOfTides.Data;
+using UnityEngine;
 
 namespace ThroneOfTides.UI
 {
-    // Shows reaction charges and active per-ship status badges (Gunpowder/Whirlpool/Hail Storm/
-    // High Spirits/Siren Song) for one ship. Reactions are tracked per side — this instance only
-    // reacts to events for whichever side its own Side field is set to.
-    // Unlike a dynamic instantiate-a-prefab system, this drives a fixed set of pre-placed badge
-    // GameObjects authored per status type — toggling visibility and updating a count label rather
-    // than spawning/destroying instances. One instance per ship — set Side to which ship this
-    // represents, and assign a Badges entry per status type you've placed in the scene.
+    // Shows only the currently-active per-ship status badges (Gunpowder/Whirlpool/Hail
+    // Storm/High Spirits/Siren Song) plus reaction charge badges (Dead Man's Turn/Counter
+    // Gale) for one ship. Badges are dynamically instantiated from a single shared prefab
+    // when an effect becomes active and destroyed when it clears — nothing sits pre-placed
+    // in the scene. One instance per ship — set Side to which ship this represents.
     public class ActiveEffectsBar : MonoBehaviour
     {
-        [Serializable]
-        public class StatusBadge
-        {
-            [Tooltip("Which status this badge represents.")]
-            public ShipStatusType Type;
-            [Tooltip("Root GameObject to show/hide for this badge.")]
-            public GameObject Root;
-            [Tooltip("Count label shown on the badge (e.g. stack count or turns remaining).")]
-            public TextMeshProUGUI CountLabel;
-        }
-
         [Header("Side")]
-        [Tooltip("Which ship this bar displays status for.")]
+        [Tooltip("Which ship this bar displays status/reactions for.")]
         [SerializeField] private DamageTarget _side = DamageTarget.Player;
 
-        [Header("Reactions — Dead Man's Turn")]
-        [SerializeField] private GameObject      _dmtRoot;
-        [SerializeField] private TextMeshProUGUI _dmtChargesLabel;
+        [Header("Layout")]
+        [Tooltip("Row that holds dynamically spawned status-effect badges (Gunpowder, Whirlpool, Hail Storm, High Spirits, Siren Song).")]
+        [SerializeField] private RectTransform _effectsContainer;
+        [Tooltip("Row that holds dynamically spawned reaction-charge badges (Dead Man's Turn, Counter Gale).")]
+        [SerializeField] private RectTransform _reactionsContainer;
 
-        [Header("Reactions — Counter Gale")]
-        [SerializeField] private GameObject      _counterGaleRoot;
-        [SerializeField] private TextMeshProUGUI _counterGaleChargesLabel;
+        [Header("Data")]
+        [SerializeField] private EffectBadgeView       _badgePrefab;
+        [SerializeField] private EffectSymbolPaletteSO _palette;
 
-        [Header("Status Badges")]
-        [Tooltip("One entry per pre-placed status badge in the scene.")]
-        [SerializeField] private List<StatusBadge> _badges = new List<StatusBadge>();
+        [Header("Reaction Icons")]
+        [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette — assign their icons directly.")]
+        [SerializeField] private Sprite _deadMansTurnIcon;
+        [SerializeField] private Sprite _counterGaleIcon;
 
-        private int _dmtCharges;
-        private int _counterGaleCharges;
+        private readonly Dictionary<ShipStatusType, EffectBadgeView> _activeStatusBadges =
+            new Dictionary<ShipStatusType, EffectBadgeView>();
+        private readonly Dictionary<ReactionType, EffectBadgeView> _activeReactionBadges =
+            new Dictionary<ReactionType, EffectBadgeView>();
+        private readonly Dictionary<ReactionType, int> _reactionCharges =
+            new Dictionary<ReactionType, int>();
 
         private void OnEnable()
         {
+            GameEventBus.OnShipStatusCountChanged += OnShipStatusCountChanged;
             GameEventBus.OnReactionCharged        += OnReactionCharged;
             GameEventBus.OnReactionFired          += OnReactionFired;
-            GameEventBus.OnShipStatusCountChanged += OnShipStatusCountChanged;
             GameEventBus.OnMatchWin               += OnMatchEnd;
             GameEventBus.OnMatchLoss              += OnMatchEnd;
         }
 
         private void OnDisable()
         {
+            GameEventBus.OnShipStatusCountChanged -= OnShipStatusCountChanged;
             GameEventBus.OnReactionCharged        -= OnReactionCharged;
             GameEventBus.OnReactionFired          -= OnReactionFired;
-            GameEventBus.OnShipStatusCountChanged -= OnShipStatusCountChanged;
             GameEventBus.OnMatchWin               -= OnMatchEnd;
             GameEventBus.OnMatchLoss              -= OnMatchEnd;
         }
 
+        // ── Status Effects ───────────────────────────────────────────────────
+
+        private void OnShipStatusCountChanged(ShipStatusType type, DamageTarget ship, int count)
+        {
+            if (ship != _side) return;
+
+            // Siren Song is a pending-effect badge — presence only, no count shown.
+            int? displayCount = type == ShipStatusType.SirenSong ? (int?)null : count;
+
+            SetBadge(_activeStatusBadges, type, count > 0, _effectsContainer,
+                _palette != null ? _palette.GetSprite(type) : null, displayCount);
+        }
+
+        // ── Reaction Charges ─────────────────────────────────────────────────
+
         private void OnReactionCharged(ReactionType type, DamageTarget side, int charges)
         {
             if (side != _side) return;
-
-            if (type == ReactionType.DeadMansTurn)
-            {
-                _dmtCharges = charges;
-                Refresh(_dmtRoot, _dmtChargesLabel, _dmtCharges);
-            }
-            else
-            {
-                _counterGaleCharges = charges;
-                Refresh(_counterGaleRoot, _counterGaleChargesLabel, _counterGaleCharges);
-            }
+            _reactionCharges[type] = charges;
+            RefreshReactionBadge(type, charges);
         }
 
         private void OnReactionFired(ReactionType type, DamageTarget side)
         {
             if (side != _side) return;
 
-            if (type == ReactionType.DeadMansTurn)
-            {
-                _dmtCharges = Mathf.Max(0, _dmtCharges - 1);
-                Refresh(_dmtRoot, _dmtChargesLabel, _dmtCharges);
-            }
-            else
-            {
-                _counterGaleCharges = Mathf.Max(0, _counterGaleCharges - 1);
-                Refresh(_counterGaleRoot, _counterGaleChargesLabel, _counterGaleCharges);
-            }
+            _reactionCharges.TryGetValue(type, out int current);
+            int remaining = Mathf.Max(0, current - 1);
+            _reactionCharges[type] = remaining;
+            RefreshReactionBadge(type, remaining);
         }
 
-        private void OnShipStatusCountChanged(ShipStatusType type, DamageTarget ship, int count)
+        private void RefreshReactionBadge(ReactionType type, int charges)
         {
-            if (ship != _side) return;
+            Sprite icon = type == ReactionType.DeadMansTurn ? _deadMansTurnIcon : _counterGaleIcon;
+            SetBadge(_activeReactionBadges, type, charges > 0, _reactionsContainer, icon, charges);
+        }
 
-            var badge = _badges.Find(b => b.Type == type);
-            if (badge == null) return;
+        // ── Shared badge create/update/destroy ───────────────────────────────
 
-            Refresh(badge.Root, badge.CountLabel, count);
+        private void SetBadge<T>(Dictionary<T, EffectBadgeView> active, T key, bool shouldBeActive,
+            RectTransform container, Sprite icon, int? count)
+        {
+            bool exists = active.TryGetValue(key, out EffectBadgeView badge);
+
+            if (!shouldBeActive)
+            {
+                if (exists)
+                {
+                    Destroy(badge.gameObject);
+                    active.Remove(key);
+                }
+                return;
+            }
+
+            if (!exists)
+            {
+                if (_badgePrefab == null || container == null) return;
+                badge = Instantiate(_badgePrefab, container);
+                active[key] = badge;
+            }
+
+            badge.Setup(icon, count);
         }
 
         private void OnMatchEnd()
         {
-            _dmtCharges = 0;
-            _counterGaleCharges = 0;
+            foreach (var badge in _activeStatusBadges.Values)
+                if (badge != null) Destroy(badge.gameObject);
+            _activeStatusBadges.Clear();
 
-            foreach (var badge in _badges)
-                Refresh(badge.Root, badge.CountLabel, 0);
-        }
-
-        private static void Refresh(GameObject root, TextMeshProUGUI label, int charges)
-        {
-            if (root  != null) root.SetActive(charges > 0);
-            if (label != null) label.text = charges > 0 ? $"×{charges}" : string.Empty;
+            foreach (var badge in _activeReactionBadges.Values)
+                if (badge != null) Destroy(badge.gameObject);
+            _activeReactionBadges.Clear();
+            _reactionCharges.Clear();
         }
     }
 }
