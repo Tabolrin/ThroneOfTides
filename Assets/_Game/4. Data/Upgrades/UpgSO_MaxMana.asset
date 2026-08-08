@@ -18,5 +18,4 @@ MonoBehaviour:
   Icon: {fileID: 0}
   MaxLevel: 3
   ValuePerLevel: 010000000100000001000000
-  RumCostPerLevel: 050000000a00000014000000
-  ShipwreckCostPerLevel: 020000000400000008000000
+  CoinCostPerLevel: 190000002d00000046000000

@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using _Game._2._Scripts.rum;
 
 namespace ThroneOfTides.UI
 {
@@ -51,11 +52,23 @@ namespace ThroneOfTides.UI
                 _enemyManaLabel.text = $"{enemyMana} / {enemyMaxMana}";
         }
 
-        // Guards against div-by-zero and clamps to a valid 0–1 range for Image.fillAmount
+        // Guards against div-by-zero and clamps to a valid 0–1 range for Image.fillAmount.
+        // If a LiquidFillAnimator sits on the same object (idle wave wobble on the liquid art),
+        // route through it instead of tweening the Image directly — its own Update() loop
+        // continuously re-applies its last-known target fill, which would otherwise fight and
+        // undo DOTween's tween every frame.
         private static void SetFillAmount(Image image, int current, int max, float duration = 0.3f)
         {
             if (image == null) return;
             float target = max > 0 ? Mathf.Clamp01((float)current / max) : 0f;
+
+            var liquidAnimator = image.GetComponent<LiquidFillAnimator>();
+            if (liquidAnimator != null)
+            {
+                liquidAnimator.SetFill(target, duration);
+                return;
+            }
+
             image.DOFillAmount(target, duration).SetEase(Ease.OutQuad);
         }
     }

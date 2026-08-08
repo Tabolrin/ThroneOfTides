@@ -1,0 +1,14 @@
+{
+    "name": "ThroneOfTides.Rum",
+    "rootNamespace": "_Game._2._Scripts.rum",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

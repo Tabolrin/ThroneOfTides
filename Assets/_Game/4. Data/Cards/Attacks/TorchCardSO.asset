@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 1
   _description: Now we end this. If Gunpowder is on the enemy ship, ignite it. Deals
     8 damage +2 per stacked Barrel.
-  _manaCost: 2
-  _storageCost: 3
+  _manaCost: 3
+  _storageCost: 4
   _hpCost: 0
   _damage: 1
   _comboDamage: 8
@@ -29,6 +29,7 @@ MonoBehaviour:
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
   _statusType: 1
   _art: {fileID: 21300000, guid: d1755e11d022d524ba5ab4e3e504b349, type: 3}
   _presentationEntries: []

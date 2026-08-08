@@ -16,7 +16,7 @@ MonoBehaviour:
   MaxHandSize: 4
   StartingMaxMana: 3
   LowDeckThreshold: 3
-  BaseStorageCapacity: 20
+  BaseStorageCapacity: 80
   CardSpacing: 1
   EnemyThinkTimeMin: 1
   EnemyThinkTimeMax: 1

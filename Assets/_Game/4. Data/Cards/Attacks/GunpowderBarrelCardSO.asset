@@ -18,7 +18,7 @@ MonoBehaviour:
   _description: "Let it build. Let it burn. Prime the combo \u2014 stack each turn
     to increase Torch damage."
   _manaCost: 1
-  _storageCost: 3
+  _storageCost: 2
   _hpCost: 0
   _damage: 0
   _comboDamage: 8

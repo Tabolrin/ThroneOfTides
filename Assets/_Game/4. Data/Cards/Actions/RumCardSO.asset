@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RumCardSO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.CardSO
   _name: Rum
-  _id: 19
+  _id: 18
   _cardType: 2
   _description: Restore 5 HP.
   _manaCost: 1

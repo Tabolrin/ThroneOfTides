@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _description: Return 3 cards from your original deck and draw 1. 50% chance to
     also gain +1 max mana.
-  _manaCost: 3
-  _storageCost: 6
+  _manaCost: 2
+  _storageCost: 5
   _hpCost: 0
   _damage: 0
   _comboDamage: 0

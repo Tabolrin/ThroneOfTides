@@ -16,8 +16,8 @@ MonoBehaviour:
   _id: 3
   _cardType: 0
   _description: Blood for blood. Sacrifice 2 HP. Deal 8 damage.
-  _manaCost: 1
-  _storageCost: 2
+  _manaCost: 2
+  _storageCost: 3
   _hpCost: 0
   _damage: 4
   _comboDamage: 0
@@ -28,6 +28,7 @@ MonoBehaviour:
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
   _statusType: 0
   _art: {fileID: 21300000, guid: 7fe440f9afbcc364bac996d81af1f84e, type: 3}
   _presentationEntries: []

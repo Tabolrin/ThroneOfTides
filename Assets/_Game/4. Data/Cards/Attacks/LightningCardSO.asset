@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 0
   _description: The storm has chosen its admiral. Deal 10 damage.
   _manaCost: 4
-  _storageCost: 8
+  _storageCost: 6
   _hpCost: 0
   _damage: 10
   _comboDamage: 0

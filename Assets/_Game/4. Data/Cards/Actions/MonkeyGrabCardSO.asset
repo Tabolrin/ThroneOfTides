@@ -16,8 +16,8 @@ MonoBehaviour:
   _id: 17
   _cardType: 2
   _description: Gone before they noticed. Steal 1 random card from the enemy's hand.
-  _manaCost: 1
-  _storageCost: 5
+  _manaCost: 2
+  _storageCost: 3
   _hpCost: 0
   _damage: 0
   _comboDamage: 0
@@ -27,8 +27,8 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 11400000, guid: a0517dceb67a8de4cbb3ffcebae00a0a, type: 2}
   _isEligibleAsActionPair: 1
+  _requiresTargetSelection: 0
   _aiPlayBeforeAttack: 1
-  _tags: []
+  _statusType: 0
   _art: {fileID: 21300000, guid: c958ddd0be6ae5c449dbea96b77e17f0, type: 3}
-  _cardTypeSymbol: {fileID: 0}
-  _cardArtAnimator: {fileID: 0}
+  _presentationEntries: []

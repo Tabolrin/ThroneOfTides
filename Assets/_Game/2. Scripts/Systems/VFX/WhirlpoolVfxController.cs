@@ -5,7 +5,7 @@ using ThroneOfTides.Core;
 namespace ThroneOfTides.Systems.VFX
 {
     /// <summary>
-    /// Spawns/despawns the Whirlpool world-space VFX at a ship's sea-surface anchor in response
+    /// Spawns/despawns the Whirlpool world-space VFX at a ship's front anchor in response
     /// to GameEventBus.OnShipStatusCountChanged. At most one instance per ship — re-applying
     /// Whirlpool to a ship that already has one just extends the status's turn count (handled
     /// entirely by the game's own status tracking), so this controller never re-triggers the VFX
@@ -33,7 +33,7 @@ namespace ThroneOfTides.Systems.VFX
             {
                 if (hasActive) return; // already playing — extra turns are tracked by GameState, not by us.
 
-                Transform anchor = GetAnchors(ship)?.Get(VfxAnchorType.SeaSurface);
+                Transform anchor = GetAnchors(ship)?.Get(VfxAnchorType.ShipFront);
                 if (anchor == null || _whirlpoolPrefab == null) return;
 
                 _activeVfx[ship] = Instantiate(_whirlpoolPrefab, anchor.position, anchor.rotation, anchor);

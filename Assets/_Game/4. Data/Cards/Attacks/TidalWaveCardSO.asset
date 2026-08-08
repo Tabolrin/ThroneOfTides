@@ -18,7 +18,7 @@ MonoBehaviour:
   _description: The sea obeys no one. Deal 3 damage. Removes Gunpowder from the hit
     ship - use on your own ship to break an active Gunpowder stack.
   _manaCost: 2
-  _storageCost: 2
+  _storageCost: 3
   _hpCost: 0
   _damage: 3
   _comboDamage: 0
@@ -29,6 +29,7 @@ MonoBehaviour:
   _actionEffect: {fileID: 11400000, guid: 9a4016e19ed089644ba24d579e69e4f9, type: 2}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 1
+  _aiPlayBeforeAttack: 0
   _statusType: 0
   _art: {fileID: 21300000, guid: 832551d4df6c5eb43b2ddc8ff01acee3, type: 3}
   _presentationEntries: []

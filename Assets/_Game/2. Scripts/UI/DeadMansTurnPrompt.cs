@@ -18,8 +18,6 @@ namespace ThroneOfTides.UI
         private System.Action _onNegate;
         private System.Action _onTakeHit;
 
-        private void Awake() => gameObject.SetActive(false);
-
         public void Show(CardSO attackCard, int damage, string blockCost,
             System.Action onNegate, System.Action onTakeHit)
         {

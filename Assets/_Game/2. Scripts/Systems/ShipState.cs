@@ -75,10 +75,14 @@ namespace ThroneOfTides.Systems
 
         // ── Combo ─────────────────────────────────────────────────────────────
 
+        // Prevents Gunpowder/Torch from scaling without bound — see Torch's damage formula
+        // (8 + (stack-1)*2), which would otherwise snowball indefinitely.
+        public const int MaxComboStack = 4;
+
         public void IncrementCombo(CardSO card)
         {
             ActiveComboCard = card;
-            ComboStackCount++;
+            ComboStackCount = Mathf.Min(ComboStackCount + 1, MaxComboStack);
         }
 
         public void ResetCombo()

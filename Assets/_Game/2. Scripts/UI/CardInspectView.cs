@@ -35,8 +35,6 @@ namespace ThroneOfTides.UI
         [SerializeField] private float _openDuration  = 0.25f;
         [SerializeField] private float _closeDuration = 0.18f;
 
-        private void Awake() => gameObject.SetActive(false);
-
         // ── Public API ─────────────────────────────────────────────────────────
 
         public void Show(CardSO card)

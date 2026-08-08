@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 4
   _description: Legends don't dodge. They were never there to begin with. React in
     time to negate the next incoming attack.
-  _manaCost: 1
-  _storageCost: 0
+  _manaCost: 0
+  _storageCost: 3
   _hpCost: 0
   _damage: 0
   _comboDamage: 0

@@ -17,8 +17,8 @@ MonoBehaviour:
   _cardType: 2
   _description: Davy Jones collects debts, not weapons. Recover 3 random cards from
     your discard pile. Cannot recover The Kraken
-  _manaCost: 2
-  _storageCost: 5
+  _manaCost: 3
+  _storageCost: 4
   _hpCost: 0
   _damage: 0
   _comboDamage: 0
@@ -28,5 +28,8 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 11400000, guid: 7aa77dce0777cdc419148fc3bac2a55a, type: 2}
   _isEligibleAsActionPair: 1
+  _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
+  _statusType: 0
   _art: {fileID: 21300000, guid: 09a30c7de20f018428b0c3eaf98ebb1c, type: 3}
-  _cardArtAnimator: {fileID: 0}
+  _presentationEntries: []

@@ -18,7 +18,7 @@ MonoBehaviour:
   _description: Fair wind, ill-gotten. Steal 2 mana from the enemy this turn.
   _manaCost: 0
   _storageCost: 6
-  _hpCost: 2
+  _hpCost: 3
   _damage: 0
   _comboDamage: 0
   _comboStackBonus: 0
@@ -27,7 +27,9 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 11400000, guid: f826e96d9dd24dfb92aec6718a97da53, type: 2}
   _isEligibleAsActionPair: 1
+  _requiresTargetSelection: 0
   _aiPlayBeforeAttack: 1
+  _statusType: 0
   _art: {fileID: 21300000, guid: 03f76c77f779a264c931ab0a9ab3cbe5, type: 3}
   _presentationEntries:
   - _casterFilter: 0

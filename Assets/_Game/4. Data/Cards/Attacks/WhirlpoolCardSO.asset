@@ -16,7 +16,7 @@ MonoBehaviour:
   _id: 8
   _cardType: 3
   _description: The sea swallows the wicked. Deal 3 damage per turn for 3 turns.
-  _manaCost: 3
+  _manaCost: 4
   _storageCost: 5
   _hpCost: 0
   _damage: 0
@@ -28,6 +28,7 @@ MonoBehaviour:
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
   _statusType: 2
   _art: {fileID: 21300000, guid: 415c10d89a5a7f240bcc8673bb9f82c5, type: 3}
   _presentationEntries: []

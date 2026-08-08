@@ -18,8 +18,8 @@ MonoBehaviour:
   _description: Sacrifice 3 HP and 33% of your materials. Deal 15 unblockable damage.
     You called. It answered.
   _manaCost: 5
-  _storageCost: 15
-  _hpCost: 5
+  _storageCost: 12
+  _hpCost: 4
   _damage: 15
   _comboDamage: 0
   _comboStackBonus: 0
@@ -29,6 +29,7 @@ MonoBehaviour:
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
   _statusType: 0
   _art: {fileID: 21300000, guid: c8b6762b78e0e524aa81d96f1f0c857b, type: 3}
   _presentationEntries:

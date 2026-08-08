@@ -16,8 +16,8 @@ MonoBehaviour:
   _id: 13
   _cardType: 2
   _description: Eyes where yours cannot reach. Inspect 3 cards in the enemy's hand.
-  _manaCost: 2
-  _storageCost: 3
+  _manaCost: 1
+  _storageCost: 2
   _hpCost: 0
   _damage: 0
   _comboDamage: 0
@@ -27,7 +27,8 @@ MonoBehaviour:
   _dotDuration: 0
   _actionEffect: {fileID: 11400000, guid: 18c25de1127587a4c8c4a1f98167cdc3, type: 2}
   _isEligibleAsActionPair: 1
-  _tags: []
+  _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
+  _statusType: 0
   _art: {fileID: -8708541447700203620, guid: d72bdb6d0d868d54ebe91b78b9e8268d, type: 3}
-  _cardTypeSymbol: {fileID: 0}
-  _cardArtAnimator: {fileID: 9100000, guid: 600bdb11b5a778c43820331013c2da16, type: 2}
+  _presentationEntries: []

@@ -17,8 +17,6 @@ namespace ThroneOfTides.UI
 
         private System.Action<DamageTarget> _onTargetChosen;
 
-        private void Awake() => gameObject.SetActive(false);
-
         public void Show(CardSO card, System.Action<DamageTarget> onTargetChosen)
         {
             _onTargetChosen = onTargetChosen;

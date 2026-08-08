@@ -17,7 +17,7 @@ MonoBehaviour:
   _cardType: 2
   _description: Their will is not their own. The attack you play this turn is unblockable.
   _manaCost: 3
-  _storageCost: 6
+  _storageCost: 4
   _hpCost: 0
   _damage: 0
   _comboDamage: 0
