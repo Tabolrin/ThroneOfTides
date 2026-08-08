@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2543838592321141363}
   - component: {fileID: 1564980007039056087}
   m_Layer: 5
-  m_Name: Liquid
+  m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35,8 +35,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000015259, y: 75.8}
-  m_SizeDelta: {x: 175, y: 175}
+  m_AnchoredPosition: {x: 1, y: 72.9}
+  m_SizeDelta: {x: 160, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &891776651085864260
 CanvasRenderer:
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b30098542c98202468e56dfae25e10e7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b1010638517d4a643b3256d72d0b6817, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 6495812711115619221}
   - component: {fileID: 1507528771433633242}
   m_Layer: 5
-  m_Name: HPBar
+  m_Name: HPBarBlood
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -317,7 +317,7 @@ GameObject:
   - component: {fileID: 2981904291188716875}
   - component: {fileID: 3823119284388241599}
   m_Layer: 5
-  m_Name: Bottle
+  m_Name: DropBkg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -363,14 +363,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.6603774, g: 0.6603774, b: 0.6603774, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e90a48b2de219924691143df73544606, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b1010638517d4a643b3256d72d0b6817, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
