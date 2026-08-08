@@ -31,25 +31,19 @@ You remembered correctly, and I had it wrong initially: the `ActiveEffectsBar` s
 
 4. **`Assets/_Game/2. Scripts/UI/ActiveEffectsBar.cs`** — rewritten back to the dynamic instantiate/destroy pattern (`Dictionary<ShipStatusType, EffectBadgeView>` / `Dictionary<ReactionType, EffectBadgeView>`, spawned into `_effectsContainer`/`_reactionsContainer` via `_badgePrefab` + `_palette`, destroyed when a count hits zero). Kept the current, already-correct per-side `DamageTarget`-aware event signatures (`OnReactionCharged(ReactionType, DamageTarget, int)` etc.) rather than reverting those. One thing I had to catch and fix mid-build: reactions (Dead Man's Turn / Counter Gale) aren't `ShipStatusType`s, so they can't come from the palette lookup — added two direct `Sprite` fields (`_deadMansTurnIcon`, `_counterGaleIcon`) instead of the wrong palette-based stub I first wrote.
 
-### What's still outstanding for this system
+### Update — scene placement completed
 
-**Scene placement.** `ActiveEffectsBar` needs to actually be placed in `Match.unity` — it isn't there at all right now. I attempted this via Unity MCP but hit a live connectivity issue this session (the MCP server my session talks to and the one Unity's bridge connected to appear to be two separate processes not sharing state — see your MCP client config for how `unityMCP` is set up, whether it should point at the HTTP server Unity's bridge auto-starts on `127.0.0.1:8080` rather than spawning its own stdio process). I did not hand-author this part into the scene YAML directly, on purpose — the HP/mana bars this needs to sit near live inside a **nested prefab instance** with "stripped" component references, meaning I can't read their real positions from the scene file text, and blindly inserting new UI siblings into that hierarchy risks corrupting the prefab-instance override records in a way I can't verify without visual feedback.
+Unity MCP connectivity was fine in the follow-up session; the placement described below is now done and live-verified.
 
-**Once Unity MCP is reachable (or if you do it manually in the meantime), here's exactly what's needed:**
+- `ActiveEffectsBar_Player` was added as a child of `PlayerSidePanel` (under `GameCanvas/CanvasShakeContainer/PlayerSidePanel`), `ActiveEffectsBar_Enemy` as a child of `EnemySidePanel`. Both panels are plain (non-prefab) GameObjects, so this sidesteps the stripped-prefab-instance risk entirely — nothing was inserted into the nested prefab that holds the HP/mana bars themselves.
+- Each got `EffectsContainer` / `ReactionsContainer` children with a `HorizontalLayoutGroup` (spacing 6, no child-control/force-expand) and got assigned to `_effectsContainer` / `_reactionsContainer`.
+- `_badgePrefab` → `EffectBadgeView.prefab`, `_palette` → `Effect Symbol Palette SO.asset`, `_deadMansTurnIcon` → `DeadMansTurnArt.png`, `_counterGaleIcon` → `Turnado Card Art.png` (Counter Gale's actual card art asset, despite the filename).
+- Verified live in Play mode by calling `GameEventBus.FireShipStatusCountChanged` / `FireReactionCharged` directly (Unity MCP `execute_code`): badges spawned in the correct container for both Player and Enemy, and despawned correctly when the count dropped to 0. No errors from any of the new scripts.
+- Unrelated pre-existing errors observed in the same Play session (not caused by this change, different files entirely): a `NullReferenceException` in `GameBootstrapper.OnEnable` (input actions ordering) and repeated `NullReferenceException`s in `MMSMPlaylistManager.Update` (Feel asset audio playlist). Worth a look separately if not already known.
 
-1. Under `GameCanvas`, create two empty UI GameObjects — one near the player's HP/mana area, one near the enemy's. Name them e.g. `ActiveEffectsBar_Player` / `ActiveEffectsBar_Enemy`.
-2. Add the `ActiveEffectsBar` component to each.
-   - Player instance: `_side = Player`.
-   - Enemy instance: `_side = Enemy`.
-3. On each, add two empty child `RectTransform`s (`EffectsContainer`, `ReactionsContainer` — a horizontal or vertical layout group on each is fine, your call on the exact look) and assign them to `_effectsContainer` / `_reactionsContainer`.
-4. On both instances, assign:
-   - `_badgePrefab` → `EffectBadgeView.prefab`
-   - `_palette` → `Effect Symbol Palette SO.asset`
-   - `_deadMansTurnIcon` → Dead Man's Turn's card art (or any icon you prefer)
-   - `_counterGaleIcon` → Counter Gale's card art (or any icon you prefer)
-5. Compile, enter Play mode, and trigger each status (play Gunpowder Barrel, Whirlpool, High Spirits, Siren Song, charge a reaction) to confirm a badge spawns and disappears correctly on both sides.
+**Positioning follow-up (same session):** the first placement (bars at panel-local Y = -140, tucked directly under the mana row) put the badges directly behind an unrelated bottom-left/top-right icon cluster (deck-order preview icons), invisible in-game even though they were spawning correctly. Verified this with an actual screenshot via Unity MCP (`manage_camera` → `screenshot`), not just by reading transform data. Fixed by moving both bars into the open water area just outside their panel's top/bottom edge instead of layering them inside the tightly-packed panel: `ActiveEffectsBar_Player` local position `(0, 280, 0)`, `ActiveEffectsBar_Enemy` local position `(0, -280, 0)` (mirrored, since the enemy panel is top-anchored and its clear space is below it). Also widened the gap between each bar's `EffectsContainer` and `ReactionsContainer` from local Y `-30` to `-75` — at `-30` the two rows overlapped almost entirely (badges are 60 units tall), making a 2-badge situation look like a single row. Re-verified visually after both fixes: two distinct, unobstructed rows per side. Final position is a reasonable default, not a pixel-perfect art placement — worth a look in the actual Editor to confirm it reads well against final art/animation.
 
-I was not able to complete or verify step 5 this session due to the connection issue above — once Unity MCP is reachable, I can do the placement and the live verification directly rather than you having to check it by hand.
+This closes out the one remaining item from Part A — the persistent effect badge system is now fully recovered and working end-to-end.
 
 ---
 
@@ -72,7 +66,7 @@ I re-verified every item from the original `SESSION_CHANGES_LOST.md` against the
 | `ResultsPanel.Awake()` first-loss bug | ✅ Recovered — the destructive `gameObject.SetActive(false);` line is gone from `Awake()` |
 | Cheats panel → game-over check | ✅ Recovered — `OnCheatApplied` → `TurnCoordinator.CheckGameOver()` wired in `GameBootstrapper` |
 | Card descriptions (Chain Shot/Torch/Counter Gale/High Spirits) | Independently rewritten with new flavor text (different from both the original terse versions and my session's fixes) — this is deliberate design work on your end, not a gap, nothing to redo |
-| **Persistent effect badges (dynamic spawn/destroy system)** | ⚠️ **Scripts + prefab rebuilt this session (Part A above); scene placement still outstanding** |
+| **Persistent effect badges (dynamic spawn/destroy system)** | ✅ Fully recovered — scripts, prefab, and scene placement all done and live-verified (Part A above) |
 
 ### The one other thing worth a decision, not a fix
 `Captain_Loreley`/`Captain_Nurgle` now coexist with `Captain_Rumboat` (three Captains total) rather than replacing older placeholders — this matches what I'd flagged as needing your call, and it looks like the resolution was simply "keep all three." No action needed unless that's not actually what you want.
