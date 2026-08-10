@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UpgSO_MaxStorage
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.UpgradeSO
   Type: 2
-  DisplayName: MaxStorage
+  DisplayName: Storage
   Description: 
   Icon: {fileID: 0}
   MaxLevel: 3

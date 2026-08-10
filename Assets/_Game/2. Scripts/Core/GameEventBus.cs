@@ -1,5 +1,6 @@
 // Assets/_Game/2. Scripts/Core/GameEventBus.cs
 using System;
+using System.Collections.Generic;
 
 namespace ThroneOfTides.Core
 {
@@ -11,12 +12,23 @@ namespace ThroneOfTides.Core
         // ── Card ──────────────────────────────────────────────────────────────
         public static event Action<ICard> OnCardDrawn;
         public static event Action<ICard> OnCardPlayed;
+        // Fires the instant a play is irrevocably committed (mana spent), before any target
+        // selection prompt — CardView listens for this to know it's leaving the hand, so it
+        // doesn't snap back to hand while a target-selection card is still awaiting the
+        // player's choice. Fires for every accepted play, target-selection or not.
+        public static event Action<ICard> OnCardCommitted;
         // Target is null for normally-targeted cards (inferred caster/opponent); non-null when
         // the player explicitly chose a target ship via a targeting prompt (e.g. Tidal Wave).
+        // Fires once the effect actually resolves — for a target-selection card, that's after
+        // the prompt is answered, not at commit time — so VFX spawners get the real target.
         public static event Action<ICard, DamageTarget?> OnCardPlayAccepted;
         public static event Action<ICard> OnPlayerCardRemoved;
         public static event Action<ICard, DamageTarget?> OnEnemyCardPlayed;
         public static event Action       OnEnemyCardAnimationComplete;
+
+        // Fires when an effect (e.g. Recon Parrot) reveals the enemy's hand — EnemyHandRevealPanel
+        // displays the given cards until the player dismisses it.
+        public static event Action<IReadOnlyList<ICard>> OnEnemyHandRevealed;
 
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
@@ -60,10 +72,12 @@ namespace ThroneOfTides.Core
         public static void FireTurnPhaseChanged(TurnPhase phase)             => OnTurnPhaseChanged?.Invoke(phase);
         public static void FireCardDrawn(ICard card)                         => OnCardDrawn?.Invoke(card);
         public static void FireCardPlayed(ICard card)                        => OnCardPlayed?.Invoke(card);
+        public static void FireCardCommitted(ICard card)                     => OnCardCommitted?.Invoke(card);
         public static void FireCardPlayAccepted(ICard card, DamageTarget? target = null) => OnCardPlayAccepted?.Invoke(card, target);
         public static void FirePlayerCardRemoved(ICard card)                 => OnPlayerCardRemoved?.Invoke(card);
         public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
         public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
+        public static void FireEnemyHandRevealed(IReadOnlyList<ICard> cards) => OnEnemyHandRevealed?.Invoke(cards);
         public static void FireDamageDealt(DamageTarget target, int amount)  => OnDamageDealt?.Invoke(target, amount);
         public static void FireHealApplied(DamageTarget target, int amount) => OnHealApplied?.Invoke(target, amount);
         public static void FireHPChanged(int hp)                             => OnHPChanged?.Invoke(hp);
@@ -90,10 +104,12 @@ namespace ThroneOfTides.Core
             OnTurnPhaseChanged           = null;
             OnCardDrawn                  = null;
             OnCardPlayed                 = null;
+            OnCardCommitted              = null;
             OnCardPlayAccepted           = null;
             OnPlayerCardRemoved          = null;
             OnEnemyCardPlayed            = null;
             OnEnemyCardAnimationComplete = null;
+            OnEnemyHandRevealed          = null;
             OnDamageDealt                = null;
             OnHealApplied                = null;
             OnHPChanged                  = null;

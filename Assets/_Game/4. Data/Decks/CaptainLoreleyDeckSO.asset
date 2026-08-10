@@ -18,20 +18,28 @@ MonoBehaviour:
   - Card: {fileID: 11400000, guid: 113e21d82ac278c4581bbabd9b16e962, type: 2}
     Count: 4
   - Card: {fileID: 11400000, guid: 13836fc428319484a8d71e56c073ab25, type: 2}
-    Count: 4
-  - Card: {fileID: 11400000, guid: b70463cb921192144855faee858f1708, type: 2}
-    Count: 4
-  - Card: {fileID: 11400000, guid: 2453aca1d0a07a04f96d6509f2418018, type: 2}
-    Count: 4
-  - Card: {fileID: 11400000, guid: beb41d5072d4d9345b4546ce29b41294, type: 2}
     Count: 3
-  - Card: {fileID: 11400000, guid: baa5bc3625ad5f0439300dcff4bebb68, type: 2}
+  - Card: {fileID: 11400000, guid: 55de937facfeb224ba1434ee90a9aea9, type: 2}
     Count: 3
   - Card: {fileID: 11400000, guid: 1c453b3302beb194e9543d518fc3373d, type: 2}
     Count: 2
-  - Card: {fileID: 11400000, guid: 3707c0de5dcf96640b7f4b19e88ff62f, type: 2}
+  - Card: {fileID: 11400000, guid: b70463cb921192144855faee858f1708, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: 1255c9689b6719641a3967c758fef008, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: 592ab224bc8beba4d952d7f6361e2d27, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: beb41d5072d4d9345b4546ce29b41294, type: 2}
+    Count: 2
+  - Card: {fileID: 11400000, guid: a7fb26fd80a57044f926f3e40ef45306, type: 2}
+    Count: 1
+  - Card: {fileID: 11400000, guid: baa5bc3625ad5f0439300dcff4bebb68, type: 2}
     Count: 2
   - Card: {fileID: 11400000, guid: c1db74e802e87e348a52b35bc55cfc88, type: 2}
-    Count: 3
+    Count: 2
   - Card: {fileID: 11400000, guid: f2b5e2fbe6bf8fe43a80040ddee1b5f1, type: 2}
-    Count: 3
+    Count: 2
+  - Card: {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
+    Count: 1
+  - Card: {fileID: 11400000, guid: e99ae19356c0e414daec202d36f21506, type: 2}
+    Count: 1

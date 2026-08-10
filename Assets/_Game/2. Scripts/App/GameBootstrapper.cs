@@ -41,6 +41,8 @@ namespace ThroneOfTides.App
         [SerializeField] private HandLayoutManager     _handLayoutManager;
         [SerializeField] private UnityEngine.UI.Button _endTurnButton;
         [SerializeField] private RectTransform         _playZone;
+        [Tooltip("Where the enemy's played-card display animates to — kept off-center (right side, clear of the ships) so it doesn't cover the card's own VFX playing over the ships.")]
+        [SerializeField] private RectTransform         _enemyPlayZone;
         [SerializeField] private DeadMansTurnPrompt    _deadMansTurnPrompt;
         [SerializeField] private TargetSelectionPrompt _targetSelectionPrompt;
         [SerializeField] private ResultsPanel          _resultsPanel;
@@ -113,7 +115,7 @@ namespace ThroneOfTides.App
                                           enemyMaxHP, enemyMaxMana);
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
-            var combatResolver = new CombatResolver(_gameState);
+            var combatResolver = new CombatResolver(_gameState, _playerInventory);
             var enemyAI        = new EnemyAI(_activeCaptain);
 
             _turnCoordinator.Initialise(
@@ -141,7 +143,10 @@ namespace ThroneOfTides.App
 
         private void DealOpeningHand()
         {
-            for (int i = 0; i < _config.MaxHandSize; i++)
+            // Draws until the hand itself is full, not a fixed number of draws — a Reaction
+            // card is charged instead of occupying a hand slot and must not count toward the
+            // fill target, or the opening hand ends up short whenever one is drawn early.
+            while (_gameState.EnemyHand.Count < _config.MaxHandSize && _gameState.EnemyDeck.Count > 0)
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
                 if (card == null) break;
@@ -167,7 +172,9 @@ namespace ThroneOfTides.App
             var normalCards   = new List<CardSO>();
             var reactionCards = new List<CardSO>();
 
-            for (int i = 0; i < _config.MaxHandSize; i++)
+            // Draws until the hand itself is full, not a fixed number of draws — see the
+            // matching comment in DealOpeningHand for why a plain fixed-count loop undercounts.
+            while (_gameState.PlayerHand.Count < _config.MaxHandSize && _gameState.PlayerDeck.Count > 0)
             {
                 CardSO card = _gameState.PlayerDeck.Draw();
                 if (card == null) break;
@@ -269,9 +276,10 @@ namespace ThroneOfTides.App
 
         private IEnumerator EnemyCardAnimationRoutine(CardSO card)
         {
+            RectTransform destination = _enemyPlayZone != null ? _enemyPlayZone : _playZone;
             yield return StartCoroutine(
                 _handLayoutManager.PlayEnemyCardAnimation(
-                    card, _playZone,
+                    card, destination,
                     GameEventBus.FireEnemyCardAnimationComplete));
         }
 

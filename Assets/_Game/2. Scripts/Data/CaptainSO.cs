@@ -42,6 +42,13 @@ namespace ThroneOfTides.Data
         // WeightActionDefense above is reused for Dead Man's Turn preference (negate).
         [SerializeField] private float _weightReactionCounter;
 
+        [Header("Tactical Awareness")]
+        [Tooltip("How much this captain plays around the player's charged reactions: 0 = " +
+                 "ignores them entirely (reckless), 1 = neutral, 2+ = strongly prioritizes " +
+                 "landing an unblockable hit (Siren Song/Kraken) and holds back its best attack " +
+                 "rather than feed a charged Dead Man's Turn.")]
+        [SerializeField] private float _weightPlayAroundReactions = 1f;
+
         public string         CaptainName          => _captainName;
         public Sprite         Portrait             => _portrait;
         public string         ArchetypeDescription => _archetypeDescription;
@@ -65,6 +72,7 @@ namespace ThroneOfTides.Data
         public float WeightBoardingParty      => _weightBoardingParty;
         public float WeightDOT                => _weightDOT;
         public float WeightReactionCounter    => _weightReactionCounter;
+        public float WeightPlayAroundReactions=> _weightPlayAroundReactions;
 
         // Convenience method for AI system - returns weight for a given card
         public float GetWeightForCard(CardSO card)

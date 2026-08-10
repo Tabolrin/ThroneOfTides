@@ -19,7 +19,7 @@ MonoBehaviour:
   _hp: 60
   _maxMana: 5
   _deckDefinition: {fileID: 11400000, guid: f47345d5e1af41c6b2cb724ea80e6981, type: 2}
-  _levelReward: {fileID: 11400000, guid: 6ec320d32275647438ec484c84dd8ea4, type: 2}
+  _levelReward: {fileID: 11400000, guid: 3297d3363832d454f827a403db776fc2, type: 2}
   _weightHighDamageWeapon: 0.8
   _weightLowDamageWeapon: 1
   _weightBlockHoldForDefense: 1
@@ -35,3 +35,4 @@ MonoBehaviour:
   _weightBoardingParty: 0
   _weightDOT: 1
   _weightReactionCounter: 1.3
+  _weightPlayAroundReactions: 0.5

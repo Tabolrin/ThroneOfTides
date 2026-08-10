@@ -10,6 +10,7 @@ namespace ThroneOfTides.Systems
         private readonly GameState          _gameState;
         private readonly IHandLayoutManager _handLayout;
         private readonly System.Func<bool>  _secondaryDraw;
+        private readonly PlayerInventory    _playerInventory;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
@@ -24,13 +25,15 @@ namespace ThroneOfTides.Systems
         public CardEffectContext(GameState gameState, IHandLayoutManager handLayout,
                                  DamageTarget caster = DamageTarget.Player,
                                  System.Func<bool> secondaryDraw = null,
-                                 DamageTarget? selectedTarget = null)
+                                 DamageTarget? selectedTarget = null,
+                                 PlayerInventory playerInventory = null)
         {
-            _gameState     = gameState;
-            _handLayout    = handLayout;
-            Caster         = caster;
-            _secondaryDraw = secondaryDraw;
-            SelectedTarget = selectedTarget;
+            _gameState       = gameState;
+            _handLayout      = handLayout;
+            Caster           = caster;
+            _secondaryDraw   = secondaryDraw;
+            SelectedTarget   = selectedTarget;
+            _playerInventory = playerInventory;
         }
 
         public void ApplyDamage(DamageTarget target, int amount) =>
@@ -136,8 +139,7 @@ namespace ThroneOfTides.Systems
                 CardSO card  = playerHand[index];
                 _gameState.PlayerHand.RemoveCard(card);
                 _gameState.EnemyHand.AddCard(card, _gameState.EnemyDeck.Count);
-                _handLayout.RemoveCardFromPlayerHand(card);
-                _handLayout.AddCardToEnemyHand(card);
+                _handLayout.StealCardFromPlayerHand(card);
             }
         }
 
@@ -173,5 +175,13 @@ namespace ThroneOfTides.Systems
 
         public IReadOnlyList<ICard> GetEnemyHand()  => _gameState.EnemyHand.Cards;
         public IReadOnlyList<ICard> GetPlayerHand() => _gameState.PlayerHand.Cards;
+
+        // Only the player has a tracked coin balance — a no-op when the enemy casts a card
+        // that happens to touch coins (e.g. an enemy Treasure Chest).
+        public void AddCoins(int amount)
+        {
+            if (Caster == DamageTarget.Player)
+                _playerInventory?.AddCoins(amount);
+        }
     }
 }

@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7d867f727039654eae737b74e4ee229, type: 3}
   m_Name: Monkey Grab Effect SO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.MonkeyGrabEffectSO
+  _role: 2

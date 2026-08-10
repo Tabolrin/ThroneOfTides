@@ -31,7 +31,23 @@ namespace ThroneOfTides.Systems
         /// currently playable (caller should end the turn). Called once per card played — the
         /// caller re-invokes this after each play since hand/mana/HP change each time.
         /// </summary>
-        public CardSO PickCard(IReadOnlyList<CardSO> hand, int enemyMana, int enemyHP)
+        /// <param name="comboPrimed">
+        /// True once the enemy has already primed its own combo (e.g. Gunpowder Barrel) this
+        /// match and has an unspent stack — a follow-up finisher (Torch) is always the correct
+        /// play once available, so it's forced through rather than left to weighted RNG, which
+        /// could otherwise waste the turn (or the whole match) on something else while the
+        /// primed stack just sits there.
+        /// </param>
+        /// <param name="playerHasDeadMansTurn">Player has a Dead Man's Turn charge — the next
+        /// non-unblockable attack would be fully negated for free.</param>
+        /// <param name="playerHasCounterGale">Player has a Counter Gale charge — the next
+        /// non-unblockable attack gets half its damage reflected back.</param>
+        /// <param name="selfUnblockable">This side's next attack is already guaranteed to land
+        /// (Siren Song already resolved this turn) — reaction-threat weighting is skipped since
+        /// there's nothing left to play around.</param>
+        public CardSO PickCard(IReadOnlyList<CardSO> hand, int enemyMana, int enemyHP,
+            bool comboPrimed = false, bool playerHasDeadMansTurn = false,
+            bool playerHasCounterGale = false, bool selfUnblockable = false)
         {
             if (hand.Count == 0) return null;
 
@@ -61,6 +77,16 @@ namespace ThroneOfTides.Systems
 
             if (candidates.Count == 0) return null;
 
+            // A primed combo is always worth cashing in the instant it's available — no
+            // personality reads this differently, so it bypasses weighting entirely.
+            if (comboPrimed)
+            {
+                var finisher = candidates.FirstOrDefault(c => c.card.Id == CardId.Torch);
+                if (finisher.card != null) return finisher.card;
+            }
+
+            ApplyReactionAwareness(candidates, playerHasDeadMansTurn, playerHasCounterGale, selfUnblockable);
+
             // Prefer cards that are more valuable played before an attack (Siren Song, Monkey
             // Grab, etc.) — if any are still playable, restrict the pick to that group; only
             // fall back to the full candidate pool (including attacks) once none remain. Still
@@ -70,6 +96,38 @@ namespace ThroneOfTides.Systems
             var pool      = preferred.Count > 0 ? preferred : candidates;
 
             return WeightedRandom(pool);
+        }
+
+        // Plays around the player's charged reactions, scaled by the captain's own
+        // WeightPlayAroundReactions (0 = reckless, ignores this entirely). Siren Song and Kraken
+        // are both innately unblockable, so they get a boost to land a "free" hit through a
+        // charged reaction; every other attack gets dampened so the AI doesn't just feed its
+        // best hit into a guaranteed Dead Man's Turn negate.
+        private void ApplyReactionAwareness(List<(CardSO card, float weight)> candidates,
+            bool playerHasDeadMansTurn, bool playerHasCounterGale, bool selfUnblockable)
+        {
+            float caution = _captain.WeightPlayAroundReactions;
+            bool anyReactionThreat = playerHasDeadMansTurn || playerHasCounterGale;
+            if (caution <= 0f || selfUnblockable || !anyReactionThreat) return;
+
+            // A full negate is worth playing around much harder than a half-damage reflect.
+            float dampen = playerHasDeadMansTurn
+                ? Mathf.Max(0.15f, 1f - 0.5f  * caution)
+                : Mathf.Max(0.4f,  1f - 0.25f * caution);
+
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var (card, weight) = candidates[i];
+                bool isUnblockableCard = card.Id == CardId.Kraken || card.Id == CardId.SirenSong;
+                bool isAttack = card.CardType == CardType.Weapon ||
+                                card.CardType == CardType.Combo  ||
+                                card.CardType == CardType.DOT;
+
+                if (isUnblockableCard)
+                    candidates[i] = (card, weight * (1f + caution));
+                else if (isAttack)
+                    candidates[i] = (card, weight * dampen);
+            }
         }
 
         private static CardSO WeightedRandom(List<(CardSO card, float weight)> candidates)

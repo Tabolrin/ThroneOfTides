@@ -17,6 +17,7 @@ MonoBehaviour:
   _cardType: 0
   _description: Sacrifice 3 HP and 33% of your materials. Deal 15 unblockable damage.
     You called. It answered.
+  _maxCopiesInDeck: 1
   _manaCost: 5
   _storageCost: 12
   _hpCost: 4

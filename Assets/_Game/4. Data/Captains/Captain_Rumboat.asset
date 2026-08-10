@@ -34,3 +34,4 @@ MonoBehaviour:
   _weightBoardingParty: 1.5
   _weightDOT: 0.6
   _weightReactionCounter: 0
+  _weightPlayAroundReactions: 0

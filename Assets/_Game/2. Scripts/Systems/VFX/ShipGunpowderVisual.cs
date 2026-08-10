@@ -16,13 +16,33 @@ namespace ThroneOfTides.Systems
         [SerializeField] private Sprite _normalSprite;
         [SerializeField] private Sprite _poweredSprite;
 
+        // While held, incoming status changes are recorded but not applied — lets a VFX
+        // sequence (e.g. Tidal Wave) keep the powdered look on screen past the instant the
+        // game state actually clears it, then reveal the change at its own chosen beat.
+        private bool _overriding;
+        private int  _latestCount;
+
         private void OnEnable()  => GameEventBus.OnShipStatusCountChanged += HandleStatusChanged;
         private void OnDisable() => GameEventBus.OnShipStatusCountChanged -= HandleStatusChanged;
 
         private void HandleStatusChanged(ShipStatusType type, DamageTarget ship, int count)
         {
             if (type != ShipStatusType.Gunpowder || ship != _ship || _shipRenderer == null) return;
-            _shipRenderer.sprite = count > 0 ? _poweredSprite : _normalSprite;
+            _latestCount = count;
+            if (_overriding) return;
+            Apply(count);
+        }
+
+        private void Apply(int count) => _shipRenderer.sprite = count > 0 ? _poweredSprite : _normalSprite;
+
+        /// <summary>Starts ignoring live status updates — the sprite stays exactly as it is now.</summary>
+        public void BeginOverride() => _overriding = true;
+
+        /// <summary>Stops ignoring updates and immediately applies whatever the real state became meanwhile.</summary>
+        public void EndOverride()
+        {
+            _overriding = false;
+            Apply(_latestCount);
         }
     }
 }

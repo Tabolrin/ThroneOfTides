@@ -76,9 +76,18 @@ namespace ThroneOfTides.Core
         DamageTarget? SelectedTarget { get; }
     }
 
+    // The player's persistent coin economy (Port currency) — a no-op when the enemy is the
+    // caster, since only the player has a tracked coin balance. Deliberately separate from the
+    // per-match IManaEffects/IDamageEffects (session state): coins survive across matches.
+    public interface IEconomyEffects
+    {
+        void AddCoins(int amount);
+    }
+
     public interface ICardEffectContext :
         IDamageEffects, IHealEffects, IManaEffects, IHandEffects,
-        IDiscardEffects, IStatusEffects, IReactionChargeEffects, ITargetSelectionContext
+        IDiscardEffects, IStatusEffects, IReactionChargeEffects, ITargetSelectionContext,
+        IEconomyEffects
     {
         /// Which side played the card that owns this effect — lets effects that benefit
         /// "whoever cast this" (Siren Song, Monkey Grab) work correctly for either caster.

@@ -15,9 +15,12 @@ namespace ThroneOfTides.Systems
     {
         private readonly Dictionary<VfxAnchorType, Transform> _anchors = new Dictionary<VfxAnchorType, Transform>();
         private readonly Dictionary<ShipStatusType, ShipStatusIndicator> _statusIndicators = new Dictionary<ShipStatusType, ShipStatusIndicator>();
+        private ShipGunpowderVisual _gunpowderVisual;
 
         private void Awake()
         {
+            _gunpowderVisual = GetComponent<ShipGunpowderVisual>();
+
             foreach (var marker in GetComponentsInChildren<VFXSpawnPosition>(true))
             {
                 if (_anchors.ContainsKey(marker.Type))
@@ -49,6 +52,13 @@ namespace ThroneOfTides.Systems
             _statusIndicators.TryGetValue(statusType, out var indicator);
             return indicator;
         }
+
+        /// <summary>
+        /// This ship's whole-sprite Gunpowder visual (null if this ship has none placed).
+        /// Lets a VFX controller hold the powdered look on screen past the instant the game
+        /// state actually clears it — see ShipGunpowderVisual.BeginOverride/EndOverride.
+        /// </summary>
+        public ShipGunpowderVisual GetGunpowderVisual() => _gunpowderVisual;
 
         /// <summary>
         /// Resolves the transform for the given anchor type on this ship. Falls back to this

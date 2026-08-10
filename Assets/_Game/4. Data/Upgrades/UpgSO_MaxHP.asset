@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UpgSO_MaxHP
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.UpgradeSO
   Type: 1
-  DisplayName: MaxHP
+  DisplayName: Health
   Description: 
   Icon: {fileID: 0}
   MaxLevel: 3

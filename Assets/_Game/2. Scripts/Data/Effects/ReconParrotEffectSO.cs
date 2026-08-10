@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ThroneOfTides.Core;
 using UnityEngine;
 
@@ -13,9 +14,11 @@ namespace ThroneOfTides.Data
             var enemyHand   = context.GetEnemyHand();
             int revealCount = Mathf.Min(_cardsToReveal, enemyHand.Count);
 
-            // TODO - wire ReconParrot reveal UI when inspect system is extended
+            var revealed = new List<ICard>(revealCount);
             for (int i = 0; i < revealCount; i++)
-                GameDebug.Log($"Recon Parrot revealed: {enemyHand[i].Name}");
+                revealed.Add(enemyHand[i]);
+
+            GameEventBus.FireEnemyHandRevealed(revealed);
         }
     }
 }

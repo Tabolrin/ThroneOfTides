@@ -66,6 +66,35 @@ namespace ThroneOfTides.Core
         /// </summary>
         public readonly Func<ShipStatusType, bool> IsOpponentStatusVisible;
 
+        /// <summary>
+        /// Resolves an anchor point on whichever ship was this play's explicit target (e.g. Tidal
+        /// Wave's player-chosen ship) — for self-driving effects that need a second point beyond
+        /// their own spawn position, such as animating a projectile from spawn to a hit point.
+        /// Null if this card has no explicit target.
+        /// </summary>
+        public readonly Func<VfxAnchorType, Transform> GetExplicitTargetAnchor;
+
+        /// <summary>
+        /// Resolves an anchor point of any VfxAnchorType on the opponent's ship, independent of
+        /// the entry's own PositionType — for always-targets-opponent effects (e.g. Whale Ram)
+        /// that spawn at one anchor (say, SeaSurface) but need to travel to a different one
+        /// (ShipHit) without requiring target selection. Unlike GetExplicitTargetAnchor, this is
+        /// always available since it doesn't depend on the player having chosen a target.
+        /// </summary>
+        public readonly Func<VfxAnchorType, Transform> GetOpponentAnchor;
+
+        /// <summary>
+        /// Starts holding the explicit target ship's Gunpowder sprite exactly as it currently
+        /// looks, ignoring the game state's instant clear, until EndExplicitTargetGunpowderHold
+        /// is called — for effects (e.g. Tidal Wave) that want the powdered-look-to-clean swap
+        /// timed to their own sequence instead of snapping the moment the card resolves.
+        /// No-op if this card has no explicit target or that ship has no Gunpowder visual.
+        /// </summary>
+        public readonly Action BeginExplicitTargetGunpowderHold;
+
+        /// <summary>Releases a hold started by BeginExplicitTargetGunpowderHold, applying the real current state.</summary>
+        public readonly Action EndExplicitTargetGunpowderHold;
+
         public CardEffectSpawnContext(
             Transform casterAnchor,
             Transform opponentAnchor,
@@ -80,7 +109,11 @@ namespace ThroneOfTides.Core
             ParticleSystem hailParticles = null,
             Action<ShipStatusType> revealOpponentStatusIndicator = null,
             Func<ShipStatusType, bool> isOpponentStatusVisible = null,
-            ParticleSystem gunpowderDustParticles = null)
+            ParticleSystem gunpowderDustParticles = null,
+            Func<VfxAnchorType, Transform> getExplicitTargetAnchor = null,
+            Action beginExplicitTargetGunpowderHold = null,
+            Action endExplicitTargetGunpowderHold = null,
+            Func<VfxAnchorType, Transform> getOpponentAnchor = null)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -96,6 +129,10 @@ namespace ThroneOfTides.Core
             RevealOpponentStatusIndicator = revealOpponentStatusIndicator;
             IsOpponentStatusVisible = isOpponentStatusVisible;
             GunpowderDustParticles = gunpowderDustParticles;
+            GetExplicitTargetAnchor = getExplicitTargetAnchor;
+            BeginExplicitTargetGunpowderHold = beginExplicitTargetGunpowderHold;
+            EndExplicitTargetGunpowderHold = endExplicitTargetGunpowderHold;
+            GetOpponentAnchor = getOpponentAnchor;
         }
     }
 }

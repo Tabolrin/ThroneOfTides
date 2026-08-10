@@ -90,49 +90,46 @@ namespace ThroneOfTides.UI
             foreach (var card in existing)
                 _cardPool.Release(card);
 
-            var groups = BuildCardGroups();
+            var unlocked = BuildUnlockedCardList();
 
-            foreach (var (card, ownedCount) in groups)
+            foreach (var card in unlocked)
             {
                 if (_activeFilter.HasValue && card.CardType != _activeFilter.Value)
                     continue;
 
+                // Ownership is per card type (unlocked or not), not per copy — how many copies
+                // of an owned card you may run is governed by CardSO.MaxCopiesInDeck (bounded
+                // only by storage for most cards; a few singleton cards cap much lower).
                 int  inDeckCount = _deckEditor.GetCountInDeck(card);
                 bool canAdd      = _deckEditor.GetStorageUsed() + card.StorageCost <= _deckEditor.MaxStorage
-                                   && inDeckCount < ownedCount;
+                                   && inDeckCount < card.MaxCopiesInDeck;
 
                 var panel   = _cardPool.Get();
                 panel.transform.SetParent(_inventoryContent, false);
                 var cardRef = card; // capture for lambda
 
-                panel.Setup(card, ownedCount, inDeckCount, canAdd,
+                panel.Setup(card, card.MaxCopiesInDeck, inDeckCount, canAdd,
                             () => OnAddCardRequested?.Invoke(cardRef));
             }
         }
 
-        // Groups the flat collection list by unique card, sorted by type then name
-        private List<(CardSO card, int count)> BuildCardGroups()
+        // Unique unlocked cards, sorted by type then name — a card's presence in the collection
+        // means it's unlocked; how many times it happens to appear there is not meaningful.
+        private List<CardSO> BuildUnlockedCardList()
         {
-            var counts = new Dictionary<CardSO, int>();
+            var unique = new List<CardSO>();
             foreach (var card in _inventory.Collection)
-            {
-                if (counts.ContainsKey(card)) counts[card]++;
-                else counts[card] = 1;
-            }
+                if (card != null && !unique.Contains(card))
+                    unique.Add(card);
 
-            var result = new List<(CardSO, int)>();
-            foreach (var kvp in counts)
-                result.Add((kvp.Key, kvp.Value));
-
-            result.Sort((a, b) =>
+            unique.Sort((a, b) =>
             {
-                int typeComp = a.Item1.CardType.CompareTo(b.Item1.CardType);
+                int typeComp = a.CardType.CompareTo(b.CardType);
                 return typeComp != 0 ? typeComp
-                                     : string.Compare(a.Item1.Name, b.Item1.Name,
-                                                      System.StringComparison.Ordinal);
+                                     : string.Compare(a.Name, b.Name, System.StringComparison.Ordinal);
             });
 
-            return result;
+            return unique;
         }
     }
 }

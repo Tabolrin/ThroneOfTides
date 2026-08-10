@@ -30,6 +30,17 @@ namespace ThroneOfTides.UI
         [Header("Panel")]
         [SerializeField] private Button _closeButton;
 
+        [Header("Playtest")]
+        [Tooltip("Wipes saved progress (coins, collection, deck, upgrades, level-beaten flags) back to a fresh-install state. Left unassigned in builds where this isn't wired.")]
+        [SerializeField] private ThroneOfTides.Data.PlayerInventory _playerInventory;
+        [SerializeField] private ThroneOfTides.Data.ProgressionSO   _progression;
+        [Tooltip("Clicking once arms the button (label/color change); the actual reset only fires on the confirming second click, so this can't be triggered by a stray misclick.")]
+        [SerializeField] private Button _resetDataButton;
+        [SerializeField] private TextMeshProUGUI _resetDataButtonLabel;
+        [SerializeField] private string _resetDataDefaultText = "Reset Player Data";
+        [SerializeField] private string _resetDataConfirmText = "Click again to confirm";
+        [SerializeField] private float  _resetDataConfirmWindow = 3f;
+
         [Serializable]
         private class DisplaySaveData
         {
@@ -43,12 +54,15 @@ namespace ThroneOfTides.UI
 
         private List<Resolution> _resolutions = new List<Resolution>();
         private bool _initialising;
+        private bool _resetArmed;
 
         private void Awake()
         {
             gameObject.SetActive(false);
 
             if (_closeButton != null) _closeButton.onClick.AddListener(Hide);
+            if (_resetDataButton != null) _resetDataButton.onClick.AddListener(OnResetDataClicked);
+            SetResetButtonArmed(false);
 
             if (_masterVolumeSlider != null) _masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
             if (_musicVolumeSlider  != null) _musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
@@ -73,6 +87,46 @@ namespace ThroneOfTides.UI
         public void Hide()
         {
             gameObject.SetActive(false);
+            SetResetButtonArmed(false);
+        }
+
+        // ── Playtest: Reset Player Data ──────────────────────────────────────
+
+        private void OnResetDataClicked()
+        {
+            if (!_resetArmed)
+            {
+                SetResetButtonArmed(true);
+                CancelInvoke(nameof(DisarmResetButton));
+                Invoke(nameof(DisarmResetButton), _resetDataConfirmWindow);
+                return;
+            }
+
+            CancelInvoke(nameof(DisarmResetButton));
+            SetResetButtonArmed(false);
+
+            if (_playerInventory != null)
+            {
+                _playerInventory.Reset();
+                _playerInventory.Save();
+            }
+
+            if (_progression != null)
+            {
+                _progression.Reset();
+                _progression.Save();
+            }
+
+            Debug.Log("[OptionsPanel] Player data reset to a clean slate.");
+        }
+
+        private void DisarmResetButton() => SetResetButtonArmed(false);
+
+        private void SetResetButtonArmed(bool armed)
+        {
+            _resetArmed = armed;
+            if (_resetDataButtonLabel != null)
+                _resetDataButtonLabel.text = armed ? _resetDataConfirmText : _resetDataDefaultText;
         }
 
         // ── Init / Refresh ────────────────────────────────────────────────────

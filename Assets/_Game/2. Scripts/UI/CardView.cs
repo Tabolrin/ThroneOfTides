@@ -1,14 +1,13 @@
 // Assets/_Game/2. Scripts/UI/CardView.cs
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 
 namespace ThroneOfTides.UI
 {
-    public class CardView : MonoBehaviour, IPointerClickHandler
+    public class CardView : MonoBehaviour
     {
         // ── Card structure ─────────────────────────────────────────────────────
         [Header("Structure")]
@@ -59,8 +58,26 @@ namespace ThroneOfTides.UI
 
         // ── Lifecycle ──────────────────────────────────────────────────────────
 
-        private void OnEnable()  => GameEventBus.OnCardPlayAccepted += OnCardPlayAccepted;
-        private void OnDisable() => GameEventBus.OnCardPlayAccepted -= OnCardPlayAccepted;
+        private void OnEnable()
+        {
+            GameEventBus.OnCardCommitted    += OnCardCommitted;
+            GameEventBus.OnCardPlayAccepted += OnCardPlayAccepted;
+        }
+
+        private void OnDisable()
+        {
+            GameEventBus.OnCardCommitted    -= OnCardCommitted;
+            GameEventBus.OnCardPlayAccepted -= OnCardPlayAccepted;
+        }
+
+        // Fires the instant the play is committed (mana spent) — before any target-selection
+        // prompt — so the drag handler knows to release this card instead of snapping it back
+        // to hand while the prompt is still pending an answer.
+        private void OnCardCommitted(ICard card)
+        {
+            if (card as CardSO == CardData && IsBeingPlayed)
+                WasPlayed = true;
+        }
 
         private void OnCardPlayAccepted(ICard card, DamageTarget? selectedTarget)
         {
@@ -99,12 +116,6 @@ namespace ThroneOfTides.UI
             IsBeingPlayed = false;
             _cardFront.SetActive(false);
             if (_cardBack != null) _cardBack.gameObject.SetActive(true);
-        }
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            if (eventData.button == PointerEventData.InputButton.Right && CardData != null)
-                OnInspectRequested?.Invoke(this);
         }
 
         // ── Private setup ──────────────────────────────────────────────────────

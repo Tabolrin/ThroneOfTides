@@ -6,7 +6,8 @@ using UnityEngine;
 namespace ThroneOfTides.Data
 {
     // Icon lookup for ActiveEffectsBar/ShipStatusIndicator — one shared asset maps each
-    // ShipStatusType to the sprite its badge/world indicator should show.
+    // ShipStatusType to the sprite its badge/world indicator should show, plus a short
+    // hover-tooltip description for the badge.
     [CreateAssetMenu(menuName = "ThroneOfTides/Data/EffectSymbolPalette")]
     public class EffectSymbolPaletteSO : ScriptableObject
     {
@@ -15,6 +16,8 @@ namespace ThroneOfTides.Data
         {
             public ShipStatusType Type;
             public Sprite         Icon;
+            [TextArea]
+            public string         Description;
         }
 
         [SerializeField] private List<IconEntry> _icons = new List<IconEntry>();
@@ -23,6 +26,12 @@ namespace ThroneOfTides.Data
         {
             var entry = _icons.Find(e => e.Type == type);
             return entry?.Icon;
+        }
+
+        public string GetDescription(ShipStatusType type)
+        {
+            var entry = _icons.Find(e => e.Type == type);
+            return entry?.Description;
         }
     }
 }

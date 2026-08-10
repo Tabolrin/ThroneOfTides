@@ -1,0 +1,96 @@
+// Assets/_Game/2. Scripts/UI/CardHoverEffect.cs
+using DG.Tweening;
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+namespace ThroneOfTides.UI
+{
+    // Generic pointer-hover growth for a UI card: scales up and rises while hovered, optionally
+    // jumping to the front of its parent's draw order, reverting on exit. Attach to a card-like
+    // RectTransform that should react to hover without needing to be draggable/playable (e.g.
+    // EnemyHandRevealPanel's read-only card display, or a hand card via Configure()).
+    // Base scale/position are captured fresh on every hover-enter rather than once in OnEnable —
+    // pooled hand cards get repositioned by hand-layout re-fanning throughout their lifetime, so
+    // a one-time cached base would go stale and snap back to the wrong spot.
+    public class CardHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    {
+        [SerializeField] private float _hoverScale    = 1.15f;
+        [SerializeField] private float _hoverRise     = 30f;
+        [SerializeField] private float _tweenDuration = 0.15f;
+        [SerializeField] private Ease  _ease          = Ease.OutBack;
+        [SerializeField] private bool  _bringToFront;
+
+        private RectTransform _rect;
+        private Vector3       _baseScale;
+        private Vector2       _basePos;
+        private int           _baseSiblingIndex;
+        private bool          _isHovering;
+
+        private void Awake() => _rect = GetComponent<RectTransform>();
+
+        /// <summary>Overrides the inspector/AddComponent defaults at runtime.</summary>
+        public void Configure(float hoverScale, float hoverRise, bool bringToFront)
+        {
+            _hoverScale    = hoverScale;
+            _hoverRise     = hoverRise;
+            _bringToFront  = bringToFront;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_isHovering) return;
+            _isHovering = true;
+
+            _baseScale = _rect.localScale;
+            _basePos   = _rect.anchoredPosition;
+
+            if (_bringToFront)
+            {
+                _baseSiblingIndex = _rect.GetSiblingIndex();
+                _rect.SetAsLastSibling();
+            }
+
+            _rect.DOKill();
+            _rect.DOScale(_baseScale * _hoverScale, _tweenDuration).SetEase(_ease);
+            _rect.DOAnchorPos(_basePos + new Vector2(0f, _hoverRise), _tweenDuration).SetEase(_ease);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (!_isHovering) return;
+            _isHovering = false;
+
+            _rect.DOKill();
+            _rect.DOScale(_baseScale, _tweenDuration).SetEase(_ease);
+            _rect.DOAnchorPos(_basePos, _tweenDuration).SetEase(_ease)
+                .OnComplete(() =>
+                {
+                    // Restored only after the tween settles — reordering mid-tween would make
+                    // an overlapping neighbor draw on top of the still-animating card.
+                    if (_bringToFront) _rect.SetSiblingIndex(_baseSiblingIndex);
+                });
+        }
+
+        private void OnDisable()
+        {
+            _rect.DOKill();
+            _isHovering = false;
+        }
+
+        // Called by CardDragHandler the instant a drag begins — a card picked up mid-hover (a
+        // very common "hover to preview, then drag" flow) would otherwise start the drag still
+        // enlarged/raised, and OnDrag's anchoredPosition += delta math assumes scale == 1, so a
+        // lingering hover scale makes the card visibly drift away from the cursor. Snaps back
+        // instantly (no tween) since a drag is starting this same frame.
+        public void CancelHover()
+        {
+            if (!_isHovering) return;
+            _isHovering = false;
+
+            _rect.DOKill();
+            _rect.localScale        = _baseScale;
+            _rect.anchoredPosition  = _basePos;
+            if (_bringToFront) _rect.SetSiblingIndex(_baseSiblingIndex);
+        }
+    }
+}

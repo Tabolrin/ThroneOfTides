@@ -26,11 +26,18 @@ namespace ThroneOfTides.UI
         [Header("Data")]
         [SerializeField] private EffectBadgeView       _badgePrefab;
         [SerializeField] private EffectSymbolPaletteSO _palette;
+        [Tooltip("Shared floating tooltip shown when a badge is hovered.")]
+        [SerializeField] private EffectBadgeTooltip    _tooltip;
 
         [Header("Reaction Icons")]
         [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette — assign their icons directly.")]
         [SerializeField] private Sprite _deadMansTurnIcon;
         [SerializeField] private Sprite _counterGaleIcon;
+        [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette — assign their hover descriptions directly.")]
+        [TextArea]
+        [SerializeField] private string _deadMansTurnDescription;
+        [TextArea]
+        [SerializeField] private string _counterGaleDescription;
 
         private readonly Dictionary<ShipStatusType, EffectBadgeView> _activeStatusBadges =
             new Dictionary<ShipStatusType, EffectBadgeView>();
@@ -67,7 +74,8 @@ namespace ThroneOfTides.UI
             int? displayCount = type == ShipStatusType.SirenSong ? (int?)null : count;
 
             SetBadge(_activeStatusBadges, type, count > 0, _effectsContainer,
-                _palette != null ? _palette.GetSprite(type) : null, displayCount);
+                _palette != null ? _palette.GetSprite(type) : null, displayCount,
+                _palette != null ? _palette.GetDescription(type) : null);
         }
 
         // ── Reaction Charges ─────────────────────────────────────────────────
@@ -92,13 +100,14 @@ namespace ThroneOfTides.UI
         private void RefreshReactionBadge(ReactionType type, int charges)
         {
             Sprite icon = type == ReactionType.DeadMansTurn ? _deadMansTurnIcon : _counterGaleIcon;
-            SetBadge(_activeReactionBadges, type, charges > 0, _reactionsContainer, icon, charges);
+            string description = type == ReactionType.DeadMansTurn ? _deadMansTurnDescription : _counterGaleDescription;
+            SetBadge(_activeReactionBadges, type, charges > 0, _reactionsContainer, icon, charges, description);
         }
 
         // ── Shared badge create/update/destroy ───────────────────────────────
 
         private void SetBadge<T>(Dictionary<T, EffectBadgeView> active, T key, bool shouldBeActive,
-            RectTransform container, Sprite icon, int? count)
+            RectTransform container, Sprite icon, int? count, string description = null)
         {
             bool exists = active.TryGetValue(key, out EffectBadgeView badge);
 
@@ -119,7 +128,7 @@ namespace ThroneOfTides.UI
                 active[key] = badge;
             }
 
-            badge.Setup(icon, count);
+            badge.Setup(icon, count, description, _tooltip);
         }
 
         private void OnMatchEnd()

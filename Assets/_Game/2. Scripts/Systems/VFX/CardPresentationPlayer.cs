@@ -125,6 +125,8 @@ namespace ThroneOfTides.Systems
 
             if (spriteInstance.TryGetComponent<ICardPlayEffect>(out var playEffect))
             {
+                var explicitTargetAnchors = ResolveExplicitTargetAnchors(explicitTarget);
+
                 // Self-driving effects decide when their SFX actually happens (e.g. on impact,
                 // not at spawn) — hand them a bound callback instead of firing it here.
                 var context = new CardEffectSpawnContext(
@@ -141,7 +143,11 @@ namespace ThroneOfTides.Systems
                     hailParticles: _hailParticles,
                     revealOpponentStatusIndicator: type => opponentAnchors.GetStatusIndicator(type)?.RevealNow(),
                     isOpponentStatusVisible: type => opponentAnchors.GetStatusIndicator(type)?.IsVisible ?? false,
-                    gunpowderDustParticles: _gunpowderDustParticles);
+                    gunpowderDustParticles: _gunpowderDustParticles,
+                    getExplicitTargetAnchor: type => explicitTargetAnchors?.Get(type),
+                    beginExplicitTargetGunpowderHold: () => explicitTargetAnchors?.GetGunpowderVisual()?.BeginOverride(),
+                    endExplicitTargetGunpowderHold: () => explicitTargetAnchors?.GetGunpowderVisual()?.EndOverride(),
+                    getOpponentAnchor: type => opponentAnchors.Get(type));
 
                 playEffect.Initialize(context);
                 playEffect.Completed += () => Destroy(spriteInstance);
@@ -168,6 +174,15 @@ namespace ThroneOfTides.Systems
             return anchors.Get(positionType);
         }
 
+        // Null (not the player-ship fallback ResolveExplicitTargetPoint uses) when there's no
+        // explicit target — callers only use this for optional extra lookups, not the primary
+        // spawn point, so silently doing nothing is the right failure mode here.
+        private ShipVfxAnchors ResolveExplicitTargetAnchors(DamageTarget? explicitTarget)
+        {
+            if (!explicitTarget.HasValue) return null;
+            return explicitTarget.Value == DamageTarget.Player ? _playerShipAnchors : _enemyShipAnchors;
+        }
+
         private GameObject SpawnWorldSprite(CardPresentationEntry entry, Transform spawnTransform)
         {
             return Instantiate(entry.SpritePrefab, spawnTransform.position, spawnTransform.rotation, _worldEffectParent);
@@ -188,8 +203,12 @@ namespace ThroneOfTides.Systems
         private Vector2 WorldToCanvasLocalPoint(Vector3 worldPosition)
         {
             Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(_gameCamera, worldPosition);
+            // null camera is correct for Screen Space Overlay canvases — see HailstormVFXController's
+            // PositionAtWorldPoint, which follows the same rule. Passing the real camera here (as
+            // opposed to the WorldToScreenPoint call above, which needs it) makes this conversion
+            // collapse to roughly the canvas's corner regardless of the input world position.
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _gameCanvasRect, screenPoint, _gameCamera, out var localPoint);
+                _gameCanvasRect, screenPoint, null, out var localPoint);
             return localPoint;
         }
 

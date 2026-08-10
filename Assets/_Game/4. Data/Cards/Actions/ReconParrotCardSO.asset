@@ -31,4 +31,16 @@ MonoBehaviour:
   _aiPlayBeforeAttack: 0
   _statusType: 0
   _art: {fileID: -8708541447700203620, guid: d72bdb6d0d868d54ebe91b78b9e8268d, type: 3}
-  _presentationEntries: []
+  _presentationEntries:
+  - _casterFilter: 0
+    _presentationMode: 0
+    _anchorSide: 0
+    _positionType: 1
+    _spritePrefab: {fileID: 5922238752439569510, guid: 4f80dce524b392249969af76c1d17247, type: 3}
+    _worldParticlePrefab: {fileID: 0}
+    _sfx:
+      _playlist: {fileID: 0}
+      _songName: 
+      _volumeMultiplier: 0
+      _pitchMultiplier: 0
+    _lifetime: 3

@@ -21,6 +21,10 @@ namespace ThroneOfTides.Data
         [Tooltip("Flavor/rules text shown on the card and in the inspect view.")]
         [SerializeField] private string _description;
 
+        [Header("Deck Building")]
+        [Tooltip("Maximum copies of this card the Port deck editor allows in a single deck once owned. Most cards are effectively unlimited (bounded only by storage capacity); a small number of singleton/legendary-style cards (e.g. The Kraken) are capped lower.")]
+        [SerializeField] private int _maxCopiesInDeck = 99;
+
         [Header("Cost")]
         [Tooltip("Mana required to play this card.")]
         [SerializeField] private int _manaCost;
@@ -92,6 +96,7 @@ namespace ThroneOfTides.Data
         public int      ManaCost         => _manaCost;
         public int      StorageCost      => _storageCost;
         public int      HPCost           => _hpCost;
+        public int      MaxCopiesInDeck  => _maxCopiesInDeck;
 
         // ── CardSO-only ────────────────────────────────────────────────────────
         public ActionEffectSO ActionEffect           => _actionEffect;

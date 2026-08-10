@@ -15,11 +15,16 @@ MonoBehaviour:
   _icons:
   - Type: 1
     Icon: {fileID: 21300000, guid: 7ee0f208e4d6cda4ebf245e6d43b0181, type: 3}
+    Description: "Primed to explode \u2014 Torch ignites it for bonus damage."
   - Type: 2
     Icon: {fileID: 21300000, guid: 415c10d89a5a7f240bcc8673bb9f82c5, type: 3}
+    Description: Dealing 3 damage per turn.
   - Type: 3
     Icon: {fileID: 21300000, guid: fea533f9939a4c74b8eb8ad6df6404d5, type: 3}
+    Description: Dealing 2 damage per turn.
   - Type: 4
     Icon: {fileID: 21300000, guid: 6f15f89afcd92c74795a3685c8b3010c, type: 3}
+    Description: Tracks how many times High Spirits has been played.
   - Type: 5
     Icon: {fileID: 21300000, guid: 4e114900b534de841858ec2fa30b856b, type: 3}
+    Description: This ship's next attack cannot be blocked.

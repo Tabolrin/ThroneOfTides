@@ -154,6 +154,16 @@ namespace ThroneOfTides.Systems
                 return;
             }
 
+            // Committed the instant mana is spent — the card leaves the hand regardless of
+            // which target ends up chosen. CardView listens for this so it stops treating the
+            // drag as "rejected, snap back" while a target-selection prompt is still pending;
+            // OnCardPlayAccepted (below/later) fires the actual resolution once the target is
+            // known, which is what VFX spawning keys off instead.
+            GameEventBus.FireCardCommitted(cardSO);
+            _gameState.RegisterCardPlayed(cardSO);
+            _gameState.PlayerHand.RemoveCard(cardSO);
+            _gameState.DiscardPlayerCard(cardSO);
+
             if (cardSO.RequiresTargetSelection)
             {
                 StartCoroutine(PlayCardWithTargetSelection(cardSO));
@@ -174,9 +184,6 @@ namespace ThroneOfTides.Systems
         private void FinishHandleCardPlayed(CardSO cardSO, DamageTarget? selectedTarget)
         {
             GameEventBus.FireCardPlayAccepted(cardSO, selectedTarget);
-            _gameState.RegisterCardPlayed(cardSO);
-            _gameState.PlayerHand.RemoveCard(cardSO);
-            _gameState.DiscardPlayerCard(cardSO);
 
             int damage = _combatResolver.ResolvePlayerCard(cardSO, _handLayout, selectedTarget);
             if (damage > 0)
@@ -316,7 +323,11 @@ namespace ThroneOfTides.Systems
                 CardSO playedCard = _enemyAI.PickCard(
                     _gameState.EnemyHand.CardsSO,
                     _gameState.EnemyMana,
-                    _gameState.EnemyHP);
+                    _gameState.EnemyHP,
+                    comboPrimed: _gameState.EnemyComboStackCount > 0 && _gameState.EnemyActiveComboCard != null,
+                    playerHasDeadMansTurn: _gameState.PlayerDeadMansTurnCharges > 0,
+                    playerHasCounterGale: _gameState.PlayerCounterGaleCharges > 0,
+                    selfUnblockable: _gameState.SirenSongActive);
 
                 if (playedCard == null) break;
 

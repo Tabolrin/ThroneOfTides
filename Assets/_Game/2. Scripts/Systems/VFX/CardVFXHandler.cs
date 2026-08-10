@@ -223,10 +223,12 @@ namespace ThroneOfTides.Systems
             {
                 case CardId.Pistol:
                 case CardId.Cannonball:
-                case CardId.WhaleRam:
                 case CardId.ChainShot:
                     yield return StartCoroutine(FireCannonball(source.position, target.position));
                     break;
+
+                // Whale Ram is migrated to CardPresentationPlayer (PresentationEntries +
+                // ICardPlayEffect) — no case needed here for its spawn logic.
 
                 case CardId.RamTheHull:
                     SpawnVFX(_ramTheHullPrefab != null

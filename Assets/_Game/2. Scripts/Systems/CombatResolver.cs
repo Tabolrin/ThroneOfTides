@@ -7,7 +7,10 @@ namespace ThroneOfTides.Systems
 {
     public class CombatResolver
     {
-        private readonly GameState _gameState;
+        private readonly GameState       _gameState;
+        // Optional — null outside a real game session (e.g. isolated tests). Only the player has
+        // a tracked coin balance, so this is only ever consulted for a Player-cast Kraken.
+        private readonly PlayerInventory _playerInventory;
 
         // Set once by TurnCoordinator during setup. Allows effect SOs to trigger secondary
         // draws (e.g. Treasure Chest) without assembly boundary issues. Kept per-side so a
@@ -21,9 +24,10 @@ namespace ThroneOfTides.Systems
             _secondaryDrawCallbackEnemy  = enemyCallback;
         }
 
-        public CombatResolver(GameState gameState)
+        public CombatResolver(GameState gameState, PlayerInventory playerInventory = null)
         {
-            _gameState = gameState;
+            _gameState       = gameState;
+            _playerInventory = playerInventory;
         }
 
         /// <summary>
@@ -37,6 +41,18 @@ namespace ThroneOfTides.Systems
             {
                 _gameState.ApplyDamage(caster, card.HPCost);
                 GameDebug.Log($"{card.Name} — paid {card.HPCost} HP");
+            }
+
+            // The Kraken's own text: "Sacrifice 3 HP and 33% of your materials." — only the
+            // player has coins to sacrifice; an enemy-cast Kraken skips this entirely.
+            if (card.Id == CardId.Kraken && caster == DamageTarget.Player && _playerInventory != null)
+            {
+                int materialsCost = Mathf.FloorToInt(_playerInventory.Coins * 0.33f);
+                if (materialsCost > 0)
+                {
+                    _playerInventory.SpendCoins(materialsCost);
+                    GameDebug.Log($"The Kraken — sacrificed {materialsCost} coins (33% of materials)");
+                }
             }
 
             switch (card.CardType)
@@ -108,7 +124,7 @@ namespace ThroneOfTides.Systems
                 return 0;
             }
             var secondaryDraw = caster == DamageTarget.Player ? _secondaryDrawCallbackPlayer : _secondaryDrawCallbackEnemy;
-            var context = new CardEffectContext(_gameState, handLayout, caster, secondaryDraw, selectedTarget);
+            var context = new CardEffectContext(_gameState, handLayout, caster, secondaryDraw, selectedTarget, _playerInventory);
             card.ActionEffect.Execute(context);
             return 0;
         }
@@ -122,7 +138,7 @@ namespace ThroneOfTides.Systems
             if (card.ActionEffect != null)
             {
                 var secondaryDraw = caster == DamageTarget.Player ? _secondaryDrawCallbackPlayer : _secondaryDrawCallbackEnemy;
-            var context = new CardEffectContext(_gameState, handLayout, caster, secondaryDraw, selectedTarget);
+            var context = new CardEffectContext(_gameState, handLayout, caster, secondaryDraw, selectedTarget, _playerInventory);
                 card.ActionEffect.Execute(context);
                 return 0;
             }

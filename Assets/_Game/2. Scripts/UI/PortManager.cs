@@ -98,12 +98,10 @@ namespace ThroneOfTides.App
 
         private void SaveDeck()
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(_playerInventory.PlayerDeck);
-            UnityEditor.AssetDatabase.SaveAssets();
-            Debug.Log("[Port] Deck saved to asset.");
-#endif
-            // TODO (post-vertical-slice): JSON serialization for build persistence
+            // Persists to disk (see PlayerInventory.Save) so the deck survives an actual build,
+            // not just the current Editor session.
+            _playerInventory.Save();
+            Debug.Log("[Port] Deck saved.");
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────

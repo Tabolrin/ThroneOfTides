@@ -20,6 +20,13 @@ namespace ThroneOfTides.Data
         [Header("Card Collection")]
         [SerializeField] private List<CardSO> _collection = new List<CardSO>();
 
+        [Tooltip("The collection/deck a Reset (see OptionsPanel's 'Reset Player Data') restores. " +
+                 "_collection and _playerDeck's own Cards list are both mutated at runtime and " +
+                 "persisted over the top of themselves — without a separate untouched baseline, " +
+                 "there'd be nothing left to reset back to.")]
+        [SerializeField] private List<CardSO> _startingCollection = new List<CardSO>();
+        [SerializeField] private List<DeckDefinitionSO.CardEntry> _startingDeckCards = new List<DeckDefinitionSO.CardEntry>();
+
         [Header("Active Deck")]
         [SerializeField] private DeckDefinitionSO _playerDeck;
 
@@ -40,6 +47,10 @@ namespace ThroneOfTides.Data
 
         // ── Properties ────────────────────────────────────────────────────────
 
+        // Fired whenever Coins actually changes — lets a live HUD (e.g. the Match scene's coin
+        // counter) reflect Treasure Chest/Kraken/upgrade-purchase changes without polling.
+        public event Action<int> OnCoinsChanged;
+
         public IReadOnlyList<CardSO>      Collection             => _collection.AsReadOnly();
         public DeckDefinitionSO           PlayerDeck             => _playerDeck;
         public int                        Coins                  => _coins;
@@ -50,11 +61,20 @@ namespace ThroneOfTides.Data
 
         // ── Collection ────────────────────────────────────────────────────────
 
+        // Ownership is per card TYPE, not per copy — the Port deck editor lets a player add as
+        // many copies of an owned card as they want (bounded by storage and MaxCopiesInDeck),
+        // it's not limited by how many times they happen to own that card. Adding an
+        // already-owned reward card again (e.g. a duplicate future reward) is a no-op rather
+        // than an accumulating duplicate entry.
         public void AddCards(List<CardSO> cards)
         {
-            _collection.AddRange(cards);
+            foreach (var card in cards)
+                if (card != null && !_collection.Contains(card))
+                    _collection.Add(card);
             Save();
         }
+
+        public bool IsUnlocked(CardSO card) => _collection.Contains(card);
 
         public int CountOwned(CardSO card)
         {
@@ -69,6 +89,7 @@ namespace ThroneOfTides.Data
         public void AddCoins(int amount)
         {
             _coins += amount;
+            OnCoinsChanged?.Invoke(_coins);
             Save();
         }
 
@@ -78,6 +99,7 @@ namespace ThroneOfTides.Data
         {
             if (!CanAfford(amount)) return false;
             _coins -= amount;
+            OnCoinsChanged?.Invoke(_coins);
             return true;
         }
 
@@ -125,14 +147,26 @@ namespace ThroneOfTides.Data
 
         // ── Reset ─────────────────────────────────────────────────────────────
 
+        // Playtest-only "clean slate" — see OptionsPanel's Reset Player Data button. Restores
+        // the collection and deck to their designer-authored starting state (not empty — an
+        // empty deck/collection would softlock deck-building) and wipes everything earned since.
         public void Reset()
         {
             _collection.Clear();
+            _collection.AddRange(_startingCollection);
+
+            if (_playerDeck != null)
+            {
+                _playerDeck.Cards.Clear();
+                _playerDeck.Cards.AddRange(_startingDeckCards);
+            }
+
             _powerUps.Clear();
             _coins                  = 0;
             _hullReinforcementLevel = 0;
             _expandedCargoHoldLevel = 0;
             _manaCrystalLevel       = 0;
+            OnCoinsChanged?.Invoke(_coins);
         }
 
         // ── Save/Load ─────────────────────────────────────────────────────────
@@ -153,6 +187,17 @@ namespace ThroneOfTides.Data
             foreach (var card in _collection)
                 if (card != null && card.Id != CardId.None)
                     data.CollectionCardIds.Add(card.Id);
+
+            // The deck editor (PortDeckEditor) mutates _playerDeck.Cards directly at runtime —
+            // that in-memory ScriptableObject edit only survives an actual build if it's also
+            // captured here. Without this, deck changes appeared to save (AssetDatabase.Save is
+            // Editor-only) but silently reverted to the shipped default on every relaunch.
+            if (_playerDeck != null)
+            {
+                foreach (var entry in _playerDeck.Cards)
+                    if (entry.Card != null && entry.Card.Id != CardId.None && entry.Count > 0)
+                        data.DeckCards.Add(new DeckCardSaveEntry { CardId = entry.Card.Id, Count = entry.Count });
+            }
 
             MMSaveLoadManager.Save(data, SaveFileName, SaveFolderName);
         }
@@ -175,6 +220,17 @@ namespace ThroneOfTides.Data
                 {
                     var card = _cardDatabase.GetById(id);
                     if (card != null) _collection.Add(card);
+                }
+
+                if (_playerDeck != null && data.DeckCards.Count > 0)
+                {
+                    _playerDeck.Cards.Clear();
+                    foreach (var saved in data.DeckCards)
+                    {
+                        var card = _cardDatabase.GetById(saved.CardId);
+                        if (card != null)
+                            _playerDeck.Cards.Add(new DeckDefinitionSO.CardEntry { Card = card, Count = saved.Count });
+                    }
                 }
             }
         }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UpgSO_MaxMana
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.UpgradeSO
   Type: 0
-  DisplayName: MaxMana
+  DisplayName: Mana
   Description: 
   Icon: {fileID: 0}
   MaxLevel: 3

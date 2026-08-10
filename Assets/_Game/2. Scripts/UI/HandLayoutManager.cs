@@ -41,6 +41,11 @@ namespace ThroneOfTides.UI
         [Header("Hand Animation")]
         [SerializeField] private float _gapCloseDuration = 0.12f;
 
+        [Header("Hand Hover")]
+        [Tooltip("Bigger/further than EnemyHandRevealPanel's hover so a card popping out of the fanned hand reads clearly above its overlapping neighbors.")]
+        [SerializeField] private float _handHoverScale = 1.35f;
+        [SerializeField] private float _handHoverRise  = 80f;
+
         [Header("Manual Draw Animation")]
         [SerializeField] private RectTransform _deckTransform;
         [SerializeField] private float         _drawArcHeight   = 120f;
@@ -77,6 +82,7 @@ namespace ThroneOfTides.UI
                     view.transform.DOKill();
                     var canvasGroup = view.GetComponent<CanvasGroup>();
                     if (canvasGroup != null) canvasGroup.DOKill();
+                    DisableHover(view);
 
                     view.gameObject.SetActive(false);
                     view.transform.SetParent(transform, false);
@@ -90,7 +96,30 @@ namespace ThroneOfTides.UI
             CardView view = _cardViewPool.Get();
             view.transform.SetParent(parent, false);
             view.OnInspectRequested = ShowCardInspect;
+
+            // Only the player's own hand grows/lifts/fronts on hover — the enemy's hand is
+            // face-down and not meant to invite interaction.
+            if (parent == _playerHandContainer) EnableHover(view);
+            else                                DisableHover(view);
+
             return view;
+        }
+
+        // Pooled views can move between the player's hand and the enemy's hand (or the reveal
+        // panel briefly borrows one) across their lifetime — hover must be explicitly set every
+        // time a view is (re)placed rather than assumed from whatever it had before.
+        private void EnableHover(CardView view)
+        {
+            var hover = view.GetComponent<CardHoverEffect>();
+            if (hover == null) hover = view.gameObject.AddComponent<CardHoverEffect>();
+            hover.Configure(_handHoverScale, _handHoverRise, bringToFront: true);
+            hover.enabled = true;
+        }
+
+        private void DisableHover(CardView view)
+        {
+            var hover = view.GetComponent<CardHoverEffect>();
+            if (hover != null) hover.enabled = false;
         }
 
         private void ShowCardInspect(CardView card)
@@ -114,6 +143,9 @@ namespace ThroneOfTides.UI
 
         void IHandLayoutManager.StealCardFromEnemyHand(ICard card) =>
             StealCardFromEnemyHand(card as CardSO);
+
+        void IHandLayoutManager.StealCardFromPlayerHand(ICard card) =>
+            StealCardFromPlayerHand(card as CardSO);
 
         void IHandLayoutManager.AddCardToEnemyHand(ICard card) =>
             AddCardToEnemyHand(card as CardSO);
@@ -368,7 +400,7 @@ namespace ThroneOfTides.UI
             if (view == null) return;
 
             _enemyCards.Remove(view);
-            RefreshEnemyLayout();
+            RefreshEnemyLayout(animated: true);
 
             var drag = view.GetComponent<CardDragHandler>();
             if (drag != null)
@@ -378,15 +410,56 @@ namespace ThroneOfTides.UI
                 drag.OnDragEnded   += OnCardDragEnded;
             }
 
+            // Reparenting with worldPositionStays keeps the card exactly where it visually was
+            // (still inside the enemy hand's on-screen area) — the animated RefreshPlayerLayout
+            // right after is what makes it read as "flying" from the enemy's hand into the
+            // player's, rather than teleporting straight into its final fanned slot.
             view.transform.SetParent(_playerHandContainer, true);
+            // PlayerHandContainer and EnemyHandContainer apply different local scales (the
+            // player's own hand renders larger) — worldPositionStays preserves the card's old
+            // *world* scale, which lands on a non-1 local scale here that renders smaller than
+            // its new sibling cards. Reset explicitly, matching what pool Get() does for a
+            // normal spawn.
+            view.transform.localScale = Vector3.one;
             view.Setup(card);
             view.HandYOffset = Random.Range(-_maxYOffset, _maxYOffset);
+            EnableHover(view);
 
             _playerCards.Add(view);
             RefreshPlayerLayout(animated: true);
         }
 
-        private void RefreshEnemyLayout()
+        // Mirror of StealCardFromEnemyHand — reuses the player's existing CardView (flipped
+        // face-down) instead of destroying it and spawning a fresh enemy-hand card, so Monkey
+        // Grab reads as the same card flying away rather than the player's card vanishing and
+        // an unrelated card appearing in the enemy's hand.
+        public void StealCardFromPlayerHand(CardSO card)
+        {
+            CardView view = _playerCards.Find(v => v != null && v.CardData == card);
+            if (view == null) return;
+
+            var drag = view.GetComponent<CardDragHandler>();
+            if (drag != null)
+            {
+                drag.OnDragStarted -= OnCardDragStarted;
+                drag.OnDragEnded   -= OnCardDragEnded;
+            }
+
+            _playerCards.Remove(view);
+            DisableHover(view);
+            RefreshPlayerLayout(animated: true);
+
+            view.transform.SetParent(_enemyHandContainer, true);
+            // See the matching reset in StealCardFromEnemyHand — worldPositionStays otherwise
+            // carries over the player hand's larger local scale.
+            view.transform.localScale = Vector3.one;
+            view.SetFaceDown(card);
+
+            _enemyCards.Add(view);
+            RefreshEnemyLayout(animated: true);
+        }
+
+        private void RefreshEnemyLayout(bool animated = false)
         {
             _enemyCards.RemoveAll(v => v == null);
             if (_enemyCards.Count == 0) return;
@@ -396,9 +469,15 @@ namespace ThroneOfTides.UI
 
             for (int i = 0; i < _enemyCards.Count; i++)
             {
-                var rect    = _enemyCards[i].GetComponent<RectTransform>();
-                var current = rect.anchoredPosition;
-                rect.anchoredPosition = new Vector2(startX + i * _enemyCardSpacing, current.y);
+                var rect        = _enemyCards[i].GetComponent<RectTransform>();
+                var current     = rect.anchoredPosition;
+                var targetPos   = new Vector2(startX + i * _enemyCardSpacing, current.y);
+
+                if (animated)
+                    rect.DOAnchorPos(targetPos, _gapCloseDuration).SetEase(Ease.OutCubic);
+                else
+                    rect.anchoredPosition = targetPos;
+
                 _enemyCards[i].transform.SetSiblingIndex(i);
             }
         }

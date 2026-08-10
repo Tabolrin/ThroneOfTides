@@ -10,8 +10,8 @@ using UnityEngine.UI;
 namespace ThroneOfTides.UI
 {
     // Runtime deck editor — mirrors DeckBuilderWindow but as in-game UI.
-    // Modifies the DeckDefinitionSO directly; changes persist in Editor.
-    // TODO: JSON serialization needed for build persistence (post-vertical-slice).
+    // Mutates the DeckDefinitionSO's Cards list directly and in-memory; PortManager.SaveDeck
+    // persists it to disk via PlayerInventory.Save() when the player presses Save.
     public class PortDeckEditor : MonoBehaviour
     {
         [Header("Deck List")]
@@ -75,10 +75,11 @@ namespace ThroneOfTides.UI
 
         // ── Public API ─────────────────────────────────────────────────────────
 
-        // Returns false if storage cap would be exceeded
+        // Returns false if storage cap would be exceeded or the card's own copy limit is reached
         public bool TryAddCard(CardSO card)
         {
             if (GetStorageUsed() + card.StorageCost > MaxStorage) return false;
+            if (GetCountInDeck(card) >= card.MaxCopiesInDeck) return false;
 
             int idx = _deck.Cards.FindIndex(e => e.Card == card);
             if (idx >= 0)
@@ -146,9 +147,9 @@ namespace ThroneOfTides.UI
 
         private void BuildRows()
         {
-            // Sort by type then name for readability
+            // One row per card TYPE (not one per physical copy) — sorted by type then name.
             var sorted = new List<DeckDefinitionSO.CardEntry>(_deck.Cards);
-            sorted.RemoveAll(e => e.Card == null);
+            sorted.RemoveAll(e => e.Card == null || e.Count <= 0);
             sorted.Sort((a, b) =>
             {
                 int typeComp = a.Card.CardType.CompareTo(b.Card.CardType);
@@ -159,13 +160,15 @@ namespace ThroneOfTides.UI
 
             foreach (var entry in sorted)
             {
-                var cardRef = entry.Card;
-                for (int i = 0; i < entry.Count; i++)
-                {
-                    var row = _rowPool.Get();
-                    row.transform.SetParent(_deckContent, false);
-                    row.Setup(cardRef, _palette, () => RemoveCard(cardRef));
-                }
+                var cardRef      = entry.Card;
+                bool canIncrement = GetStorageUsed() + cardRef.StorageCost <= MaxStorage
+                                    && entry.Count < cardRef.MaxCopiesInDeck;
+
+                var row = _rowPool.Get();
+                row.transform.SetParent(_deckContent, false);
+                row.Setup(cardRef, entry.Count, _palette, canIncrement,
+                    onIncrement: () => TryAddCard(cardRef),
+                    onDecrement: () => RemoveCard(cardRef));
             }
         }
 

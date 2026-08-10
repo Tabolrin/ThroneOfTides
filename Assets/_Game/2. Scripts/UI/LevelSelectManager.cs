@@ -27,16 +27,25 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject      _level2Lock;
         [SerializeField] private GameObject      _level3Lock;
 
+        [Header("Port")]
+        [Tooltip("The Port is always optional and freely revisitable from the map — never gated behind a level and never accessible from the main menu, so this is the only entry point.")]
+        [SerializeField] private Button     _portButton;
+        [Tooltip("Small indicator shown on the Port node when there's coin or an unused unlocked card worth spending — a nudge, not a gate.")]
+        [SerializeField] private GameObject _portNotificationBadge;
+        [SerializeField] private PlayerInventory _playerInventory;
+
         [Header("Navigation")]
         [SerializeField] private Button _mainMenuButton;
 
         private void Start()
         {
             RefreshNodes();
+            RefreshPortBadge();
 
             _level1Button.onClick.AddListener(() => OnLevelSelected(_captain1, 1));
             _level2Button.onClick.AddListener(() => OnLevelSelected(_captain2, 2));
             _level3Button.onClick.AddListener(() => OnLevelSelected(_captain3, 3));
+            if (_portButton != null) _portButton.onClick.AddListener(OnPortSelected);
             _mainMenuButton.onClick.AddListener(OnMainMenuPressed);
         }
 
@@ -59,7 +68,33 @@ namespace ThroneOfTides.Systems
             SceneManager.LoadScene("Match");
         }
 
+        private void OnPortSelected() => SceneManager.LoadScene("Port");
+
         private void OnMainMenuPressed() =>
             SceneManager.LoadScene("MainMenu");
+
+        // A nudge, not a gate — lights up when there's coin sitting unspent or a card the
+        // player has unlocked but never actually put in their deck.
+        private void RefreshPortBadge()
+        {
+            if (_portNotificationBadge == null || _playerInventory == null) return;
+
+            bool hasUnspentCoins = _playerInventory.Coins > 0;
+            bool hasUnusedCard   = false;
+
+            if (_playerInventory.PlayerDeck != null)
+            {
+                foreach (var card in _playerInventory.Collection)
+                {
+                    if (!_playerInventory.PlayerDeck.Cards.Exists(e => e.Card == card))
+                    {
+                        hasUnusedCard = true;
+                        break;
+                    }
+                }
+            }
+
+            _portNotificationBadge.SetActive(hasUnspentCoins || hasUnusedCard);
+        }
     }
 }

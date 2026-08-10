@@ -30,38 +30,59 @@ namespace ThroneOfTides.Systems
         [Tooltip("If false, this indicator ignores the 0→active transition of OnShipStatusCountChanged and waits for an external RevealNow() call instead — for statuses whose activation is timed to a thrown-projectile VFX's impact (e.g. Gunpowder Barrel) rather than the instant the card is played. Fading back out on expiry still works normally either way.")]
         [SerializeField] private bool _autoRevealOnActivate = true;
 
+        [Header("Activation Burst")]
+        [Tooltip("Optional one-shot particle burst played only on the 0→active transition (not on every subsequent stack increase, and not on a re-application while already active). Stays dormant otherwise. Fires at the same moment the icon reveals — immediately if AutoRevealOnActivate, otherwise deferred to the external RevealNow() call (e.g. a thrown-projectile's impact).")]
+        [SerializeField] private ParticleSystem _activationBurst;
+
         public ShipStatusType StatusType => _statusType;
         public DamageTarget   Ship       => _ship;
 
         /// <summary>True while the icon is at (or fading toward) full visibility.</summary>
         public bool IsVisible => _icon != null && _icon.color.a > 0.01f;
 
+        private int  _previousCount;
+        private bool _burstPending;
+
         private void OnEnable()  => GameEventBus.OnShipStatusCountChanged += HandleStatusChanged;
         private void OnDisable() => GameEventBus.OnShipStatusCountChanged -= HandleStatusChanged;
 
         private void HandleStatusChanged(ShipStatusType type, DamageTarget ship, int count)
         {
-            if (type != _statusType || ship != _ship || _icon == null) return;
+            if (type != _statusType || ship != _ship) return;
+
+            bool activating = count > 0 && _previousCount <= 0;
+            _previousCount = count;
 
             if (count > 0)
             {
+                if (activating) _burstPending = true;
                 if (_autoRevealOnActivate) RevealNow();
                 return;
             }
 
+            if (_icon == null) return;
             _icon.DOKill();
             _icon.DOFade(0f, _fadeDuration);
         }
 
         /// <summary>
         /// Fades the icon to fully visible right now, regardless of _autoRevealOnActivate —
-        /// called by a thrown-projectile VFX controller at its impact moment.
+        /// called by a thrown-projectile VFX controller at its impact moment. Also fires the
+        /// activation burst if a genuine 0→active transition is still waiting on this reveal.
         /// </summary>
         public void RevealNow()
         {
-            if (_icon == null) return;
-            _icon.DOKill();
-            _icon.DOFade(1f, _fadeDuration);
+            if (_icon != null)
+            {
+                _icon.DOKill();
+                _icon.DOFade(1f, _fadeDuration);
+            }
+
+            if (_burstPending)
+            {
+                _burstPending = false;
+                _activationBurst?.Play();
+            }
         }
     }
 }

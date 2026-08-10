@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba36d273a3241964db6b7e2e161125d6, type: 3}
   m_Name: Locker Return Effect SO
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.LockerReturnEffectSO
+  _role: 3
   _cardsToRetrieve: 3

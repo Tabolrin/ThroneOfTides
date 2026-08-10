@@ -6,50 +6,61 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // One card panel in the collection grid.
-    // Shows art, name, type, costs, owned/in-deck counts and an Add button.
-    // Prefab: VerticalLayout root.
+    // One card panel in the collection grid — shows the card exactly as it renders in hand
+    // (embeds a real CardView) plus Port-specific info (storage cost, current/limit copies in
+    // deck) and an Add button below it. Pooled by PortInventoryView, so the embedded CardView is
+    // created once per panel instance and just re-Setup() on every refresh.
     public class PortInventoryCard : MonoBehaviour
     {
-        // Type is conveyed via _typeLabel's text — no per-type background tint anymore.
-        [SerializeField] private Image            _cardArt;
-        [SerializeField] private TextMeshProUGUI  _nameLabel;
-        [SerializeField] private TextMeshProUGUI  _typeLabel;
-        [SerializeField] private TextMeshProUGUI  _manaCostLabel;
-        [SerializeField] private TextMeshProUGUI  _storageCostLabel;
-        [SerializeField] private TextMeshProUGUI  _ownedLabel;
-        [SerializeField] private TextMeshProUGUI  _inDeckLabel;
-        [SerializeField] private Button           _addButton;
-        [SerializeField] private TextMeshProUGUI  _addButtonLabel;
+        [SerializeField] private CardView  _cardViewPrefab;
+        [SerializeField] private Transform _cardViewParent;
+        [SerializeField] private float     _cardViewScale = 0.55f;
 
-        public void Setup(CardSO card,
-                          int ownedCount, int inDeckCount,
-                          bool canAdd, System.Action onAdd)
+        [SerializeField] private TextMeshProUGUI _storageCostLabel;
+        [SerializeField] private TextMeshProUGUI _inDeckLabel;
+        [SerializeField] private Button          _addButton;
+        [SerializeField] private TextMeshProUGUI _addButtonLabel;
+
+        private CardView _cardViewInstance;
+
+        // maxCopies is CardSO.MaxCopiesInDeck — ownership is unlocked-or-not, not a copy count,
+        // so what's worth showing here is the deck-building cap, not how many you "own".
+        public void Setup(CardSO card, int maxCopies, int inDeckCount, bool canAdd, System.Action onAdd)
         {
-            if (_cardArt != null)
-            {
-                _cardArt.gameObject.SetActive(card.Art != null);
-                if (card.Art != null) _cardArt.sprite = card.Art;
-            }
+            EnsureCardView();
+            _cardViewInstance?.Setup(card);
 
-            if (_nameLabel        != null) _nameLabel.text        = card.Name;
-            if (_typeLabel        != null) _typeLabel.text        = card.CardType.ToString();
-            if (_manaCostLabel    != null) _manaCostLabel.text    = $"{card.ManaCost} mana";
-            if (_storageCostLabel != null) _storageCostLabel.text = $"{card.StorageCost} slots";
-            if (_ownedLabel       != null) _ownedLabel.text       = $"Owned: {ownedCount}";
-            if (_inDeckLabel      != null) _inDeckLabel.text      = $"In deck: {inDeckCount}";
+            if (_storageCostLabel != null)
+                _storageCostLabel.text = $"{card.StorageCost} slots";
+
+            if (_inDeckLabel != null)
+                _inDeckLabel.text = maxCopies >= 99
+                    ? $"In deck: {inDeckCount}"
+                    : $"In deck: {inDeckCount} / {maxCopies}";
 
             _addButton.interactable = canAdd;
 
             if (_addButtonLabel != null)
             {
-                _addButtonLabel.text = canAdd                   ? "Add"
-                                     : inDeckCount >= ownedCount ? "All in deck"
-                                                                 : "Storage full";
+                _addButtonLabel.text = canAdd                  ? "Add to Deck"
+                                     : inDeckCount >= maxCopies ? "Limit reached"
+                                                                : "Storage full";
             }
 
             _addButton.onClick.RemoveAllListeners();
             if (canAdd) _addButton.onClick.AddListener(() => onAdd?.Invoke());
+        }
+
+        private void EnsureCardView()
+        {
+            if (_cardViewInstance != null || _cardViewPrefab == null || _cardViewParent == null) return;
+
+            _cardViewInstance = Instantiate(_cardViewPrefab, _cardViewParent);
+            _cardViewInstance.transform.localScale = Vector3.one * _cardViewScale;
+
+            // Read-only display — not draggable/playable, and has no inspect-overlay wired here.
+            var drag = _cardViewInstance.GetComponent<CardDragHandler>();
+            if (drag != null) Destroy(drag);
         }
     }
 }
