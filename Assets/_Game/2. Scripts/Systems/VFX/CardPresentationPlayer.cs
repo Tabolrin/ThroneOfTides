@@ -147,7 +147,14 @@ namespace ThroneOfTides.Systems
                     getExplicitTargetAnchor: type => explicitTargetAnchors?.Get(type),
                     beginExplicitTargetGunpowderHold: () => explicitTargetAnchors?.GetGunpowderVisual()?.BeginOverride(),
                     endExplicitTargetGunpowderHold: () => explicitTargetAnchors?.GetGunpowderVisual()?.EndOverride(),
-                    getOpponentAnchor: type => opponentAnchors.Get(type));
+                    getOpponentAnchor: type => opponentAnchors.Get(type),
+                    getAnchor: (side, type) => side switch
+                    {
+                        CardPresentationSide.Caster => casterAnchors.Get(type),
+                        CardPresentationSide.Opponent => opponentAnchors.Get(type),
+                        CardPresentationSide.ExplicitTarget => explicitTargetAnchors?.Get(type),
+                        _ => null
+                    });
 
                 playEffect.Initialize(context);
                 playEffect.Completed += () => Destroy(spriteInstance);

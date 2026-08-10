@@ -44,7 +44,14 @@ namespace ThroneOfTides.Core
         void DiscardRandomFromOpponentHand();
     }
 
-    public interface IDiscardEffects
+    // A terse one-off line for the match log (e.g. "Recovered 3 cards from the discard") — for
+    // effects whose outcome is worth calling out but has no dedicated event of its own to log.
+    public interface INoteEffects
+    {
+        void LogNote(string message);
+    }
+
+    public interface IDiscardEffects : INoteEffects
     {
         int PlayerDeckCount { get; }
         int EnemyDeckCount  { get; }
@@ -87,7 +94,7 @@ namespace ThroneOfTides.Core
     public interface ICardEffectContext :
         IDamageEffects, IHealEffects, IManaEffects, IHandEffects,
         IDiscardEffects, IStatusEffects, IReactionChargeEffects, ITargetSelectionContext,
-        IEconomyEffects
+        IEconomyEffects, INoteEffects
     {
         /// Which side played the card that owns this effect — lets effects that benefit
         /// "whoever cast this" (Siren Song, Monkey Grab) work correctly for either caster.

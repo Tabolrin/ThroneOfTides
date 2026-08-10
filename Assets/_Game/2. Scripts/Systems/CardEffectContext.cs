@@ -183,5 +183,7 @@ namespace ThroneOfTides.Systems
             if (Caster == DamageTarget.Player)
                 _playerInventory?.AddCoins(amount);
         }
+
+        public void LogNote(string message) => GameEventBus.FireMatchNote(message);
     }
 }

@@ -93,10 +93,18 @@ MonoBehaviour:
     _songName: Whale
     _volumeMultiplier: 1
     _pitchMultiplier: 1
+  _startSide: 1
+  _startAnchorType: 3
+  _startOffset: {x: -10, y: 0}
+  _endSide: 1
+  _endAnchorType: 0
+  _endOffset: {x: 10, y: 0}
   _whaleImage: {fileID: 8361403241487600808}
   _fillTarget: 0.9
-  _travelDuration: 0.75
-  _travelEase: 5
+  _fillDuration: 1.5
+  _fillEase: 5
+  _moveDuration: 0.85
+  _moveEase: 5
   _shakeDuration: 0.3
   _shakeAmplitude: 3
   _shakeFrequency: 35
@@ -106,5 +114,5 @@ MonoBehaviour:
     _volumeMultiplier: 1
     _pitchMultiplier: 1
   _eclipseHoldDuration: 0.45
-  _fadeDuration: 0.35
+  _fadeDuration: 0.2
   _fadeEase: 5

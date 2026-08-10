@@ -15,12 +15,15 @@ namespace ThroneOfTides.Data
         {
             context.ReturnFromSnapshot(_cardsToReturn);
             GameDebug.Log($"Treasure Chest — returned {_cardsToReturn} cards from original deck");
+            context.LogNote($"Recovered {_cardsToReturn} card(s) from the original deck.");
 
             if (_maxCoinReward > 0)
             {
                 int coinReward = UnityEngine.Random.Range(_minCoinReward, _maxCoinReward + 1);
                 context.AddCoins(coinReward);
                 GameDebug.Log($"Treasure Chest — found {coinReward} coins");
+                if (context.Caster == DamageTarget.Player)
+                    context.LogNote($"Found {coinReward} coins.");
             }
 
             if (UnityEngine.Random.value >= 0.5f)

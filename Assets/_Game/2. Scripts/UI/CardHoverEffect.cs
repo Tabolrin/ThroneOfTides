@@ -71,9 +71,16 @@ namespace ThroneOfTides.UI
                 });
         }
 
+        // A card can be disabled mid-hover — played away, or released back to HandLayoutManager's
+        // pool via DisableHover — with no OnPointerExit ever firing. Without restoring here too,
+        // the card would stay at its enlarged scale/raised position; the *next* hover-enter would
+        // then capture that already-enlarged state as its "base" and enlarge again on top of it,
+        // compounding on every subsequent hover. Reset unconditionally (not just when
+        // _isHovering) since a component freshly re-enabled by AddComponent/enabled=true should
+        // never carry over a stale flag from a previous life either.
         private void OnDisable()
         {
-            _rect.DOKill();
+            RestoreToBase();
             _isHovering = false;
         }
 
@@ -85,11 +92,19 @@ namespace ThroneOfTides.UI
         public void CancelHover()
         {
             if (!_isHovering) return;
+            RestoreToBase();
             _isHovering = false;
+        }
 
+        // Snaps (no tween) straight back to the last captured base — shared by CancelHover and
+        // OnDisable so there's exactly one place that knows how to fully undo the hover state.
+        private void RestoreToBase()
+        {
             _rect.DOKill();
-            _rect.localScale        = _baseScale;
-            _rect.anchoredPosition  = _basePos;
+            if (!_isHovering) return;
+
+            _rect.localScale       = _baseScale;
+            _rect.anchoredPosition = _basePos;
             if (_bringToFront) _rect.SetSiblingIndex(_baseSiblingIndex);
         }
     }

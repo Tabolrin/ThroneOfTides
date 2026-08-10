@@ -27,6 +27,13 @@ namespace ThroneOfTides.UI
         [SerializeField] private TMP_Dropdown _resolutionDropdown;
         [SerializeField] private Toggle _vsyncToggle;
 
+        [Header("Gameplay")]
+        [SerializeField] private ThroneOfTides.Data.GameplaySettingsSO _gameplaySettings;
+        [Tooltip("On: the enemy's played-card reveal waits for a click. Off: it auto-dismisses after the slider's duration.")]
+        [SerializeField] private Toggle _requireClickToDismissToggle;
+        [SerializeField] private Slider _enemyCardDismissDurationSlider;
+        [SerializeField] private TextMeshProUGUI _enemyCardDismissDurationLabel;
+
         [Header("Panel")]
         [SerializeField] private Button _closeButton;
 
@@ -71,6 +78,9 @@ namespace ThroneOfTides.UI
             if (_fullscreenToggle   != null) _fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
             if (_vsyncToggle        != null) _vsyncToggle.onValueChanged.AddListener(OnVSyncChanged);
             if (_resolutionDropdown != null) _resolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
+
+            if (_requireClickToDismissToggle    != null) _requireClickToDismissToggle.onValueChanged.AddListener(OnRequireClickToDismissChanged);
+            if (_enemyCardDismissDurationSlider != null) _enemyCardDismissDurationSlider.onValueChanged.AddListener(OnEnemyCardDismissDurationChanged);
 
             BuildDistinctResolutions();
             ApplySavedDisplaySettings();
@@ -147,6 +157,14 @@ namespace ThroneOfTides.UI
 
             PopulateResolutionDropdown();
 
+            if (_gameplaySettings != null)
+            {
+                if (_requireClickToDismissToggle    != null) _requireClickToDismissToggle.isOn = _gameplaySettings.RequireClickToDismissEnemyCard;
+                if (_enemyCardDismissDurationSlider != null) _enemyCardDismissDurationSlider.value = _gameplaySettings.EnemyCardAutoDismissDuration;
+                RefreshDismissDurationInteractable();
+                RefreshDismissDurationLabel();
+            }
+
             _initialising = false;
         }
 
@@ -215,6 +233,35 @@ namespace ThroneOfTides.UI
         private static void SaveAudioSettings()
         {
             if (MMSoundManager.HasInstance) MMSoundManager.Instance.SaveSettings();
+        }
+
+        // ── Gameplay Callbacks ────────────────────────────────────────────────
+
+        private void OnRequireClickToDismissChanged(bool value)
+        {
+            _gameplaySettings?.SetRequireClickToDismissEnemyCard(value);
+            RefreshDismissDurationInteractable();
+        }
+
+        private void OnEnemyCardDismissDurationChanged(float value)
+        {
+            if (!_initialising) _gameplaySettings?.SetEnemyCardAutoDismissDuration(value);
+            RefreshDismissDurationLabel();
+        }
+
+        // The duration only matters when NOT waiting for a click — grey it out otherwise so the
+        // player isn't left wondering why changing it does nothing.
+        private void RefreshDismissDurationInteractable()
+        {
+            if (_enemyCardDismissDurationSlider == null) return;
+            _enemyCardDismissDurationSlider.interactable =
+                _requireClickToDismissToggle == null || !_requireClickToDismissToggle.isOn;
+        }
+
+        private void RefreshDismissDurationLabel()
+        {
+            if (_enemyCardDismissDurationLabel != null && _enemyCardDismissDurationSlider != null)
+                _enemyCardDismissDurationLabel.text = $"Enemy Card Duration: {_enemyCardDismissDurationSlider.value:0.0}s";
         }
 
         // ── Display Callbacks ─────────────────────────────────────────────────

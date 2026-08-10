@@ -12,6 +12,7 @@ namespace ThroneOfTides.Data
         {
             context.RetrieveFromDiscard(_cardsToRetrieve);
             GameDebug.Log($"Locker's Return - retrieved {_cardsToRetrieve} cards from discard");
+            context.LogNote($"Recovered {_cardsToRetrieve} card(s) from the discard.");
         }
     }
 }

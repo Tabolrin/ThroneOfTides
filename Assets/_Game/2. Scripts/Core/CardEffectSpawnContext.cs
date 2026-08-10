@@ -95,6 +95,15 @@ namespace ThroneOfTides.Core
         /// <summary>Releases a hold started by BeginExplicitTargetGunpowderHold, applying the real current state.</summary>
         public readonly Action EndExplicitTargetGunpowderHold;
 
+        /// <summary>
+        /// Generic anchor resolver — given a side (Caster/Opponent/ExplicitTarget) and an anchor
+        /// type, returns that ship's Transform for it (null for ExplicitTarget if this play had
+        /// no chosen target). Lets a VFX controller expose its own Inspector-configurable
+        /// start/end points instead of being hardcoded to whatever the CardPresentationEntry's
+        /// own AnchorSide/PositionType happened to spawn it at.
+        /// </summary>
+        public readonly Func<CardPresentationSide, VfxAnchorType, Transform> GetAnchor;
+
         public CardEffectSpawnContext(
             Transform casterAnchor,
             Transform opponentAnchor,
@@ -113,7 +122,8 @@ namespace ThroneOfTides.Core
             Func<VfxAnchorType, Transform> getExplicitTargetAnchor = null,
             Action beginExplicitTargetGunpowderHold = null,
             Action endExplicitTargetGunpowderHold = null,
-            Func<VfxAnchorType, Transform> getOpponentAnchor = null)
+            Func<VfxAnchorType, Transform> getOpponentAnchor = null,
+            Func<CardPresentationSide, VfxAnchorType, Transform> getAnchor = null)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -133,6 +143,7 @@ namespace ThroneOfTides.Core
             BeginExplicitTargetGunpowderHold = beginExplicitTargetGunpowderHold;
             EndExplicitTargetGunpowderHold = endExplicitTargetGunpowderHold;
             GetOpponentAnchor = getOpponentAnchor;
+            GetAnchor = getAnchor;
         }
     }
 }

@@ -10,23 +10,39 @@ using ThroneOfTides.Data;
 namespace ThroneOfTides.Systems
 {
     /// <summary>
-    /// Tidal Wave's presentation: a Filled-from-bottom wave image fills and slides in from the
-    /// sea-surface spawn point to the target ship's hit point at once, "eclipsing" the ship on
+    /// Tidal Wave's presentation: a Filled-from-bottom wave image fills and slides from a
+    /// configurable start point to a configurable end point at once, "eclipsing" the ship on
     /// arrival (a Screen Space Overlay canvas element always draws over world-space ship
     /// sprites, so no manual sort-order work is needed for that). Contact triggers a camera
     /// shake and SFX; the target's Gunpowder sprite is held at its pre-hit look for the whole
     /// approach and only released — snapping to normal if it was cleared — right before the
     /// fade-out starts, then the wave fades and destroys itself.
-    /// Spawns already positioned by CardPresentationPlayer at the SeaSurface anchor (authored
-    /// to sit to the left of both ships) via AnchorSide = ExplicitTarget.
+    /// Start/End Point below override wherever CardPresentationPlayer originally spawned this
+    /// (per the CardSO's own PresentationEntry) — defaults match the original design (both ends
+    /// on the explicitly chosen target ship: SeaSurface to its left, then its ShipHit).
     /// </summary>
     public class TidalWaveVFXController : MonoBehaviour, ICardPlayEffect
     {
+        [Header("Travel — Start Point")]
+        [SerializeField] private CardPresentationSide _startSide = CardPresentationSide.ExplicitTarget;
+        [SerializeField] private VfxAnchorType _startAnchorType = VfxAnchorType.SeaSurface;
+        [Tooltip("Extra manual nudge applied after resolving the start anchor, in canvas pixels.")]
+        [SerializeField] private Vector2 _startOffset;
+
+        [Header("Travel — End Point")]
+        [SerializeField] private CardPresentationSide _endSide = CardPresentationSide.ExplicitTarget;
+        [SerializeField] private VfxAnchorType _endAnchorType = VfxAnchorType.ShipHit;
+        [Tooltip("Extra manual nudge applied after resolving the end anchor, in canvas pixels.")]
+        [SerializeField] private Vector2 _endOffset;
+
         [Header("Wave")]
         [Tooltip("The Image (Filled type, Fill Origin = Bottom) that fills and slides toward the target.")]
         [SerializeField] private Image _waveImage;
-        [SerializeField] private float _fillMoveDuration = 0.45f;
+        [Tooltip("How long the fill animation takes, independent of how long the move takes.")]
+        [SerializeField] private float _fillDuration = 0.45f;
         [SerializeField] private Ease  _fillEase = Ease.InQuad;
+        [Tooltip("How long the move from Start to End takes, independent of the fill duration.")]
+        [SerializeField] private float _moveDuration = 0.45f;
         [SerializeField] private Ease  _moveEase = Ease.InQuad;
 
         [Header("Contact")]
@@ -51,26 +67,33 @@ namespace ThroneOfTides.Systems
         public void Initialize(CardEffectSpawnContext context)
         {
             // Freeze the target's Gunpowder look now, before CombatResolver clears it a moment
-            // later — released at the "right before fade" beat further down.
+            // later — released at the "right before fade" beat further down. Tied to the card's
+            // real explicit target regardless of Start/End Point above (those are purely visual).
             context.BeginExplicitTargetGunpowderHold?.Invoke();
+
+            // Re-anchors to our own configurable Start Point, overriding wherever
+            // CardPresentationPlayer originally placed this based on the CardSO's entry.
+            Transform startAnchor = context.GetAnchor?.Invoke(_startSide, _startAnchorType);
+            if (_rect != null && startAnchor != null && context.GameCamera != null)
+                _rect.anchoredPosition = WorldToCanvasLocalPoint(startAnchor.position, context.GameCamera, context.GameCanvas) + _startOffset;
 
             _sequence = DOTween.Sequence();
 
             if (_waveImage != null)
             {
                 _waveImage.fillAmount = 0f;
-                _sequence.Append(_waveImage.DOFillAmount(1f, _fillMoveDuration).SetEase(_fillEase));
+                _sequence.Append(_waveImage.DOFillAmount(1f, _fillDuration).SetEase(_fillEase));
             }
             else
             {
-                _sequence.AppendInterval(_fillMoveDuration);
+                _sequence.AppendInterval(_fillDuration);
             }
 
-            Transform targetAnchor = context.GetExplicitTargetAnchor?.Invoke(VfxAnchorType.ShipHit);
-            if (_rect != null && targetAnchor != null && context.GameCamera != null)
+            Transform endAnchor = context.GetAnchor?.Invoke(_endSide, _endAnchorType);
+            if (_rect != null && endAnchor != null && context.GameCamera != null)
             {
-                Vector2 endLocalPos = WorldToCanvasLocalPoint(targetAnchor.position, context.GameCamera, context.GameCanvas);
-                _sequence.Join(_rect.DOAnchorPos(endLocalPos, _fillMoveDuration).SetEase(_moveEase));
+                Vector2 endLocalPos = WorldToCanvasLocalPoint(endAnchor.position, context.GameCamera, context.GameCanvas) + _endOffset;
+                _sequence.Join(_rect.DOAnchorPos(endLocalPos, _moveDuration).SetEase(_moveEase));
             }
 
             _sequence.AppendCallback(() => OnContact(context));

@@ -28,8 +28,13 @@ namespace ThroneOfTides.UI
         [Header("Enemy Card Play")]
         [SerializeField] private float _cardMoveDuration    = 0.4f;
         [SerializeField] private float _cardFadeDuration    = 0.2f;
+        [Tooltip("Fallback hold duration used only if GameplaySettings is unassigned.")]
         [SerializeField] private float _cardDisplayDuration = 1.5f;
         [SerializeField] private float _enlargedCardScale = 1.75f;
+        [Tooltip("Whether the enemy's played-card reveal waits for a click or auto-dismisses — see OptionsPanel's Gameplay section.")]
+        [SerializeField] private ThroneOfTides.Data.GameplaySettingsSO _gameplaySettings;
+        [Tooltip("Shown only while RequireClickToDismissEnemyCard is on — click it (or the card) to continue.")]
+        [SerializeField] private UnityEngine.UI.Button _enemyCardDismissButton;
 
 
         [Header("Opening Deal")]
@@ -515,8 +520,30 @@ namespace ThroneOfTides.UI
 
             yield return new WaitForSeconds(_cardMoveDuration);
 
-            // Hold at display size for the display duration
-            yield return new WaitForSeconds(_cardDisplayDuration);
+            // Hold at display size — either until the player clicks to continue, or for a fixed
+            // duration, per OptionsPanel's Gameplay toggle.
+            bool requireClick = _gameplaySettings != null && _gameplaySettings.RequireClickToDismissEnemyCard;
+
+            if (requireClick && _enemyCardDismissButton != null)
+            {
+                bool dismissed = false;
+                void OnDismissClicked() => dismissed = true;
+
+                _enemyCardDismissButton.onClick.AddListener(OnDismissClicked);
+                _enemyCardDismissButton.gameObject.SetActive(true);
+
+                yield return new WaitUntil(() => dismissed);
+
+                _enemyCardDismissButton.onClick.RemoveListener(OnDismissClicked);
+                _enemyCardDismissButton.gameObject.SetActive(false);
+            }
+            else
+            {
+                float holdDuration = _gameplaySettings != null
+                    ? _gameplaySettings.EnemyCardAutoDismissDuration
+                    : _cardDisplayDuration;
+                yield return new WaitForSeconds(holdDuration);
+            }
 
             // Scale back down and fade out together
             var canvasGroup = view.GetComponent<CanvasGroup>();

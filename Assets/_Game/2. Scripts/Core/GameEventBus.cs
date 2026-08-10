@@ -30,6 +30,11 @@ namespace ThroneOfTides.Core
         // displays the given cards until the player dismisses it.
         public static event Action<IReadOnlyList<ICard>> OnEnemyHandRevealed;
 
+        // A terse, one-off flavor line for the match log (e.g. "Recovered 3 cards from the
+        // discard") — for updates worth surfacing that don't already have a dedicated event to
+        // hang a log line off of. Not every effect needs this; only ones the log should call out.
+        public static event Action<string> OnMatchNote;
+
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
         public static event Action<DamageTarget, int> OnHealApplied;
@@ -78,6 +83,7 @@ namespace ThroneOfTides.Core
         public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
         public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
         public static void FireEnemyHandRevealed(IReadOnlyList<ICard> cards) => OnEnemyHandRevealed?.Invoke(cards);
+        public static void FireMatchNote(string message)                    => OnMatchNote?.Invoke(message);
         public static void FireDamageDealt(DamageTarget target, int amount)  => OnDamageDealt?.Invoke(target, amount);
         public static void FireHealApplied(DamageTarget target, int amount) => OnHealApplied?.Invoke(target, amount);
         public static void FireHPChanged(int hp)                             => OnHPChanged?.Invoke(hp);
@@ -110,6 +116,7 @@ namespace ThroneOfTides.Core
             OnEnemyCardPlayed            = null;
             OnEnemyCardAnimationComplete = null;
             OnEnemyHandRevealed          = null;
+            OnMatchNote                  = null;
             OnDamageDealt                = null;
             OnHealApplied                = null;
             OnHPChanged                  = null;

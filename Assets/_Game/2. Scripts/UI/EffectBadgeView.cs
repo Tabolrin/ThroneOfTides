@@ -35,9 +35,19 @@ namespace ThroneOfTides.UI
             _tooltip     = tooltip;
         }
 
-        public void OnPointerEnter(PointerEventData eventData) => _tooltip?.Show(_description, _rect);
-        public void OnPointerExit(PointerEventData eventData)  => _tooltip?.Hide();
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_tooltip != null) _tooltip.Show(_description, _rect);
+        }
 
-        private void OnDisable() => _tooltip?.Hide();
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (_tooltip != null) _tooltip.Hide();
+        }
+
+        private void OnDisable()
+        {
+            if (_tooltip != null) _tooltip.Hide();
+        }
     }
 }
