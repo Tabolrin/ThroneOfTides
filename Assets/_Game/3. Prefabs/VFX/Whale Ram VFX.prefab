@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 400}
+  m_SizeDelta: {x: 350, y: 350}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7217690265525381697
 CanvasRenderer:
@@ -94,16 +94,16 @@ MonoBehaviour:
     _volumeMultiplier: 1
     _pitchMultiplier: 1
   _startSide: 1
-  _startAnchorType: 3
-  _startOffset: {x: -10, y: 0}
+  _startAnchorType: 6
+  _startOffset: {x: 0, y: 0}
   _endSide: 1
-  _endAnchorType: 0
-  _endOffset: {x: 10, y: 0}
+  _endAnchorType: 5
+  _endOffset: {x: 0, y: 0}
   _whaleImage: {fileID: 8361403241487600808}
   _fillTarget: 0.9
-  _fillDuration: 1.5
+  _fillDuration: 0.65
   _fillEase: 5
-  _moveDuration: 0.85
+  _moveDuration: 1.25
   _moveEase: 5
   _shakeDuration: 0.3
   _shakeAmplitude: 3

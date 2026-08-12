@@ -35,7 +35,10 @@ namespace ThroneOfTides.Core
     {
         void AddCardToPlayerHand(ICard card);
         void StealFromEnemyHand();
-        void DrawOneCard();
+
+        /// <param name="ignoreHandLimit">If true, forces the drawn card into the hand even past
+        /// MaxHandSize (e.g. Treasure Chest's guaranteed draws).</param>
+        void DrawOneCard(bool ignoreHandLimit = false);
         IReadOnlyList<ICard> GetEnemyHand();
         IReadOnlyList<ICard> GetPlayerHand();
 

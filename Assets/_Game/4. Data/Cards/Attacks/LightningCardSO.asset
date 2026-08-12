@@ -15,7 +15,8 @@ MonoBehaviour:
   _name: Lightning
   _id: 9
   _cardType: 0
-  _description: The storm has chosen its admiral. Deal 10 damage.
+  _description: Deal 10 damage.
+  _maxCopiesInDeck: 99
   _manaCost: 4
   _storageCost: 6
   _hpCost: 0

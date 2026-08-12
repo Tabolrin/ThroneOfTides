@@ -17,6 +17,11 @@ namespace ThroneOfTides.UI
         [SerializeField] private Transform        _inventoryContent;
         [SerializeField] private PortInventoryCard _cardPanelPrefab;
 
+        [Header("Preview")]
+        // Shared instance living on the root Canvas (not nested in this view's ScrollRect) so a
+        // preview configured larger than the scroll viewport is never clipped by it.
+        [SerializeField] private CardPreviewTooltip _previewTooltip;
+
         [Header("Filter")]
         [SerializeField] private Button _filterAll;
         [SerializeField] private Button _filterWeapon;
@@ -109,7 +114,7 @@ namespace ThroneOfTides.UI
                 var cardRef = card; // capture for lambda
 
                 panel.Setup(card, card.MaxCopiesInDeck, inDeckCount, canAdd,
-                            () => OnAddCardRequested?.Invoke(cardRef));
+                            () => OnAddCardRequested?.Invoke(cardRef), _previewTooltip);
             }
         }
 

@@ -1,5 +1,6 @@
 // Assets/_Game/2. Scripts/Systems/VFX/CardVFXHandler.cs
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using MoreMountains.Feedbacks;
 using ThroneOfTides.Core;
@@ -20,11 +21,10 @@ namespace ThroneOfTides.Systems
         [SerializeField] private Transform _enemyShipHitPoint;
         [SerializeField] private Transform _playerShipSpawnPoint;
         [SerializeField] private Transform _playerDeckPoint;
-
-        [Header("Cannonball")]
-        [SerializeField] private GameObject _cannonballPrefab;
-        [SerializeField] private float      _cannonballDuration  = 0.4f;
-        [SerializeField] private float      _cannonballArcHeight = 1.5f;
+        [Tooltip("Always used for Counter Gale's tornado, regardless of which side actually fired the reaction.")]
+        [SerializeField] private Transform _playerSkyPoint;
+        [Tooltip("Always used for Locker's Return's tentacle, regardless of which side actually played the card.")]
+        [SerializeField] private Transform _playerSeaSurfaceRightPoint;
 
         [Header("VFX Prefabs — Weapon")]
         [SerializeField] private GameObject _hitImpactStandardPrefab;
@@ -38,11 +38,11 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _lockerReturnPrefab;
         [SerializeField] private GameObject _monkeyGrabPrefab;
         [SerializeField] private GameObject _rumPrefab;
-        [SerializeField] private GameObject _treasureChestPrefab;
         [SerializeField] private GameObject _stolenWindPrefab;
 
         [Header("VFX Prefabs — Reaction")]
         [SerializeField] private GameObject _deadMansTurnPrefab;
+        [SerializeField] private GameObject _counterGaleTornadoPrefab;
         [SerializeField] private GameObject _bloodForBloodPrefab;
 
         [Header("FEEL — Hit")]
@@ -87,10 +87,23 @@ namespace ThroneOfTides.Systems
         [SerializeField] private float _winSlowDuration  = 0.8f;
         [SerializeField] private float _lossSlowDuration = 0.5f;
 
+        // Default when nothing overrides it (e.g. via SetFloatingNumberDelay) — GameBootstrapper
+        // owns the authoritative configured value so it's tunable in one place per scene.
+        [SerializeField] private float _floatingNumberDelay = 0.15f;
+
         // Tracks previous mana value per side so OnPlayerManaChanged/OnEnemyManaChanged can
         // distinguish spend from gain without requiring additional event parameters.
         private int _previousPlayerMana = -1;
         private int _previousEnemyMana  = -1;
+
+        // Several damage/heal/mana events can fire within the same frame (e.g. a combo hitting
+        // multiple times, or a DOT tick landing alongside a card play) — queued and drained with
+        // a delay between each so overlapping numbers don't stack unreadably on top of each other.
+        private readonly Queue<(string text, Color color, Vector3 position)> _floatingNumberQueue = new();
+        private Coroutine _floatingNumberQueueRoutine;
+
+        /// <summary>Overrides the inspector default — see GameBootstrapper's configurable delay.</summary>
+        public void SetFloatingNumberDelay(float delay) => _floatingNumberDelay = Mathf.Max(0f, delay);
 
         // ── Unity ─────────────────────────────────────────────────────────────
 
@@ -202,33 +215,45 @@ namespace ThroneOfTides.Systems
         private void OnReactionCharged(ReactionType type, DamageTarget side, int charges) =>
             _feedbackReactionCharged?.PlayFeedbacks();
 
-        private void OnReactionFired(ReactionType type, DamageTarget side) =>
+        private void OnReactionFired(ReactionType type, DamageTarget side)
+        {
             _feedbackReactionFired?.PlayFeedbacks();
+
+            switch (type)
+            {
+                // Anchor appears on whichever ship actually activated it.
+                case ReactionType.DeadMansTurn:
+                    if (_deadMansTurnPrefab != null)
+                        Instantiate(_deadMansTurnPrefab, GetHitPoint(side).position, Quaternion.identity);
+                    break;
+
+                // Always the player's sky anchor, regardless of which side fired it.
+                case ReactionType.CounterGale:
+                    if (_counterGaleTornadoPrefab != null && _playerSkyPoint != null)
+                        Instantiate(_counterGaleTornadoPrefab, _playerSkyPoint.position, Quaternion.identity);
+                    break;
+            }
+        }
 
         private void OnCardPlayAccepted(ICard card, DamageTarget? selectedTarget)
         {
             var cardSO = card as CardSO;
             if (cardSO == null) return;
-            StartCoroutine(PlayCardVFX(cardSO));
+            PlayCardVFX(cardSO);
         }
 
         // ── Card VFX Routing ──────────────────────────────────────────────────
 
-        private IEnumerator PlayCardVFX(CardSO card)
+        private void PlayCardVFX(CardSO card)
         {
             Transform source = _playerShipHitPoint;
             Transform target = _enemyShipHitPoint;
 
             switch (card.Id)
             {
-                case CardId.Pistol:
-                case CardId.Cannonball:
-                case CardId.ChainShot:
-                    yield return StartCoroutine(FireCannonball(source.position, target.position));
-                    break;
-
-                // Whale Ram is migrated to CardPresentationPlayer (PresentationEntries +
-                // ICardPlayEffect) — no case needed here for its spawn logic.
+                // Pistol/Cannonball/Chain Shot and Whale Ram are migrated to
+                // CardPresentationPlayer (PresentationEntries + ICardPlayEffect) — no case
+                // needed here for their spawn logic.
 
                 case CardId.RamTheHull:
                     SpawnVFX(_ramTheHullPrefab != null
@@ -247,19 +272,35 @@ namespace ThroneOfTides.Systems
                     break;
 
                 case CardId.ReconParrot:    SpawnVFX(_reconParrotPrefab,   target.position); break;
-                case CardId.LockersReturn:  SpawnVFX(_lockerReturnPrefab,  source.position); break;
+
+                case CardId.LockersReturn:
+                {
+                    if (_lockerReturnPrefab != null && _playerSeaSurfaceRightPoint != null)
+                    {
+                        var instance = Instantiate(_lockerReturnPrefab, _playerSeaSurfaceRightPoint.position, Quaternion.identity);
+                        var controller = instance.GetComponent<LockersReturnVFXController>();
+                        controller?.Setup(card.Art, _playerDeckPoint,
+                            () => SpawnFloatingNumber("+1", Color.white, _playerDeckPoint.position));
+                    }
+                    break;
+                }
+
                 case CardId.MonkeyGrab:     SpawnVFX(_monkeyGrabPrefab,    target.position); break;
-                case CardId.TreasureChest:  SpawnVFX(_treasureChestPrefab, source.position); break;
+
+                // Treasure Chest is migrated to CardPresentationPlayer (PresentationEntries +
+                // ICardPlayEffect) — no case needed here for its spawn logic.
 
                 case CardId.HighSpirits:
-                    SpawnVFX(_highSpiritsPrefab, source.position);
-                    _feedbackManaGained?.PlayFeedbacks();
+                    // Self-manages its own animation length and destroys itself — not routed
+                    // through SpawnVFX's fixed _vfxLifetime timer. Mana-gain feedback already
+                    // fires generically via OnPlayerManaChanged, so no explicit call needed here.
+                    if (_highSpiritsPrefab != null)
+                        Instantiate(_highSpiritsPrefab, source.position, Quaternion.identity);
                     break;
 
-                case CardId.Rum:
-                    SpawnVFX(_rumPrefab, source.position);
-                    _feedbackHeal?.PlayFeedbacks();
-                    break;
+                // Rum is SFX-only, migrated to CardPresentationPlayer's SFX-only entry support —
+                // no case needed here (and its heal feedback already fires generically via
+                // OnHealApplied).
 
                 case CardId.StolenWind:
                     SpawnVFX(_stolenWindPrefab, source.position);
@@ -273,26 +314,6 @@ namespace ThroneOfTides.Systems
         }
 
         // ── VFX Sequences ─────────────────────────────────────────────────────
-
-        private IEnumerator FireCannonball(Vector3 from, Vector3 to)
-        {
-            if (_cannonballPrefab == null) yield break;
-
-            GameObject ball = Instantiate(_cannonballPrefab, from, Quaternion.identity);
-            Vector3    mid  = Vector3.Lerp(from, to, 0.5f) + Vector3.up * _cannonballArcHeight;
-
-            float elapsed = 0f;
-            while (elapsed < _cannonballDuration)
-            {
-                elapsed                += Time.deltaTime;
-                float   t               = Mathf.Clamp01(elapsed / _cannonballDuration);
-                ball.transform.position = Vector3.Lerp(Vector3.Lerp(from, mid, t),
-                                                       Vector3.Lerp(mid,  to,  t), t);
-                yield return null;
-            }
-
-            Destroy(ball);
-        }
 
         private IEnumerator WinSequence()
         {
@@ -324,8 +345,31 @@ namespace ThroneOfTides.Systems
         private void SpawnFloatingNumber(string text, Color color, Vector3 position)
         {
             if (_floatingTextPrefab == null) return;
-            var instance = Instantiate(_floatingTextPrefab, position, Quaternion.identity);
-            instance.Setup(text, color);
+
+            _floatingNumberQueue.Enqueue((text, color, position));
+            _floatingNumberQueueRoutine ??= StartCoroutine(ProcessFloatingNumberQueue());
+        }
+
+        private IEnumerator ProcessFloatingNumberQueue()
+        {
+            // StartCoroutine runs synchronously up to the first yield — without this, several
+            // SpawnFloatingNumber calls in the same frame (e.g. a multi-hit combo) would each
+            // see a freshly-empty queue and drain their own single item immediately instead of
+            // ever accumulating together, defeating the whole point of the delay. Yielding once
+            // up front lets every same-frame call land in the queue before draining begins.
+            yield return null;
+
+            while (_floatingNumberQueue.Count > 0)
+            {
+                var (text, color, position) = _floatingNumberQueue.Dequeue();
+                var instance = Instantiate(_floatingTextPrefab, position, Quaternion.identity);
+                instance.Setup(text, color);
+
+                if (_floatingNumberQueue.Count > 0)
+                    yield return new WaitForSeconds(_floatingNumberDelay);
+            }
+
+            _floatingNumberQueueRoutine = null;
         }
     }
 }

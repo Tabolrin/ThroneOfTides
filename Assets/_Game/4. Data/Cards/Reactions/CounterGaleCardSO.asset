@@ -15,10 +15,11 @@ MonoBehaviour:
   _name: Counter Gale
   _id: 23
   _cardType: 4
-  _description: Enemy cannot cancel. React in time to deal back half the incoming
-    damage, rounded down.
+  _description: Charges on draw. When the enemy attacks, reflects half the incoming
+    damage (rounded down) back at them. Refunds 1 mana and draws a card.
+  _maxCopiesInDeck: 2
   _manaCost: 0
-  _storageCost: 2
+  _storageCost: 7
   _hpCost: 0
   _damage: 0
   _comboDamage: 0

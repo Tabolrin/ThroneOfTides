@@ -15,7 +15,8 @@ MonoBehaviour:
   _name: Whale Ram
   _id: 4
   _cardType: 0
-  _description: The deep answers your call. Deal 6 damage.
+  _description: Deal 6 damage.
+  _maxCopiesInDeck: 99
   _manaCost: 3
   _storageCost: 3
   _hpCost: 0
@@ -39,8 +40,8 @@ MonoBehaviour:
     _spritePrefab: {fileID: 2778589634648136665, guid: 95292e30309214545a96089d901821c5, type: 3}
     _worldParticlePrefab: {fileID: 0}
     _sfx:
-      _playlist: {fileID: 0}
-      _songName: 
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+      _songName: Whale
       _volumeMultiplier: 0
       _pitchMultiplier: 0
     _lifetime: 3

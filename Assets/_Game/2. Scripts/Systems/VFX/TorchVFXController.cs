@@ -1,6 +1,5 @@
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
@@ -39,8 +38,6 @@ namespace ThroneOfTides.Systems.VFX
         [Header("Explosion (only plays if Gunpowder was active on the hit ship)")]
         [SerializeField] private GameObject _explosionPrefab;
         [SerializeField] private float      _explosionLifetime = 1.5f;
-        [SerializeField] private MMF_Player  _feedbackExplosion;
-        [SerializeField] private MMF_Player  _feedbackScreenShake;
 
         public event Action Completed;
 
@@ -92,8 +89,7 @@ namespace ThroneOfTides.Systems.VFX
                 ExplosionEffectPool.PlayAt(_explosionPrefab, _context.OpponentAnchor.position, _explosionLifetime);
 
                 CardSfxPlayer.Play(_explosionSfx, _context.OpponentAnchor.position);
-                _feedbackExplosion?.PlayFeedbacks();
-                _feedbackScreenShake?.PlayFeedbacks();
+                ScreenShake.Trigger(ScreenShakeLevel.Level4);
             }
 
             Completed?.Invoke();

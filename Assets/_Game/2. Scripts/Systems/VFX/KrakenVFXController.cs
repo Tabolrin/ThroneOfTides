@@ -213,6 +213,7 @@ namespace ThroneOfTides.Systems.VFX
         private void OnAttackPeak()
         {
             _feedbackKrakenAttack?.PlayFeedbacks();
+            ScreenShake.Trigger(ScreenShakeLevel.Level5);
             OnAttackMoment?.Invoke();
         }
     }

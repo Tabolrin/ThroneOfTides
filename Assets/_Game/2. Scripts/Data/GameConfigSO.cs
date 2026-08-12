@@ -24,9 +24,5 @@ namespace ThroneOfTides.Data
         [Header("Enemy")]
         public float EnemyThinkTimeMin   = 0.8f;
         public float EnemyThinkTimeMax   = 2.2f;
-
-        [Header("Weapon VFX")]
-        [Tooltip("Seconds between a cannonball-style weapon card being played and its shot actually firing — lets the card-play animation read clearly before the effect starts.")]
-        public float CannonballPreShotDelay = 0.65f;
     }
 }

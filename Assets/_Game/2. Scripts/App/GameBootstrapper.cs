@@ -57,6 +57,12 @@ namespace ThroneOfTides.App
         [Header("Captain — fallback for testing without level select")]
         [SerializeField] private CaptainSO _fallbackCaptain;
 
+        [Header("VFX Timing")]
+        [Tooltip("CardVFXHandler in the scene — its floating damage/heal/mana number queue delay is configured from here so it's tunable in one place per scene.")]
+        [SerializeField] private ThroneOfTides.Systems.CardVFXHandler _cardVFXHandler;
+        [Tooltip("Seconds between each floating combat number when several need to appear in quick succession (e.g. a multi-hit combo) — keeps them from stacking unreadably on top of each other.")]
+        [SerializeField] private float _floatingNumberDelay = 0.15f;
+
         private GameState                 _gameState;
         private TurnStateMachine          _stateMachine;
         private ThroneOfTidesInputActions _inputActions;
@@ -74,6 +80,9 @@ namespace ThroneOfTides.App
         private void Start()
         {
             _activeCaptain = GameSession.SelectedCaptain ?? _fallbackCaptain;
+
+            if (_cardVFXHandler != null)
+                _cardVFXHandler.SetFloatingNumberDelay(_floatingNumberDelay);
 
             // ── Apply upgrade modifiers ─────────────────────────────────────
             // Base values from config, with optional per-upgrade level bonuses
@@ -283,10 +292,12 @@ namespace ThroneOfTides.App
                     GameEventBus.FireEnemyCardAnimationComplete));
         }
 
-        private void ShowReactionPrompt(CardSO card, int damage, string blockCost,
-                                        System.Action onNegate, System.Action onTakeHit)
+        private void ShowReactionPrompt(CardSO card, int damage,
+                                        string negateLabel, System.Action onNegate,
+                                        string counterGaleLabel, System.Action onCounterGale,
+                                        System.Action onTakeHit)
         {
-            _deadMansTurnPrompt.Show(card, damage, blockCost, onNegate, onTakeHit);
+            _deadMansTurnPrompt.Show(card, damage, negateLabel, onNegate, counterGaleLabel, onCounterGale, onTakeHit);
         }
 
         private void ShowTargetSelectionPrompt(CardSO card, System.Action<DamageTarget> onTargetChosen)

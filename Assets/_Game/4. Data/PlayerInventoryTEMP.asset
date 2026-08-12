@@ -29,6 +29,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c1db74e802e87e348a52b35bc55cfc88, type: 2}
   - {fileID: 11400000, guid: a7fb26fd80a57044f926f3e40ef45306, type: 2}
   - {fileID: 11400000, guid: 779ca79aa7bb2c348a42f9868232ca0c, type: 2}
+  - {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
   _startingCollection:
   - {fileID: 11400000, guid: beb41d5072d4d9345b4546ce29b41294, type: 2}
   - {fileID: 11400000, guid: baa5bc3625ad5f0439300dcff4bebb68, type: 2}
@@ -82,7 +83,7 @@ MonoBehaviour:
   _playerDeck: {fileID: 11400000, guid: 3d5cbef6e19b23e4f8036a530c09f757, type: 2}
   _coins: 0
   _powerUps: []
-  _hullReinforcementLevel: 0
-  _expandedCargoHoldLevel: 0
-  _manaCrystalLevel: 0
+  _hullReinforcementLevel: 1
+  _expandedCargoHoldLevel: 1
+  _manaCrystalLevel: 1
   _cardDatabase: {fileID: 11400000, guid: c28fd586d4ece3e418eb92fea85fa9fc, type: 2}

@@ -232,6 +232,7 @@ namespace ThroneOfTides.Systems.VFX
             _strikeParticles.Play();
             SetWhiteoutAlpha(1f);
             _feedbackLightningStrike?.PlayFeedbacks();
+            ScreenShake.Trigger(ScreenShakeLevel.Level4);
             OnStrikeMoment?.Invoke();
         }
 

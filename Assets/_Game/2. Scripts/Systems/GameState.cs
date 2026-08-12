@@ -37,6 +37,12 @@ namespace ThroneOfTides.Systems
         public int EnemyMana     => Enemy.Mana;
         public int EnemyMaxMana  => Enemy.MaxMana;
 
+        // Extra mana cost tacked onto the very next card the player plays (e.g. Dead Man's Turn's
+        // cost) — applied once, then cleared, regardless of what that next card turns out to be.
+        public int PlayerNextCardManaSurcharge { get; private set; }
+        public void AddPlayerNextCardManaSurcharge(int amount) => PlayerNextCardManaSurcharge += amount;
+        public void ClearPlayerNextCardManaSurcharge() => PlayerNextCardManaSurcharge = 0;
+
         // ── Combo (per side — gunpowder priming/resolving works independently on each ship) ──
         public int    PlayerComboStackCount => Player.ComboStackCount;
         public CardSO PlayerActiveComboCard => Player.ActiveComboCard;
@@ -150,6 +156,13 @@ namespace ThroneOfTides.Systems
         public void AddPlayerMaxMana(int amount)
         {
             Player.AddMaxMana(amount);
+            GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
+        }
+
+        // Refunds current mana (e.g. Counter Gale) without raising PlayerMaxMana.
+        public void RefundPlayerMana(int amount)
+        {
+            Player.RefundMana(amount);
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
@@ -273,7 +286,7 @@ namespace ThroneOfTides.Systems
             // waiting for a draw that can never happen would softlock the player's turn.
             if (!HasDrawnThisTurn && PlayerDeck.Count > 0) return false;
             if (card.CardType == CardType.Reaction)        return false;
-            if (PlayerMana < card.ManaCost)                return false;
+            if (PlayerMana < card.ManaCost + PlayerNextCardManaSurcharge) return false;
 
             return true;
         }

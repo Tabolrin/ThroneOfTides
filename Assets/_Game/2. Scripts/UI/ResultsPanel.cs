@@ -69,13 +69,13 @@ namespace ThroneOfTides.UI
         private void OnRetryPressed()
         {
             gameObject.SetActive(false);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            SceneFader.LoadScene(SceneManager.GetActiveScene().name);
         }
 
-        private void OnMainMenuPressed() => SceneManager.LoadScene("MainMenu");
+        private void OnMainMenuPressed() => SceneFader.LoadScene("MainMenu");
 
-        private void OnPortPressed() => SceneManager.LoadScene("Port");
+        private void OnPortPressed() => SceneFader.LoadScene("Port");
 
-        private void OnLevelSelectPressed() => SceneManager.LoadScene("LevelSelect");
+        private void OnLevelSelectPressed() => SceneFader.LoadScene("LevelSelect");
     }
 }

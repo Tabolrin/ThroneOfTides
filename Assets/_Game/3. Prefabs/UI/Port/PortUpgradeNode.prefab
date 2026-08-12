@@ -574,7 +574,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -662,8 +662,6 @@ GameObject:
   m_Component:
   - component: {fileID: 9139800388630033189}
   - component: {fileID: 1884865320011459980}
-  - component: {fileID: 2183042099727703769}
-  - component: {fileID: 4374719872568855505}
   m_Layer: 5
   m_Name: PortUpgradeNode
   m_TagString: Untagged
@@ -727,37 +725,6 @@ MonoBehaviour:
   _costLabel: {fileID: 7672250885189595970}
   _buyButton: {fileID: 7706877584466895319}
   _maxedDisplay: {fileID: 7078183610684017887}
---- !u!222 &2183042099727703769
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3178844377459528679}
-  m_CullTransparentMesh: 1
---- !u!223 &4374719872568855505
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3178844377459528679}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
 --- !u!1 &3254136324705326621
 GameObject:
   m_ObjectHideFlags: 0

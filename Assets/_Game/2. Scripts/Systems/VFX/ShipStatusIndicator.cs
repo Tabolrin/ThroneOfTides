@@ -37,8 +37,12 @@ namespace ThroneOfTides.Systems
         public ShipStatusType StatusType => _statusType;
         public DamageTarget   Ship       => _ship;
 
-        /// <summary>True while the icon is at (or fading toward) full visibility.</summary>
-        public bool IsVisible => _icon != null && _icon.color.a > 0.01f;
+        /// <summary>
+        /// True while this status is actually active on the ship (last known count > 0) —
+        /// tracks game state directly rather than the optional decorative icon's alpha, so this
+        /// stays correct even on indicators that don't have an icon wired at all.
+        /// </summary>
+        public bool IsVisible => _previousCount > 0;
 
         private int  _previousCount;
         private bool _burstPending;

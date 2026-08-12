@@ -119,10 +119,14 @@ namespace ThroneOfTides.Systems.VFX
         {
             _dustParticles?.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 
-            // Only reveal if it wasn't already showing — avoids interrupting/restarting a fade
-            // that's already mid-way (e.g. a second Barrel stacking onto an already-lit ship).
-            if (!(_context.IsOpponentStatusVisible?.Invoke(ShipStatusType.Gunpowder) ?? true))
-                _context.RevealOpponentStatusIndicator?.Invoke(ShipStatusType.Gunpowder);
+            // Always call this — RevealNow() is idempotent (the activation burst only ever
+            // fires once per genuine 0->active transition, gated by its own internal
+            // _burstPending flag; re-fading an already-visible icon is harmless). It must NOT be
+            // gated here on IsOpponentStatusVisible: that reflects live game-state count, which
+            // GameState.IncrementCombo already set the instant the card resolved — before this
+            // throw animation even started — so it would always read "already visible" and skip
+            // the reveal entirely, silently killing the activation burst.
+            _context.RevealOpponentStatusIndicator?.Invoke(ShipStatusType.Gunpowder);
 
             Completed?.Invoke();
         }

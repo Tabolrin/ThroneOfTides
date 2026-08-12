@@ -25,7 +25,7 @@ namespace ThroneOfTides.Systems
     {
         [Header("Travel — Start Point")]
         [SerializeField] private CardPresentationSide _startSide = CardPresentationSide.ExplicitTarget;
-        [SerializeField] private VfxAnchorType _startAnchorType = VfxAnchorType.SeaSurface;
+        [SerializeField] private VfxAnchorType _startAnchorType = VfxAnchorType.SeaSurfaceLeft;
         [Tooltip("Extra manual nudge applied after resolving the start anchor, in canvas pixels.")]
         [SerializeField] private Vector2 _startOffset;
 

@@ -1,6 +1,5 @@
 using ThroneOfTides.Data;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace ThroneOfTides.UI
 {
@@ -23,10 +22,10 @@ namespace ThroneOfTides.UI
         }
 
         public void OnPlayPressed() =>
-            SceneManager.LoadScene("LevelSelect");
+            SceneFader.LoadScene("LevelSelect");
 
         public void OnPortPressed() =>
-            SceneManager.LoadScene("Port");
+            SceneFader.LoadScene("Port");
 
         public void OnOptionsPressed() =>
             _optionsPanel?.Show();

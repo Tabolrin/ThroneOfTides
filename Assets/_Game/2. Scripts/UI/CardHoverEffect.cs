@@ -105,7 +105,14 @@ namespace ThroneOfTides.UI
 
             _rect.localScale       = _baseScale;
             _rect.anchoredPosition = _basePos;
-            if (_bringToFront) _rect.SetSiblingIndex(_baseSiblingIndex);
+
+            // gameObject.activeSelf is still true here when OnDisable fired because a PARENT
+            // (e.g. PlayerHandContainer) is being deactivated and cascaded down to us — Unity
+            // forbids sibling-index changes during that cascade ("Cannot change sibling position
+            // ... while activating or deactivating the parent"). Only reorder when this object
+            // was deactivated directly (activeSelf already false by the time OnDisable runs),
+            // e.g. HandLayoutManager releasing it back to its pool.
+            if (_bringToFront && !gameObject.activeSelf) _rect.SetSiblingIndex(_baseSiblingIndex);
         }
     }
 }

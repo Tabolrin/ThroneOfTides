@@ -8,18 +8,30 @@ namespace ThroneOfTides.Core
     /// depends on Data.
     /// </summary>
     /// <remarks>
-    /// Enum order must stay ShipHit, ShipDeck, ShipFront, SeaSurface, Sky — existing
-    /// VFXSpawnPosition components already placed in scenes serialize this as a plain int index.
-    /// New values must always be appended at the end, never inserted.
+    /// Enum order must stay ShipHit, ShipDeck, ShipFront, SeaSurfaceLeft, Sky, SeaSurfaceRight,
+    /// SeaSurfaceFarLeft — existing VFXSpawnPosition components already placed in scenes
+    /// serialize this as a plain int index. New values must always be appended at the end, never
+    /// inserted. (SeaSurface was renamed to SeaSurfaceLeft in place — same ordinal value, so
+    /// existing scene data still resolves correctly; only the C# symbol name changed.)
     /// </remarks>
     public enum VfxAnchorType
     {
         ShipHit,
         ShipDeck,
         ShipFront,
-        SeaSurface,
+        SeaSurfaceLeft,
 
         /// High above the ship — for effects that strike or fall from overhead (Lightning, Hail Storm).
-        Sky
+        Sky,
+
+        /// Right-side mirror of SeaSurfaceLeft. Mostly used as a movement-end target for VFX
+        /// (e.g. a thrown/traveling effect that should land past the ship on its right side),
+        /// but not exclusively — usable anywhere a right-side sea-level anchor makes sense.
+        SeaSurfaceRight,
+
+        /// Further out to the left than SeaSurfaceLeft — for effects that need more travel
+        /// distance/room than the near-left anchor gives (e.g. a longer wind-up before closing
+        /// in on the ship).
+        SeaSurfaceFarLeft
     }
 }

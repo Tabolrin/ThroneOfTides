@@ -15,8 +15,8 @@ MonoBehaviour:
   _name: Hail Storm
   _id: 5
   _cardType: 3
-  _description: No shelter. No mercy. No end to the rain. Deal 2 damage per turn
-    for 3 turns.
+  _description: Deal 2 damage per turn for 3 turns.
+  _maxCopiesInDeck: 99
   _manaCost: 3
   _storageCost: 3
   _hpCost: 0

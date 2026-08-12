@@ -15,10 +15,11 @@ MonoBehaviour:
   _name: Dead Man's Turn
   _id: 22
   _cardType: 4
-  _description: Legends don't dodge. They were never there to begin with. React in
-    time to negate the next incoming attack.
+  _description: Charges on draw. Negates the next incoming attack. Costs 1 HP; your
+    next card played costs +1 mana.
+  _maxCopiesInDeck: 2
   _manaCost: 0
-  _storageCost: 3
+  _storageCost: 8
   _hpCost: 0
   _damage: 0
   _comboDamage: 0

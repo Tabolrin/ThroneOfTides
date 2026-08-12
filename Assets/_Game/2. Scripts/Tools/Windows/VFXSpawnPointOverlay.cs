@@ -50,10 +50,12 @@ namespace ThroneOfTides.Tools
             EditorGUILayout.LabelField("Spawn Point Legend", EditorStyles.boldLabel);
             EditorGUILayout.Space(2);
 
-            DrawLegendRow("ShipHit",    _hitColor);
-            DrawLegendRow("ShipDeck",   _deckColor);
-            DrawLegendRow("ShipFront",  _frontColor);
-            DrawLegendRow("SeaSurface", _surfaceColor);
+            DrawLegendRow("ShipHit",          _hitColor);
+            DrawLegendRow("ShipDeck",         _deckColor);
+            DrawLegendRow("ShipFront",        _frontColor);
+            DrawLegendRow("SeaSurfaceLeft",   _surfaceColor);
+            DrawLegendRow("SeaSurfaceRight",  _surfaceColor);
+            DrawLegendRow("SeaSurfaceFarLeft", _surfaceColor);
 
             EditorGUILayout.Space(4);
 
@@ -102,11 +104,13 @@ namespace ThroneOfTides.Tools
         {
             Color color = point.Type switch
             {
-                VfxAnchorType.ShipHit    => _hitColor,
-                VfxAnchorType.ShipDeck   => _deckColor,
-                VfxAnchorType.ShipFront  => _frontColor,
-                VfxAnchorType.SeaSurface => _surfaceColor,
-                _                        => Color.white
+                VfxAnchorType.ShipHit         => _hitColor,
+                VfxAnchorType.ShipDeck        => _deckColor,
+                VfxAnchorType.ShipFront       => _frontColor,
+                VfxAnchorType.SeaSurfaceLeft    => _surfaceColor,
+                VfxAnchorType.SeaSurfaceRight   => _surfaceColor,
+                VfxAnchorType.SeaSurfaceFarLeft => _surfaceColor,
+                _                               => Color.white
             };
 
             Vector3 pos = point.transform.position;

@@ -15,7 +15,7 @@ MonoBehaviour:
   _name: Monkey Grab
   _id: 17
   _cardType: 2
-  _description: Gone before they noticed. Steal 1 random card from the enemy's hand.
+  _description: Steal 1 random card from the enemy's hand into yours.
   _maxCopiesInDeck: 99
   _manaCost: 2
   _storageCost: 3
@@ -40,8 +40,8 @@ MonoBehaviour:
     _spritePrefab: {fileID: 4191687715988711111, guid: e9349b46646258347b276401e65a3dcc, type: 3}
     _worldParticlePrefab: {fileID: 0}
     _sfx:
-      _playlist: {fileID: 0}
-      _songName: 
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+      _songName: Monkey
       _volumeMultiplier: 0
       _pitchMultiplier: 0
     _lifetime: 3

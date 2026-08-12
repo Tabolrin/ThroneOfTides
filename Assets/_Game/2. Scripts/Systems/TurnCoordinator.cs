@@ -19,9 +19,14 @@ namespace ThroneOfTides.Systems
         public System.Action OnTurnChanged;
         public System.Action OnHPChanged;
 
+        // negateLabel/onNegate and counterGaleLabel/onCounterGale each come as a pair — pass
+        // both null to hide that option entirely (e.g. Kraken-vs-Kraken has no Counter Gale
+        // option; a lone-Dead-Man's-Turn defense has no Counter Gale option either).
         public delegate void ReactionPromptHandler(
-            CardSO card, int damage, string blockCost,
-            System.Action onNegate, System.Action onTakeHit);
+            CardSO card, int damage,
+            string negateLabel, System.Action onNegate,
+            string counterGaleLabel, System.Action onCounterGale,
+            System.Action onTakeHit);
         public ReactionPromptHandler OnShowReactionPrompt;
 
         public delegate void TargetSelectionHandler(CardSO card, System.Action<DamageTarget> onTargetChosen);
@@ -97,11 +102,16 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
-        // Does not consume HasDrawnThisTurn — used by Treasure Chest secondary draw
-        public bool TryDrawCardSecondary()
+        // Does not consume HasDrawnThisTurn — used by Treasure Chest secondary draw.
+        // ignoreHandLimit lets a card (e.g. Treasure Chest) force its draws into the hand even
+        // past MaxHandSize — passing an effectively unlimited cap through to Hand.AddCard too,
+        // since it enforces the same limit itself and would otherwise silently drop the card.
+        public bool TryDrawCardSecondary(bool ignoreHandLimit = false)
         {
             if (_gameState.PlayerDeck.Count == 0) return false;
-            if (_gameState.PlayerHand.Count >= _config.MaxHandSize) return false;
+
+            int maxHandSize = ignoreHandLimit ? int.MaxValue : _config.MaxHandSize;
+            if (!ignoreHandLimit && _gameState.PlayerHand.Count >= maxHandSize) return false;
 
             CardSO drawn = _gameState.PlayerDeck.Draw();
             if (drawn == null) return false;
@@ -113,7 +123,7 @@ namespace ThroneOfTides.Systems
                 return true;
             }
 
-            _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
+            _gameState.PlayerHand.AddCard(drawn, maxHandSize);
             GameEventBus.FireCardDrawn(drawn);
             StartCoroutine(_handLayout.AnimateManualDraw(drawn));
             return true;
@@ -121,10 +131,12 @@ namespace ThroneOfTides.Systems
 
         // Enemy-side mirror of TryDrawCardSecondary — used by caster-relative Action effects
         // (e.g. Treasure Chest) so an enemy-cast draw goes into the enemy's own hand.
-        public bool TryDrawCardSecondaryEnemy()
+        public bool TryDrawCardSecondaryEnemy(bool ignoreHandLimit = false)
         {
             if (_gameState.EnemyDeck.Count == 0) return false;
-            if (_gameState.EnemyHand.Count >= _config.MaxHandSize) return false;
+
+            int maxHandSize = ignoreHandLimit ? int.MaxValue : _config.MaxHandSize;
+            if (!ignoreHandLimit && _gameState.EnemyHand.Count >= maxHandSize) return false;
 
             CardSO drawn = _gameState.EnemyDeck.Draw();
             if (drawn == null) return false;
@@ -135,7 +147,7 @@ namespace ThroneOfTides.Systems
                 return true;
             }
 
-            _gameState.EnemyHand.AddCard(drawn, _config.MaxHandSize);
+            _gameState.EnemyHand.AddCard(drawn, maxHandSize);
             _handLayout.AddCardToEnemyHand(drawn);
             return true;
         }
@@ -148,11 +160,16 @@ namespace ThroneOfTides.Systems
                 return;
             }
 
-            if (!_gameState.SpendPlayerMana(cardSO.ManaCost))
+            // Dead Man's Turn's cost (if pending) taxes only the very next card, whatever it
+            // turns out to be — applied here rather than baked into ManaCost so it never shows
+            // up on the card itself.
+            int surcharge = _gameState.PlayerNextCardManaSurcharge;
+            if (!_gameState.SpendPlayerMana(cardSO.ManaCost + surcharge))
             {
                 GameDebug.Log($"Cannot play {cardSO.Name} — insufficient mana");
                 return;
             }
+            if (surcharge > 0) _gameState.ClearPlayerNextCardManaSurcharge();
 
             // Committed the instant mana is spent — the card leaves the hand regardless of
             // which target ends up chosen. CardView listens for this so it stops treating the
@@ -414,8 +431,8 @@ namespace ThroneOfTides.Systems
 
             OnShowReactionPrompt?.Invoke(
                 attackCard, attackCard.Damage,
-                "The Kraken (3 HP + 33% materials)",
-                () => { wasNegated = true;  playerChose = true; },
+                "The Kraken\n(Sacrifice 3 HP + 33% materials)", () => { wasNegated = true;  playerChose = true; },
+                null, null, // no Counter Gale option in a Kraken-vs-Kraken standoff
                 () => { wasNegated = false; playerChose = true; });
 
             yield return new WaitUntil(() => playerChose);
@@ -442,38 +459,54 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator ReactionPrompt(CardSO attackCard, int damage, bool hasDMT, bool hasCounterGale)
         {
-            string label = hasDMT && hasCounterGale
-                ? "Dead Man's Turn (negate) | Counter Gale (reflect half)"
-                : hasDMT ? "Dead Man's Turn (negate)"
-                         : "Counter Gale (reflect half)";
+            // Preview-only math — must match CombatResolver.ResolveCounterGale's own formula.
+            // Not calling that method here since it also logs, which would misfire if the
+            // player ends up picking a different option than the one being previewed.
+            int reflectedPreview = Mathf.FloorToInt(damage * 0.5f);
 
-            bool usedReaction = false;
-            bool usedDMT      = false;
-            bool playerChose  = false;
+            string negateLabel = hasDMT
+                ? "Dead Man's Turn\n(Take 0 damage — costs 1 HP, next card +1 mana)"
+                : null;
+            string counterGaleLabel = hasCounterGale
+                ? $"Counter Gale\n(Take {damage}, deal {reflectedPreview} back — refund 1 mana, draw a card)"
+                : null;
+
+            // null = no choice made yet / Take the Hit; true = Dead Man's Turn; false = Counter Gale.
+            bool? usedDMT      = null;
+            bool  playerChose  = false;
 
             OnShowReactionPrompt?.Invoke(
-                attackCard, damage, label,
-                () => { usedReaction = true; usedDMT = hasDMT; playerChose = true; },
+                attackCard, damage,
+                negateLabel,      hasDMT ? new System.Action(() => { usedDMT = true;  playerChose = true; }) : null,
+                counterGaleLabel, hasCounterGale ? new System.Action(() => { usedDMT = false; playerChose = true; }) : null,
                 () => { playerChose = true; });
 
             yield return new WaitUntil(() => playerChose);
 
-            if (!usedReaction)
+            if (usedDMT == null)
             {
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
                 yield break;
             }
 
-            if (usedDMT && _gameState.ConsumeDeadMansTurn())
+            if (usedDMT == true && _gameState.ConsumeDeadMansTurn())
             {
-                GameDebug.Log("Dead Man's Turn fired — attack negated");
+                // Negates the attack, but isn't free: costs 1 HP ("you throw yourself clear,
+                // but you get banged up") and taxes the next card played by +1 mana.
+                _gameState.ApplyDamage(DamageTarget.Player, 1);
+                _gameState.AddPlayerNextCardManaSurcharge(1);
+                GameDebug.Log("Dead Man's Turn fired — attack negated (-1 HP, next card +1 mana)");
+                GameEventBus.FireMatchNote("Dead Man's Turn — attack negated, but it cost 1 HP and your next card costs +1 mana.");
             }
-            else if (_gameState.ConsumeCounterGale())
+            else if (usedDMT == false && _gameState.ConsumeCounterGale())
             {
                 int reflected = _combatResolver.ResolveCounterGale(damage);
                 _gameState.ApplyDamage(DamageTarget.Enemy, reflected);
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
-                GameDebug.Log($"Counter Gale fired — reflected {reflected}, took {damage}");
+                _gameState.RefundPlayerMana(1);
+                bool drewCard = TryDrawCardSecondary();
+                string drawSuffix = drewCard ? ", drew a card" : ", hand full — no card drawn";
+                GameDebug.Log($"Counter Gale fired — reflected {reflected}, took {damage}, refunded 1 mana{drawSuffix}");
             }
         }
 

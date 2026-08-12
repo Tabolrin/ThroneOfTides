@@ -15,7 +15,8 @@ MonoBehaviour:
   _name: Siren Song
   _id: 21
   _cardType: 2
-  _description: Their will is not their own. The attack you play this turn is unblockable.
+  _description: The next attack you play this turn becomes unblockable.
+  _maxCopiesInDeck: 99
   _manaCost: 3
   _storageCost: 4
   _hpCost: 0
@@ -40,7 +41,7 @@ MonoBehaviour:
     _worldParticlePrefab: {fileID: 113936952444759862, guid: 4b75c93f2fa9a584fb595c15e5aa9317, type: 3}
     _sfx:
       _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
-      _songName: Treasure
+      _songName: 'sirn song '
       _volumeMultiplier: 1
       _pitchMultiplier: 1
     _lifetime: 1

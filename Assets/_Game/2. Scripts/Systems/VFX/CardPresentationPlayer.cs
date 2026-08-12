@@ -92,17 +92,21 @@ namespace ThroneOfTides.Systems
             ShipVfxAnchors opponentAnchors,
             DamageTarget? explicitTarget)
         {
-            if (entry.SpritePrefab == null)
-            {
-                Debug.LogWarning($"{card.Name}: a presentation entry has no Sprite Prefab assigned — skipping.");
-                return;
-            }
-
             // Resolve the same PositionType on both ships, not just the entry's own side, so a
             // self-driving effect can animate between the caster's and opponent's matching
             // points (e.g. a mana-pull arc between both ships' hit points).
             var casterPoint = casterAnchors.Get(entry.PositionType);
             var opponentPoint = opponentAnchors.Get(entry.PositionType);
+
+            if (entry.SpritePrefab == null)
+            {
+                // SFX-only entry (e.g. Rum) — no visual, just play the cue at the caster's anchor.
+                if (entry.Sfx.Playlist != null)
+                    CardSfxPlayer.Play(entry.Sfx, casterPoint.position);
+                else
+                    Debug.LogWarning($"{card.Name}: a presentation entry has no Sprite Prefab or SFX assigned — skipping.");
+                return;
+            }
 
             var spawnTransform = entry.AnchorSide switch
             {

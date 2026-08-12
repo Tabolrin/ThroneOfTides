@@ -4,7 +4,6 @@ using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using ThroneOfTides.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace ThroneOfTides.App
@@ -58,8 +57,8 @@ namespace ThroneOfTides.App
             _inventoryView.Initialise(_playerInventory, _deckEditor);
             _inventoryView.OnAddCardRequested += OnAddCardRequested;
 
-            _mainMenuButton?.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
-            _levelSelectButton?.onClick.AddListener(() => SceneManager.LoadScene("LevelSelect"));
+            _mainMenuButton?.onClick.AddListener(() => SceneFader.LoadScene("MainMenu"));
+            _levelSelectButton?.onClick.AddListener(() => SceneFader.LoadScene("LevelSelect"));
 
             RefreshCoins();
         }

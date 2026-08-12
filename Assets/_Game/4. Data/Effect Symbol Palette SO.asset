@@ -20,7 +20,7 @@ MonoBehaviour:
     Icon: {fileID: 21300000, guid: a0cac2a058093f940bf96c5e61c54c11, type: 3}
     Description: Dealing 3 damage per turn.
   - Type: 3
-    Icon: {fileID: 21300000, guid: e58c800ddb6455544aab3d5ef3c06455, type: 3}
+    Icon: {fileID: 21300000, guid: c46c1f55e59d80944ab7988b18532c4b, type: 3}
     Description: Dealing 2 damage per turn.
   - Type: 4
     Icon: {fileID: 21300000, guid: 9e3c25b45d05a044d8bd269703e6b40f, type: 3}

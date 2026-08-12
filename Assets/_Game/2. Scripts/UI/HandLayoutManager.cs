@@ -338,6 +338,7 @@ namespace ThroneOfTides.UI
     }
 
     var rect = view.GetComponent<RectTransform>();
+    var canvasGroup = view.GetComponent<CanvasGroup>();
 
     // Add to list and calculate final slot position via layout
     _playerCards.Add(view);
@@ -359,6 +360,11 @@ namespace ThroneOfTides.UI
     float midX  = (deckLocalPos.x + targetPos.x) / 2f;
     float peakY = Mathf.Max(deckLocalPos.y, targetPos.y) + _drawArcHeight;
 
+    // Not raycast-interactive while flying to its slot — otherwise the cursor merely sitting
+    // anywhere along the arc triggers CardHoverEffect mid-flight, whose enlarge/rise tween then
+    // fights this arc tween over the same RectTransform and corrupts the final hand layout.
+    if (canvasGroup != null) canvasGroup.blocksRaycasts = false;
+
     var sequence = DOTween.Sequence();
     sequence.Append(
         rect.DOAnchorPos(new Vector2(midX, peakY), _drawArcDuration * 0.5f)
@@ -368,6 +374,8 @@ namespace ThroneOfTides.UI
             .SetEase(Ease.InQuad));
 
     yield return sequence.WaitForCompletion();
+
+    if (canvasGroup != null) canvasGroup.blocksRaycasts = true;
 
     // Already in playerHandContainer — just settle remaining cards
     RefreshPlayerLayout(animated: true);

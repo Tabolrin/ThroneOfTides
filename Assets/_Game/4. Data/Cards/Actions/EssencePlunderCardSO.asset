@@ -15,7 +15,9 @@ MonoBehaviour:
   _name: Essence Plunder
   _id: 20
   _cardType: 2
-  _description: Fair wind, ill-gotten. Steal 2 mana from the enemy this turn.
+  _description: 'Steal 2 mana from the enemy this turn (cannot reduce enemy mana
+    below 1). Cost: 3 HP.'
+  _maxCopiesInDeck: 99
   _manaCost: 0
   _storageCost: 6
   _hpCost: 3

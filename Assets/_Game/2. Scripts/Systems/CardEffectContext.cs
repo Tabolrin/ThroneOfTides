@@ -7,10 +7,10 @@ namespace ThroneOfTides.Systems
 {
     public class CardEffectContext : ICardEffectContext
     {
-        private readonly GameState          _gameState;
-        private readonly IHandLayoutManager _handLayout;
-        private readonly System.Func<bool>  _secondaryDraw;
-        private readonly PlayerInventory    _playerInventory;
+        private readonly GameState             _gameState;
+        private readonly IHandLayoutManager    _handLayout;
+        private readonly System.Func<bool, bool> _secondaryDraw;
+        private readonly PlayerInventory       _playerInventory;
 
         public int PlayerHP        => _gameState.PlayerHP;
         public int EnemyHP         => _gameState.EnemyHP;
@@ -24,7 +24,7 @@ namespace ThroneOfTides.Systems
 
         public CardEffectContext(GameState gameState, IHandLayoutManager handLayout,
                                  DamageTarget caster = DamageTarget.Player,
-                                 System.Func<bool> secondaryDraw = null,
+                                 System.Func<bool, bool> secondaryDraw = null,
                                  DamageTarget? selectedTarget = null,
                                  PlayerInventory playerInventory = null)
         {
@@ -103,7 +103,7 @@ namespace ThroneOfTides.Systems
                 deck.ReturnCard(card);
         }
 
-        public void DrawOneCard() => _secondaryDraw?.Invoke();
+        public void DrawOneCard(bool ignoreHandLimit = false) => _secondaryDraw?.Invoke(ignoreHandLimit);
 
         public void AddCardToPlayerHand(ICard card)
         {

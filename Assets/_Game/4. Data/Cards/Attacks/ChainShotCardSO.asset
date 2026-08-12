@@ -15,7 +15,9 @@ MonoBehaviour:
   _name: Chain Shot
   _id: 3
   _cardType: 0
-  _description: Blood for blood. Sacrifice 2 HP. Deal 8 damage.
+  _description: Deal 4 damage. 50% chance to discard 1 random card from the enemy's
+    hand.
+  _maxCopiesInDeck: 99
   _manaCost: 2
   _storageCost: 3
   _hpCost: 0
@@ -25,10 +27,22 @@ MonoBehaviour:
   _comboPartner: {fileID: 0}
   _dotDamagePerTurn: 0
   _dotDuration: 0
-  _actionEffect: {fileID: 0}
+  _actionEffect: {fileID: 11400000, guid: c30afa4c117af374a9b48920817dd57e, type: 2}
   _isEligibleAsActionPair: 0
   _requiresTargetSelection: 0
   _aiPlayBeforeAttack: 0
   _statusType: 0
   _art: {fileID: 21300000, guid: 7fe440f9afbcc364bac996d81af1f84e, type: 3}
-  _presentationEntries: []
+  _presentationEntries:
+  - _casterFilter: 0
+    _presentationMode: 0
+    _anchorSide: 0
+    _positionType: 2
+    _spritePrefab: {fileID: 8807735575910824648, guid: 30246974d3035264398f4ea76051ae9f, type: 3}
+    _worldParticlePrefab: {fileID: 0}
+    _sfx:
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+      _songName: ChainShot
+      _volumeMultiplier: 0
+      _pitchMultiplier: 0
+    _lifetime: 3

@@ -21,14 +21,21 @@ namespace ThroneOfTides.UI
         [SerializeField] private Button          _addButton;
         [SerializeField] private TextMeshProUGUI _addButtonLabel;
 
-        private CardView _cardViewInstance;
+        private CardView            _cardViewInstance;
+        private CardPreviewTrigger  _previewTrigger;
 
         // maxCopies is CardSO.MaxCopiesInDeck — ownership is unlocked-or-not, not a copy count,
         // so what's worth showing here is the deck-building cap, not how many you "own".
-        public void Setup(CardSO card, int maxCopies, int inDeckCount, bool canAdd, System.Action onAdd)
+        public void Setup(CardSO card, int maxCopies, int inDeckCount, bool canAdd, System.Action onAdd,
+            CardPreviewTooltip previewTooltip = null)
         {
             EnsureCardView();
             _cardViewInstance?.Setup(card);
+
+            if (_previewTrigger == null && _cardViewParent != null)
+                _previewTrigger = _cardViewParent.GetComponent<CardPreviewTrigger>()
+                                  ?? _cardViewParent.gameObject.AddComponent<CardPreviewTrigger>();
+            _previewTrigger?.Setup(card, previewTooltip);
 
             if (_storageCostLabel != null)
                 _storageCostLabel.text = $"{card.StorageCost} slots";

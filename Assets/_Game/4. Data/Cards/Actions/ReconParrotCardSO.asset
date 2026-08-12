@@ -15,7 +15,8 @@ MonoBehaviour:
   _name: Recon Parrot
   _id: 13
   _cardType: 2
-  _description: Eyes where yours cannot reach. Inspect 3 cards in the enemy's hand.
+  _description: Reveal 3 cards from the enemy's hand.
+  _maxCopiesInDeck: 99
   _manaCost: 1
   _storageCost: 2
   _hpCost: 0
@@ -39,7 +40,7 @@ MonoBehaviour:
     _spritePrefab: {fileID: 5922238752439569510, guid: 4f80dce524b392249969af76c1d17247, type: 3}
     _worldParticlePrefab: {fileID: 0}
     _sfx:
-      _playlist: {fileID: 0}
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
       _songName: 
       _volumeMultiplier: 0
       _pitchMultiplier: 0

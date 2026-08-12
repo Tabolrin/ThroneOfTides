@@ -16,6 +16,7 @@ MonoBehaviour:
   _id: 18
   _cardType: 2
   _description: Restore 5 HP.
+  _maxCopiesInDeck: 99
   _manaCost: 1
   _storageCost: 2
   _hpCost: 0
@@ -31,4 +32,16 @@ MonoBehaviour:
   _aiPlayBeforeAttack: 0
   _statusType: 0
   _art: {fileID: 21300000, guid: 82fb0fc9e4a722547865ca5cf292b586, type: 3}
-  _presentationEntries: []
+  _presentationEntries:
+  - _casterFilter: 0
+    _presentationMode: 0
+    _anchorSide: 0
+    _positionType: 1
+    _spritePrefab: {fileID: 0}
+    _worldParticlePrefab: {fileID: 0}
+    _sfx:
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+      _songName: rum
+      _volumeMultiplier: 1
+      _pitchMultiplier: 1
+    _lifetime: 2

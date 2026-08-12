@@ -15,8 +15,8 @@ MonoBehaviour:
   _name: High Spirits
   _id: 15
   _cardType: 2
-  _description: They didn't sail through hell to die here. Neither did you. Restore
-    5 HP.
+  _description: Permanently gain +1 max mana for this match.
+  _maxCopiesInDeck: 99
   _manaCost: 3
   _storageCost: 3
   _hpCost: 0
@@ -29,6 +29,7 @@ MonoBehaviour:
   _actionEffect: {fileID: 11400000, guid: 9b56f54a6946f4e4992f9d5a4197c0e3, type: 2}
   _isEligibleAsActionPair: 1
   _requiresTargetSelection: 0
+  _aiPlayBeforeAttack: 0
   _statusType: 4
   _art: {fileID: 21300000, guid: 6f15f89afcd92c74795a3685c8b3010c, type: 3}
   _presentationEntries: []

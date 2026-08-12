@@ -28,7 +28,7 @@ namespace ThroneOfTides.UI
                 _typeBand.color = palette.GetColor(card.CardType);
 
             if (_nameLabel        != null) _nameLabel.text        = card.Name;
-            if (_manaCostLabel    != null) _manaCostLabel.text    = $"{card.ManaCost}";
+            if (_manaCostLabel    != null) _manaCostLabel.text    = $"Mana: {card.ManaCost}";
             if (_storageCostLabel != null) _storageCostLabel.text = $"{card.StorageCost} slots";
             if (_countLabel       != null) _countLabel.text       = count.ToString();
 

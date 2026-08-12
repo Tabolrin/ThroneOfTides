@@ -15,7 +15,8 @@ MonoBehaviour:
   _name: Cannonball
   _id: 2
   _cardType: 0
-  _description: Iron through hull and bone. Deal 2 damage.
+  _description: Deal 2 damage.
+  _maxCopiesInDeck: 99
   _manaCost: 1
   _storageCost: 1
   _hpCost: 0
@@ -35,12 +36,12 @@ MonoBehaviour:
   - _casterFilter: 0
     _presentationMode: 0
     _anchorSide: 0
-    _positionType: 0
-    _spritePrefab: {fileID: 0}
+    _positionType: 2
+    _spritePrefab: {fileID: 7534926032137523789, guid: b9d50004a7fb05143ac04a9ab026f90d, type: 3}
     _worldParticlePrefab: {fileID: 0}
     _sfx:
-      _playlist: {fileID: 0}
-      _songName: 
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+      _songName: Cannonball
       _volumeMultiplier: 0
       _pitchMultiplier: 0
-    _lifetime: 0
+    _lifetime: 3

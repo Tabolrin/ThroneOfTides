@@ -17,8 +17,16 @@ namespace ThroneOfTides.Data
         {
             DamageTarget target = context.Caster == DamageTarget.Player ? DamageTarget.Enemy : DamageTarget.Player;
             context.ApplyDamage(target, _damage);
-            context.DiscardRandomFromOpponentHand();
-            GameDebug.Log($"Chain Shot — {_damage} dmg, discarded 1 card from opponent's hand");
+
+            if (UnityEngine.Random.value < 0.5f)
+            {
+                context.DiscardRandomFromOpponentHand();
+                GameDebug.Log($"Chain Shot — {_damage} dmg, discard roll won: discarded 1 card from opponent's hand");
+            }
+            else
+            {
+                GameDebug.Log($"Chain Shot — {_damage} dmg, discard roll lost: no discard");
+            }
         }
     }
 }

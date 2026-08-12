@@ -15,8 +15,9 @@ MonoBehaviour:
   _name: Locker's Return
   _id: 16
   _cardType: 2
-  _description: Davy Jones collects debts, not weapons. Recover 3 random cards from
-    your discard pile. Cannot recover The Kraken
+  _description: Recover 3 random cards from your discard pile into your deck. Cannot
+    recover The Kraken.
+  _maxCopiesInDeck: 99
   _manaCost: 3
   _storageCost: 4
   _hpCost: 0

@@ -62,6 +62,10 @@ namespace ThroneOfTides.Systems
 
         public void CheatAddMana(int amount) => Mana = Mathf.Clamp(Mana + amount, 0, MaxMana);
 
+        // Refunds current mana (e.g. Counter Gale) without touching MaxMana — unlike AddMaxMana,
+        // this doesn't permanently raise the mana ceiling, just gives some back this turn.
+        public void RefundMana(int amount) => Mana = Mathf.Clamp(Mana + amount, 0, MaxMana);
+
         // Mana floor of 1 on the sender — cannot be fully drained by Stolen Wind/Essence
         // Plunder. Returns the amount actually transferred (may be less than requested, or 0).
         public int TransferManaTo(ShipState receiver, int amount)

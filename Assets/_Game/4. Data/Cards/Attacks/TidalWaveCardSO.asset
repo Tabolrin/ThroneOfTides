@@ -15,8 +15,8 @@ MonoBehaviour:
   _name: Tidal Wave
   _id: 24
   _cardType: 0
-  _description: The sea obeys no one. Deal 3 damage. Removes Gunpowder from the hit
-    ship - use on your own ship to break an active Gunpowder stack.
+  _description: Choose a target ship. Deal 3 damage and clear its Gunpowder stack.
+  _maxCopiesInDeck: 99
   _manaCost: 2
   _storageCost: 3
   _hpCost: 0
@@ -40,8 +40,8 @@ MonoBehaviour:
     _spritePrefab: {fileID: 8851032230145308981, guid: 31e8d86dca655304ba6ea53b140d191f, type: 3}
     _worldParticlePrefab: {fileID: 0}
     _sfx:
-      _playlist: {fileID: 0}
-      _songName: 
+      _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+      _songName: Wave
       _volumeMultiplier: 1
       _pitchMultiplier: 1
     _lifetime: 3

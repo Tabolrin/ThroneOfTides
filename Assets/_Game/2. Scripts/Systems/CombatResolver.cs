@@ -14,11 +14,13 @@ namespace ThroneOfTides.Systems
 
         // Set once by TurnCoordinator during setup. Allows effect SOs to trigger secondary
         // draws (e.g. Treasure Chest) without assembly boundary issues. Kept per-side so a
-        // caster-relative effect draws into its own hand, not always the player's.
-        private System.Func<bool> _secondaryDrawCallbackPlayer;
-        private System.Func<bool> _secondaryDrawCallbackEnemy;
+        // caster-relative effect draws into its own hand, not always the player's. The bool
+        // parameter is ignoreHandLimit — lets a card force its draw into the hand past
+        // MaxHandSize (e.g. Treasure Chest).
+        private System.Func<bool, bool> _secondaryDrawCallbackPlayer;
+        private System.Func<bool, bool> _secondaryDrawCallbackEnemy;
 
-        public void SetSecondaryDrawCallback(System.Func<bool> playerCallback, System.Func<bool> enemyCallback)
+        public void SetSecondaryDrawCallback(System.Func<bool, bool> playerCallback, System.Func<bool, bool> enemyCallback)
         {
             _secondaryDrawCallbackPlayer = playerCallback;
             _secondaryDrawCallbackEnemy  = enemyCallback;
