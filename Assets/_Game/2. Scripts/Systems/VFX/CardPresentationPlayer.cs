@@ -1,4 +1,6 @@
 // Assets/_Game/2. Scripts/Systems/VFX/CardPresentationPlayer.cs
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
@@ -55,16 +57,31 @@ namespace ThroneOfTides.Systems
         [Tooltip("Parent Transform that spawned world-space prefabs (world sprites and particles) are instantiated under, purely to keep the scene hierarchy tidy — does not affect their spawn position.")]
         [SerializeField] private Transform _worldEffectParent;
 
+        [Tooltip("Same assembly as this class — used for Essence Plunder's deferred mana-gain popup (suppresses the generic instant one, then fires its own once its own animation finishes).")]
+        [SerializeField] private CardVFXHandler _cardVFXHandler;
+
+        /// <summary>
+        /// Wired by GameBootstrapper (the composition root) to EnemyHandRevealPanel.ShowAndAwaitDismiss
+        /// — kept as a plain delegate rather than a direct field since Systems cannot reference the
+        /// UI assembly (UI already depends on Systems; the reverse would be a circular reference).
+        /// </summary>
+        public Action<IReadOnlyList<ICard>, Action> ShowEnemyHandReveal { get; set; }
+
         private void OnEnable()
         {
             GameEventBus.OnCardPlayAccepted += HandlePlayerCardPlayed;
-            GameEventBus.OnEnemyCardPlayed += HandleEnemyCardPlayed;
+            // Not OnEnemyCardPlayed — that fires immediately (drives the slide-in animation and
+            // match log), before any reaction prompt the player might still be looking at.
+            // OnEnemyCardPresentationReady is TurnCoordinator's signal that it's actually safe to
+            // show this card's own VFX/SFX (immediately for non-attacks, otherwise only once a
+            // Dead Man's Turn / Counter Gale / Kraken-standoff prompt has been resolved).
+            GameEventBus.OnEnemyCardPresentationReady += HandleEnemyCardPlayed;
         }
 
         private void OnDisable()
         {
             GameEventBus.OnCardPlayAccepted -= HandlePlayerCardPlayed;
-            GameEventBus.OnEnemyCardPlayed -= HandleEnemyCardPlayed;
+            GameEventBus.OnEnemyCardPresentationReady -= HandleEnemyCardPlayed;
         }
 
         private void HandlePlayerCardPlayed(ICard card, DamageTarget? target) => Play(card, CardCasterFilter.Player, target);
@@ -152,6 +169,10 @@ namespace ThroneOfTides.Systems
                     beginExplicitTargetGunpowderHold: () => explicitTargetAnchors?.GetGunpowderVisual()?.BeginOverride(),
                     endExplicitTargetGunpowderHold: () => explicitTargetAnchors?.GetGunpowderVisual()?.EndOverride(),
                     getOpponentAnchor: type => opponentAnchors.Get(type),
+                    getPlayerAnchor: type => _playerShipAnchors.Get(type),
+                    showEnemyHandReveal: ShowEnemyHandReveal,
+                    suppressManaGainPopup: () => _cardVFXHandler?.SuppressNextManaGainPopup(),
+                    spawnManaGainedNumber: (amount, pos) => _cardVFXHandler?.SpawnFloatingManaGain(amount, pos),
                     getAnchor: (side, type) => side switch
                     {
                         CardPresentationSide.Caster => casterAnchors.Get(type),

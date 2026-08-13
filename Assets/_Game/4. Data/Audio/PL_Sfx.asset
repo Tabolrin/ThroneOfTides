@@ -1280,7 +1280,7 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-  - Name: umlock p4
+  - Name: Metallic Hit
     Clip: {fileID: 8300000, guid: 51f73643674498346b6cb5913af1d309, type: 3}
     PlayCount: 1
     Options:
@@ -1377,8 +1377,8 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-  - Name: Whale
-    Clip: {fileID: 8300000, guid: 861abae614e91ae4ba5e419edbf9d609, type: 3}
+  - Name: Whale Roar
+    Clip: {fileID: 8300000, guid: d66389a3b30030441be31d993ba5e794, type: 3}
     PlayCount: 1
     Options:
       Initialized: 1
@@ -1668,7 +1668,7 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-  - Name: 'sirn song '
+  - Name: 'siren song '
     Clip: {fileID: 8300000, guid: 2c9853fbe01b7bd4d91f6c4e34fefb1e, type: 3}
     PlayCount: 1
     Options:
@@ -1765,7 +1765,7 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-  - Name: rum
+  - Name: rum cap
     Clip: {fileID: 8300000, guid: b53103b4fb48e16438e554b16ce586f3, type: 3}
     PlayCount: 1
     Options:

@@ -20,10 +20,14 @@ namespace ThroneOfTides.Systems.VFX
         [Header("Setup")]
         [Tooltip("How far apart the two mugs start, split evenly to either side of this GameObject's position.")]
         [SerializeField] private float _startSeparation = 2f;
+        [Tooltip("Empty child transform marking where the droplet particle burst plays — falls back to this GameObject's own position if left unassigned.")]
+        [SerializeField] private Transform _particleAnchor;
 
         [Header("Approach")]
         [SerializeField] private float _approachDuration = 0.35f;
         [SerializeField] private Ease  _approachEase     = Ease.InQuad;
+        [Tooltip("Gap left between the two mugs when they stop — 0 means they meet exactly in the middle.")]
+        [SerializeField] private float _stopDistance = 0f;
 
         [Header("Hold & Fade Out")]
         [SerializeField] private float _holdDuration    = 0.3f;
@@ -42,9 +46,11 @@ namespace ThroneOfTides.Systems.VFX
 
             if (_dropletParticlesPrefab != null)
             {
+                Vector3 particlePosition = _particleAnchor != null ? _particleAnchor.position : center;
+
                 // Same pattern as TreasureChestVFXController's coin burst: spawn stopped+cleared
                 // now, play it later at the actual payoff beat instead of on instantiation.
-                _dropletInstance = Instantiate(_dropletParticlesPrefab, center, Quaternion.identity);
+                _dropletInstance = Instantiate(_dropletParticlesPrefab, particlePosition, Quaternion.identity);
                 _dropletInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
         }
@@ -54,10 +60,12 @@ namespace ThroneOfTides.Systems.VFX
         private void BuildAndPlaySequence()
         {
             Vector3 center = transform.position;
+            Vector3 leftStop  = center + Vector3.left  * (_stopDistance * 0.5f);
+            Vector3 rightStop = center + Vector3.right * (_stopDistance * 0.5f);
 
             _sequence = DOTween.Sequence();
-            _sequence.Append(_leftMug.transform.DOMove(center, _approachDuration).SetEase(_approachEase));
-            _sequence.Join(_rightMug.transform.DOMove(center, _approachDuration).SetEase(_approachEase));
+            _sequence.Append(_leftMug.transform.DOMove(leftStop, _approachDuration).SetEase(_approachEase));
+            _sequence.Join(_rightMug.transform.DOMove(rightStop, _approachDuration).SetEase(_approachEase));
             _sequence.AppendCallback(OnCollide);
             _sequence.AppendInterval(_holdDuration);
             _sequence.Append(_leftMug.DOFade(0f, _fadeOutDuration));

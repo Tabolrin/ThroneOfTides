@@ -26,6 +26,14 @@ namespace ThroneOfTides.Core
         public static event Action<ICard, DamageTarget?> OnEnemyCardPlayed;
         public static event Action       OnEnemyCardAnimationComplete;
 
+        // Fires when it's actually safe to play an enemy card's own presentation VFX/SFX —
+        // immediately for non-attack cards, but only after any reaction prompt (Dead Man's Turn /
+        // Counter Gale / Kraken standoff) the player was shown has been resolved, so the attack's
+        // visuals/sound don't play out before the player has even made their choice. Distinct
+        // from OnEnemyCardPlayed, which still fires immediately to drive the card's
+        // slide-into-play-zone animation and the match log entry.
+        public static event Action<ICard, DamageTarget?> OnEnemyCardPresentationReady;
+
         // Fires when an effect (e.g. Recon Parrot) reveals the enemy's hand — EnemyHandRevealPanel
         // displays the given cards until the player dismisses it.
         public static event Action<IReadOnlyList<ICard>> OnEnemyHandRevealed;
@@ -81,6 +89,7 @@ namespace ThroneOfTides.Core
         public static void FireCardPlayAccepted(ICard card, DamageTarget? target = null) => OnCardPlayAccepted?.Invoke(card, target);
         public static void FirePlayerCardRemoved(ICard card)                 => OnPlayerCardRemoved?.Invoke(card);
         public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
+        public static void FireEnemyCardPresentationReady(ICard card, DamageTarget? target = null) => OnEnemyCardPresentationReady?.Invoke(card, target);
         public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
         public static void FireEnemyHandRevealed(IReadOnlyList<ICard> cards) => OnEnemyHandRevealed?.Invoke(cards);
         public static void FireMatchNote(string message)                    => OnMatchNote?.Invoke(message);
@@ -114,6 +123,7 @@ namespace ThroneOfTides.Core
             OnCardPlayAccepted           = null;
             OnPlayerCardRemoved          = null;
             OnEnemyCardPlayed            = null;
+            OnEnemyCardPresentationReady = null;
             OnEnemyCardAnimationComplete = null;
             OnEnemyHandRevealed          = null;
             OnMatchNote                  = null;

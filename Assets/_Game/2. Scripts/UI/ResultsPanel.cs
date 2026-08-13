@@ -1,4 +1,6 @@
 // Assets/_Game/2. Scripts/UI/ResultsPanel.cs
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using ThroneOfTides.Systems;
 using ThroneOfTides.Data;
@@ -17,8 +19,14 @@ namespace ThroneOfTides.UI
         [Header("UI")]
         [SerializeField] private TextMeshProUGUI _titleLabel;
         [SerializeField] private TextMeshProUGUI _coinRewardLabel;
+        [SerializeField] private TextMeshProUGUI _rewardsListingLabel;
         [SerializeField] private Transform       _rewardCardsContainer;
-        [SerializeField] private TextMeshProUGUI _rewardCardNamePrefab;
+
+        [Header("Reward Card Views")]
+        [Tooltip("Same CardView prefab used elsewhere (e.g. Port's collection grid) — spawned read-only, one per rewarded card, with a hover trigger wired to _previewTooltip.")]
+        [SerializeField] private CardView           _rewardCardViewPrefab;
+        [SerializeField] private float              _rewardCardViewScale = 0.55f;
+        [SerializeField] private CardPreviewTooltip _previewTooltip;
 
         [Header("Buttons")]
         [SerializeField] private Button _retryButton;
@@ -43,15 +51,8 @@ namespace ThroneOfTides.UI
                 _progression, _playerInventory, reward, GameSession.SelectedLevelIndex, playerHP);
 
             _coinRewardLabel.text = $"+{result.Coins} Coins";
-
-            foreach (Transform child in _rewardCardsContainer)
-                Destroy(child.gameObject);
-
-            foreach (var card in result.RewardCards)
-            {
-                var label = Instantiate(_rewardCardNamePrefab, _rewardCardsContainer);
-                label.text = card.Name;
-            }
+            UpdateRewardsListing(result);
+            SpawnRewardCardViews(result.RewardCards);
         }
 
         public void ShowLoss(LevelRewardSO reward, int playerHP)
@@ -61,9 +62,41 @@ namespace ThroneOfTides.UI
 
             var result = MatchRewardGranter.GrantLoss(_playerInventory, reward, playerHP);
             _coinRewardLabel.text = $"+{result.Coins} Coins";
+            UpdateRewardsListing(result);
+            SpawnRewardCardViews(result.RewardCards);
+        }
 
+        private void UpdateRewardsListing(MatchRewardResult result)
+        {
+            if (_rewardsListingLabel == null) return;
+
+            string coinsLine = $"+{result.Coins} Coins";
+            _rewardsListingLabel.text = result.RewardCards.Count == 0
+                ? coinsLine
+                : $"{string.Join(", ", result.RewardCards.Select(c => c.Name))}\n{coinsLine}";
+        }
+
+        private void SpawnRewardCardViews(IReadOnlyList<CardSO> cards)
+        {
             foreach (Transform child in _rewardCardsContainer)
                 Destroy(child.gameObject);
+
+            if (_rewardCardViewPrefab == null) return;
+
+            foreach (var card in cards)
+            {
+                var cardView = Instantiate(_rewardCardViewPrefab, _rewardCardsContainer);
+                cardView.transform.localScale = Vector3.one * _rewardCardViewScale;
+                cardView.Setup(card);
+
+                // Read-only display on the results screen — not draggable/playable.
+                var drag = cardView.GetComponent<CardDragHandler>();
+                if (drag != null) Destroy(drag);
+
+                var trigger = cardView.GetComponent<CardPreviewTrigger>()
+                              ?? cardView.gameObject.AddComponent<CardPreviewTrigger>();
+                trigger.Setup(card, _previewTooltip);
+            }
         }
 
         private void OnRetryPressed()

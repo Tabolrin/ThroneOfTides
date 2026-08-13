@@ -35,7 +35,6 @@ namespace ThroneOfTides.Data
         [SerializeField] private float _weightActionDefense;
         [SerializeField] private float _weightActionManaSteal;
         [SerializeField] private float _weightKraken;
-        [SerializeField] private float _weightBoardingParty;
         [SerializeField] private float _weightDOT;
 
         [Header("Reaction Weights")]
@@ -69,7 +68,6 @@ namespace ThroneOfTides.Data
         public float WeightActionDefense      => _weightActionDefense;
         public float WeightActionManaSteal    => _weightActionManaSteal;
         public float WeightKraken             => _weightKraken;
-        public float WeightBoardingParty      => _weightBoardingParty;
         public float WeightDOT                => _weightDOT;
         public float WeightReactionCounter    => _weightReactionCounter;
         public float WeightPlayAroundReactions=> _weightPlayAroundReactions;
@@ -93,7 +91,6 @@ namespace ThroneOfTides.Data
         private float GetWeaponWeight(CardSO card)
         {
             if (card.Id == CardId.Kraken)        return _weightKraken;
-            if (card.Id == CardId.BoardingParty) return _weightBoardingParty;
             if (card.Damage >= 5)                return _weightHighDamageWeapon;
             return card.Damage <= 2              ? _weightLowDamageWeapon : 1f;
         }

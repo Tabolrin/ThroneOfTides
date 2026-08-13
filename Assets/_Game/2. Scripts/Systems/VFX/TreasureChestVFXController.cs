@@ -11,15 +11,15 @@ namespace ThroneOfTides.Systems.VFX
     /// Treasure Chest: a UI-canvas chest image fills from empty to full (Filled/Vertical/Fill
     /// Origin = Top, same convention as Whale Ram/Kraken) while rising slightly, then quickly
     /// enlarges. The instant it reaches full size it fires a one-shot coin-burst particle system
-    /// spawned fresh between the two ships, holds briefly, then shrinks back to its original size
-    /// and fades out. Root prefab is a UI Image (RectTransform), positioned via anchoredPosition
-    /// like the other UI-canvas card controllers.
+    /// spawned right on top of the chest sprite itself, holds briefly, then shrinks back to its
+    /// original size and fades out. Root prefab is a UI Image (RectTransform), positioned via
+    /// anchoredPosition like the other UI-canvas card controllers.
     /// </summary>
     public class TreasureChestVFXController : MonoBehaviour, ICardPlayEffect
     {
         [Header("References")]
         [SerializeField] private Image _chestImage;
-        [Tooltip("Default coin-burst particle system — spawned fresh between the two ships and played the instant the chest reaches full size. Placeholder settings; tweak freely.")]
+        [Tooltip("Default coin-burst particle system — spawned right on top of the chest sprite and played the instant the chest reaches full size. Placeholder settings; tweak freely.")]
         [SerializeField] private ParticleSystem _coinParticlesPrefab;
 
         [Header("Fill")]
@@ -48,6 +48,7 @@ namespace ThroneOfTides.Systems.VFX
 
         private RectTransform _rect;
         private CanvasGroup   _canvasGroup;
+        private Camera        _gameCamera;
         private Vector2       _basePosition;
         private Vector3       _baseScale;
         private ParticleSystem _coinParticlesInstance;
@@ -63,16 +64,29 @@ namespace ThroneOfTides.Systems.VFX
 
         public void Initialize(CardEffectSpawnContext context)
         {
+            _gameCamera = context.GameCamera;
             _basePosition = _rect.anchoredPosition;
 
             if (_coinParticlesPrefab != null)
             {
-                Vector3 midpoint = Vector3.Lerp(context.CasterAnchor.position, context.OpponentAnchor.position, 0.5f);
-                _coinParticlesInstance = Instantiate(_coinParticlesPrefab, midpoint, Quaternion.identity);
+                _coinParticlesInstance = Instantiate(_coinParticlesPrefab, WorldPointOnChest(), Quaternion.identity);
                 _coinParticlesInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
 
             BuildAndPlaySequence();
+        }
+
+        // The chest is a Screen Space - Overlay UI element — RectTransform.position for it is in
+        // screen-pixel space, not the actual 3D world space the (world-space) coin particle
+        // system lives in. Converting through the game camera, same pattern as the other
+        // controllers' world/UI sync (e.g. GunpowderBarrel's dust trail), is what actually keeps
+        // the burst pinned to the chest instead of wherever the raw RectTransform position
+        // happens to fall in world units.
+        private Vector3 WorldPointOnChest()
+        {
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(null, _rect.position);
+            return _gameCamera.ScreenToWorldPoint(
+                new Vector3(screenPoint.x, screenPoint.y, _gameCamera.nearClipPlane + 1f));
         }
 
         private void BuildAndPlaySequence()
@@ -95,7 +109,15 @@ namespace ThroneOfTides.Systems.VFX
             _sequence.OnComplete(OnSequenceComplete);
         }
 
-        private void PlayCoinBurst() => _coinParticlesInstance?.Play();
+        private void PlayCoinBurst()
+        {
+            if (_coinParticlesInstance == null) return;
+
+            // The chest has risen and enlarged since spawn — re-snap to its current position so
+            // the burst plays exactly on top of the sprite, not where it started.
+            _coinParticlesInstance.transform.position = WorldPointOnChest();
+            _coinParticlesInstance.Play();
+        }
 
         private void OnSequenceComplete()
         {

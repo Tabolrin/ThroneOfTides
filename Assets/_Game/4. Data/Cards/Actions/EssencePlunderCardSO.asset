@@ -38,7 +38,7 @@ MonoBehaviour:
     _presentationMode: 1
     _anchorSide: 0
     _positionType: 0
-    _spritePrefab: {fileID: 0}
+    _spritePrefab: {fileID: 6421060018467032956, guid: 519a5834c94eb8d499d12544c38c056f, type: 3}
     _worldParticlePrefab: {fileID: 0}
     _sfx:
       _playlist: {fileID: 0}

@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.06, y: 0.06, z: 0.06}
+  m_LocalScale: {x: 0.1, y: 0.06, z: 0.06}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -129,7 +129,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.ReconParrotVFXController
   _outboundDuration: 0.6
   _outboundEase: 4
-  _holdAtTargetDuration: 0.3
   _returnDuration: 0.6
   _returnEase: 4
   _spriteRenderer: {fileID: 1016542345595749369}

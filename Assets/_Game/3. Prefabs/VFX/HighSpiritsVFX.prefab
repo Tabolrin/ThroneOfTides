@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &805700773756121737
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2601069127127649471}
+  m_Layer: 0
+  m_Name: ParticleAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2601069127127649471
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 805700773756121737}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.02, y: 2.15, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8879653032929372455}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1856735502966571412
 GameObject:
   m_ObjectHideFlags: 0
@@ -118,11 +149,12 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.65, y: 0.65, z: 0.65}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6190038731662163392}
   - {fileID: 6164987785135277582}
+  - {fileID: 2601069127127649471}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3105171496586731819
@@ -141,13 +173,15 @@ MonoBehaviour:
   _rightMug: {fileID: 3399087236448228747}
   _dropletParticlesPrefab: {fileID: 5978382566097320969, guid: d6fb97154e619234981418608b7530e8, type: 3}
   _clinkSfx:
-    _playlist: {fileID: 0}
+    _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
     _songName: 
     _volumeMultiplier: 1
     _pitchMultiplier: 1
-  _startSeparation: 5
+  _startSeparation: 2.5
+  _particleAnchor: {fileID: 2601069127127649471}
   _approachDuration: 0.35
   _approachEase: 5
+  _stopDistance: 1.25
   _holdDuration: 0.3
   _fadeOutDuration: 0.3
 --- !u!1 &6357605378864740690

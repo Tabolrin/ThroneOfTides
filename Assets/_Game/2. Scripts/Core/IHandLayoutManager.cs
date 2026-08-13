@@ -18,7 +18,12 @@ namespace ThroneOfTides.Core
         void AddCardToEnemyHand(ICard card);
 
         IEnumerator AnimateManualDraw(ICard card);
-        // Reaction cards animate to the effects bar instead of the hand
-        IEnumerator AnimateReactionDraw(ICard card);
+
+        /// Card already sits visually in the player's hand (dealt via AnimateManualDraw or the
+        /// opening deal, exactly like a normal card) — flies it from its hand slot to the
+        /// reaction badge area and shrinks it away. onArrived fires the instant it's fully gone,
+        /// so the caller can apply the actual charge increment in sync with the vanish instead
+        /// of before the player has seen the card at all.
+        IEnumerator AnimateReactionAbsorb(ICard card, System.Action onArrived);
     }
 }

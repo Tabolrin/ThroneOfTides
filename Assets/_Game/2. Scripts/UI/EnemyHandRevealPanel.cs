@@ -12,9 +12,9 @@ namespace ThroneOfTides.UI
     /// zone until the player dismisses it (Close button or clicking the dimmed background).
     /// Spawns its own CardView instances directly (not through HandLayoutManager's hand pool —
     /// this is a short-lived, independent display, not part of either hand's live layout).
-    /// The root GameObject stays active at all times so OnEnable can subscribe to
-    /// GameEventBus once at scene start; a separate Visual child is what actually toggles, to
-    /// avoid the classic "SetActive(true) re-triggers Awake/OnEnable synchronously" trap.
+    /// Driven directly by ReconParrotVFXController (via CardEffectSpawnContext.ShowEnemyHandReveal)
+    /// rather than a global event, so its on-screen timing can be sequenced around the parrot's
+    /// own flight animation instead of popping up the instant the underlying effect resolves.
     /// </summary>
     public class EnemyHandRevealPanel : MonoBehaviour
     {
@@ -26,6 +26,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private float          _cardSpacing = 330f;
 
         private readonly List<CardView> _spawned = new List<CardView>();
+        private System.Action _onDismissed;
 
         private void Awake()
         {
@@ -34,8 +35,17 @@ namespace ThroneOfTides.UI
             if (_backgroundButton != null) _backgroundButton.onClick.AddListener(Hide);
         }
 
-        private void OnEnable()  => GameEventBus.OnEnemyHandRevealed += Show;
-        private void OnDisable() => GameEventBus.OnEnemyHandRevealed -= Show;
+        /// <summary>
+        /// Shows the panel and invokes onDismissed once the player closes it (Close button or
+        /// clicking the dimmed background) — for callers (e.g. ReconParrotVFXController) that
+        /// need to sequence their own animation around the panel's lifetime instead of it firing
+        /// on a global event the instant the underlying effect resolves.
+        /// </summary>
+        public void ShowAndAwaitDismiss(IReadOnlyList<ICard> cards, System.Action onDismissed)
+        {
+            _onDismissed = onDismissed;
+            Show(cards);
+        }
 
         public void Show(IReadOnlyList<ICard> cards)
         {
@@ -71,6 +81,10 @@ namespace ThroneOfTides.UI
         {
             Clear();
             if (_visualRoot != null) _visualRoot.SetActive(false);
+
+            var callback = _onDismissed;
+            _onDismissed = null;
+            callback?.Invoke();
         }
 
         private void Clear()

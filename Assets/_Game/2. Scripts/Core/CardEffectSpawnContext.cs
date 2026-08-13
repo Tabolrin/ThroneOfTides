@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -104,6 +105,33 @@ namespace ThroneOfTides.Core
         /// </summary>
         public readonly Func<CardPresentationSide, VfxAnchorType, Transform> GetAnchor;
 
+        /// <summary>
+        /// Resolves an anchor point on the PLAYER's ship specifically, regardless of which side
+        /// actually cast the card — for effects meant to appear "in the space between the two
+        /// ships" (e.g. Treasure Chest's coin burst), which should stay pinned to the player's
+        /// side rather than flipping to the enemy's when the enemy plays the card.
+        /// </summary>
+        public readonly Func<VfxAnchorType, Transform> GetPlayerAnchor;
+
+        /// <summary>
+        /// Shows the enemy-hand-reveal modal (Recon Parrot) with the given cards, invoking the
+        /// callback once the player dismisses it. Kept as a generic delegate (not a direct
+        /// EnemyHandRevealPanel reference) since Core cannot depend on the UI assembly — see
+        /// CardPresentationPlayer for the concrete wiring.
+        /// </summary>
+        public readonly Action<IReadOnlyList<ICard>, Action> ShowEnemyHandReveal;
+
+        /// <summary>
+        /// Suppresses the next generic "+N mana" popup that OnPlayerManaChanged/OnEnemyManaChanged
+        /// would otherwise fire the instant CombatResolver's synchronous mana change actually
+        /// happens — for effects (e.g. Essence Plunder) that want to show their own "+N" popup
+        /// timed to their own animation instead of the instant the real state changes.
+        /// </summary>
+        public readonly Action SuppressManaGainPopup;
+
+        /// <summary>Spawns a deferred "+N" mana popup at the given world position, through the same queue as every other floating number.</summary>
+        public readonly Action<int, Vector3> SpawnManaGainedNumber;
+
         public CardEffectSpawnContext(
             Transform casterAnchor,
             Transform opponentAnchor,
@@ -123,7 +151,11 @@ namespace ThroneOfTides.Core
             Action beginExplicitTargetGunpowderHold = null,
             Action endExplicitTargetGunpowderHold = null,
             Func<VfxAnchorType, Transform> getOpponentAnchor = null,
-            Func<CardPresentationSide, VfxAnchorType, Transform> getAnchor = null)
+            Func<CardPresentationSide, VfxAnchorType, Transform> getAnchor = null,
+            Func<VfxAnchorType, Transform> getPlayerAnchor = null,
+            Action<IReadOnlyList<ICard>, Action> showEnemyHandReveal = null,
+            Action suppressManaGainPopup = null,
+            Action<int, Vector3> spawnManaGainedNumber = null)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -144,6 +176,10 @@ namespace ThroneOfTides.Core
             EndExplicitTargetGunpowderHold = endExplicitTargetGunpowderHold;
             GetOpponentAnchor = getOpponentAnchor;
             GetAnchor = getAnchor;
+            GetPlayerAnchor = getPlayerAnchor;
+            ShowEnemyHandReveal = showEnemyHandReveal;
+            SuppressManaGainPopup = suppressManaGainPopup;
+            SpawnManaGainedNumber = spawnManaGainedNumber;
         }
     }
 }

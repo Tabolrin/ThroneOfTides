@@ -1,11 +1,11 @@
-// Assets/_Game/2. Scripts/Data/Effects/StolenWindEffectSO.cs
+// Assets/_Game/2. Scripts/Data/Effects/EssencePlunderEffectSO.cs
 using ThroneOfTides.Core;
 using UnityEngine;
 
 namespace ThroneOfTides.Data
 {
-    [CreateAssetMenu(menuName = "ThroneOfTides/Effects/StolenWind")]
-    public class StolenWindEffectSO : ActionEffectSO<IManaEffects>
+    [CreateAssetMenu(menuName = "ThroneOfTides/Effects/EssencePlunder")]
+    public class EssencePlunderEffectSO : ActionEffectSO<IManaEffects>
     {
         [SerializeField] private int _manaToSteal = 1;
 
@@ -14,7 +14,7 @@ namespace ThroneOfTides.Data
             // HP cost is paid by CombatResolver before Execute is called,
             // using CardSO.HPCost — no HP deduction here
             context.StealEnemyMana(_manaToSteal);
-            GameDebug.Log($"Stolen Wind — stole {_manaToSteal} mana from enemy");
+            GameDebug.Log($"Essence Plunder — stole {_manaToSteal} mana from enemy");
         }
     }
 }

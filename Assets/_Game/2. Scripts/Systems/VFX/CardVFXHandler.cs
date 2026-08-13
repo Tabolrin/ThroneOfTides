@@ -30,7 +30,6 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _hitImpactStandardPrefab;
         [SerializeField] private GameObject _hitImpactExplosionPrefab;
         [SerializeField] private GameObject _whirlpoolPrefab;
-        [SerializeField] private GameObject _ramTheHullPrefab;
 
         [Header("VFX Prefabs — Action")]
         [SerializeField] private GameObject _reconParrotPrefab;
@@ -38,7 +37,6 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _lockerReturnPrefab;
         [SerializeField] private GameObject _monkeyGrabPrefab;
         [SerializeField] private GameObject _rumPrefab;
-        [SerializeField] private GameObject _stolenWindPrefab;
 
         [Header("VFX Prefabs — Reaction")]
         [SerializeField] private GameObject _deadMansTurnPrefab;
@@ -104,6 +102,20 @@ namespace ThroneOfTides.Systems
 
         /// <summary>Overrides the inspector default — see GameBootstrapper's configurable delay.</summary>
         public void SetFloatingNumberDelay(float delay) => _floatingNumberDelay = Mathf.Max(0f, delay);
+
+        // Set by a self-driving ICardPlayEffect (e.g. Essence Plunder) that wants to show its own
+        // "+N" popup timed to its own animation instead of the generic one OnPlayerManaChanged/
+        // OnEnemyManaChanged would otherwise fire the instant the mana actually changes — which
+        // happens synchronously as part of the same card resolution, before that animation even
+        // starts. Consumed (reset) the next time either handler runs, so it never leaks into an
+        // unrelated later mana change.
+        private bool _suppressNextManaGainPopup;
+
+        public void SuppressNextManaGainPopup() => _suppressNextManaGainPopup = true;
+
+        /// <summary>Public entry point for a self-driving effect's own deferred "+N" mana popup — routed through the same queue as every other floating number.</summary>
+        public void SpawnFloatingManaGain(int amount, Vector3 position) =>
+            SpawnFloatingNumber($"+{amount}", ManaColor, position);
 
         // ── Unity ─────────────────────────────────────────────────────────────
 
@@ -193,7 +205,10 @@ namespace ThroneOfTides.Systems
             bool wasGained    = hadPrevious && current > _previousPlayerMana;
 
             if (wasGained)
-                SpawnFloatingNumber($"+{current - _previousPlayerMana}", ManaColor, GetHitPoint(DamageTarget.Player).position);
+            {
+                if (_suppressNextManaGainPopup) _suppressNextManaGainPopup = false;
+                else SpawnFloatingNumber($"+{current - _previousPlayerMana}", ManaColor, GetHitPoint(DamageTarget.Player).position);
+            }
 
             _previousPlayerMana = current;
 
@@ -207,7 +222,10 @@ namespace ThroneOfTides.Systems
             bool wasGained    = hadPrevious && current > _previousEnemyMana;
 
             if (wasGained)
-                SpawnFloatingNumber($"+{current - _previousEnemyMana}", ManaColor, GetHitPoint(DamageTarget.Enemy).position);
+            {
+                if (_suppressNextManaGainPopup) _suppressNextManaGainPopup = false;
+                else SpawnFloatingNumber($"+{current - _previousEnemyMana}", ManaColor, GetHitPoint(DamageTarget.Enemy).position);
+            }
 
             _previousEnemyMana = current;
         }
@@ -246,7 +264,6 @@ namespace ThroneOfTides.Systems
 
         private void PlayCardVFX(CardSO card)
         {
-            Transform source = _playerShipHitPoint;
             Transform target = _enemyShipHitPoint;
 
             switch (card.Id)
@@ -254,13 +271,6 @@ namespace ThroneOfTides.Systems
                 // Pistol/Cannonball/Chain Shot and Whale Ram are migrated to
                 // CardPresentationPlayer (PresentationEntries + ICardPlayEffect) — no case
                 // needed here for their spawn logic.
-
-                case CardId.RamTheHull:
-                    SpawnVFX(_ramTheHullPrefab != null
-                        ? _ramTheHullPrefab
-                        : _hitImpactExplosionPrefab, target.position);
-                    _feedbackHeavyHit?.PlayFeedbacks();
-                    break;
 
                 case CardId.Whirlpool: SpawnVFX(_whirlpoolPrefab, target.position); break;
 
@@ -291,20 +301,18 @@ namespace ThroneOfTides.Systems
                 // ICardPlayEffect) — no case needed here for its spawn logic.
 
                 case CardId.HighSpirits:
-                    // Self-manages its own animation length and destroys itself — not routed
-                    // through SpawnVFX's fixed _vfxLifetime timer. Mana-gain feedback already
-                    // fires generically via OnPlayerManaChanged, so no explicit call needed here.
-                    if (_highSpiritsPrefab != null)
-                        Instantiate(_highSpiritsPrefab, source.position, Quaternion.identity);
+                    // Appears "between the ships" — always the player's sky anchor, matching
+                    // Counter Gale's placement. Self-manages its own animation length and
+                    // destroys itself, so it's not routed through SpawnVFX's fixed _vfxLifetime
+                    // timer. Mana-gain feedback already fires generically via
+                    // OnPlayerManaChanged, so no explicit call needed here.
+                    if (_highSpiritsPrefab != null && _playerSkyPoint != null)
+                        Instantiate(_highSpiritsPrefab, _playerSkyPoint.position, Quaternion.identity);
                     break;
 
                 // Rum is SFX-only, migrated to CardPresentationPlayer's SFX-only entry support —
                 // no case needed here (and its heal feedback already fires generically via
                 // OnHealApplied).
-
-                case CardId.StolenWind:
-                    SpawnVFX(_stolenWindPrefab, source.position);
-                    break;
 
                 // Reactions are charged on draw — OnReactionCharged/Fired handle their VFX
                 case CardId.DeadMansTurn:

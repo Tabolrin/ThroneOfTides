@@ -64,7 +64,7 @@ All `ScriptableObject`s, `CreateAssetMenu`-driven, designer-facing:
 | `ReconParrotEffectSO` | reveal enemy hand — UI wiring is a TODO, currently just `Debug.Log` |
 | `RumEffectSO` | heal |
 | `SirenSongEffectSO` | sets an unblockable-next-attack flag |
-| `StolenWindEffectSO` | steals enemy mana; HP cost paid by `CombatResolver` beforehand |
+| `EssencePlunderEffectSO` | steals enemy mana; HP cost paid by `CombatResolver` beforehand |
 | `TreasureChestEffectSO` | return 3 from deck snapshot + 50% coin-flip for +1 mana + draw 1 |
 
 ## 4. Systems Layer — the game engine

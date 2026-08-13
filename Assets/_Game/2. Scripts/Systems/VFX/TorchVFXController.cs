@@ -8,10 +8,13 @@ namespace ThroneOfTides.Systems.VFX
 {
     /// <summary>
     /// Torch: a UI-canvas sprite thrown from the caster's ship to the target's, spinning (no
-    /// trail). On impact, checks the target ship's Gunpowder world-space indicator
-    /// (ShipStatusIndicator) — if active, plays the explosion animation/SFX and a screen shake;
-    /// if not, the throw itself is the whole show. Damage math (base vs. combo-bonus) is already
-    /// handled by CombatResolver/GameState — this only decides what to show.
+    /// trail). Whether the target ship had an active Gunpowder stack is captured the instant the
+    /// throw starts (CombatResolver ignites/clears that stack synchronously as part of the same
+    /// card resolution, well before the throw's travel time elapses, so checking it again at
+    /// impact would always read "already cleared"). If it was active, impact plays the explosion
+    /// animation/SFX and a screen shake; if not, the throw itself is the whole show. Damage math
+    /// (base vs. combo-bonus) is already handled by CombatResolver/GameState — this only decides
+    /// what to show.
     ///
     /// Uses ProjectileThrow for the shared spin-and-arc motion — also used by
     /// GunpowderBarrelVFXController, and intended for Cannonball/Pistol to adopt later.
@@ -46,6 +49,7 @@ namespace ThroneOfTides.Systems.VFX
         private Camera        _gameCamera;
         private CardEffectSpawnContext _context;
         private Sequence _sequence;
+        private bool _gunpowderWasActive;
 
         private void Awake() => _rectTransform = GetComponent<RectTransform>();
 
@@ -54,6 +58,14 @@ namespace ThroneOfTides.Systems.VFX
             _context        = context;
             _rootCanvasRect = context.GameCanvas;
             _gameCamera     = context.GameCamera;
+
+            // Must be captured now, not at impact — CombatResolver ignites/clears the target's
+            // Gunpowder stack synchronously as part of this same card resolution, which finishes
+            // well before the throw's own travel duration elapses. Checking IsOpponentStatusVisible
+            // at OnImpact time would always read "already cleared", silently killing the
+            // explosion on every single throw regardless of whether Gunpowder was actually active.
+            _gunpowderWasActive = context.IsOpponentStatusVisible?.Invoke(ShipStatusType.Gunpowder) ?? false;
+
             BuildAndPlaySequence();
         }
 
@@ -82,9 +94,7 @@ namespace ThroneOfTides.Systems.VFX
 
         private void OnImpact()
         {
-            bool gunpowderActive = _context.IsOpponentStatusVisible?.Invoke(ShipStatusType.Gunpowder) ?? false;
-
-            if (gunpowderActive)
+            if (_gunpowderWasActive)
             {
                 ExplosionEffectPool.PlayAt(_explosionPrefab, _context.OpponentAnchor.position, _explosionLifetime);
 

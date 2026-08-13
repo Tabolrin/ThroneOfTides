@@ -57,6 +57,11 @@ namespace ThroneOfTides.UI
         [SerializeField] private float         _drawArcDuration = 0.35f;
         [SerializeField] private MMF_Player    _feedbackDeckDraw;
 
+        [Header("Reaction Charge Absorb")]
+        [Tooltip("Where a reaction card (Dead Man's Turn, Counter Gale) flies to and shrinks away once the draw phase is done — the player's reaction badge row on ActiveEffectsBar.")]
+        [SerializeField] private RectTransform _reactionBadgeAnchor;
+        [SerializeField] private float         _reactionAbsorbDuration = 0.35f;
+
         private readonly List<CardView> _playerCards = new List<CardView>();
         private readonly List<CardView> _enemyCards  = new List<CardView>();
 
@@ -572,18 +577,63 @@ namespace ThroneOfTides.UI
         }
         
         // Explicit interface — ICard parameter, delegates to public CardSO method
-        IEnumerator IHandLayoutManager.AnimateReactionDraw(ICard card) =>
-            AnimateReactionDraw(card as CardSO);
+        IEnumerator IHandLayoutManager.AnimateReactionAbsorb(ICard card, System.Action onArrived) =>
+            AnimateReactionAbsorb(card as CardSO, onArrived);
 
-// Public method — accessible from concrete type references (GameBootstrapper)
-        public IEnumerator AnimateReactionDraw(CardSO card)
+        // Public method — accessible from concrete type references (GameBootstrapper).
+        // Card must already have a live CardView sitting in _playerCards (from AnimateManualDraw
+        // or DealOpeningHandAnimated) — this just flies that existing view to the reaction badge
+        // area and shrinks/fades it away, then releases it.
+        public IEnumerator AnimateReactionAbsorb(CardSO card, System.Action onArrived)
         {
-            if (card == null) yield break;
+            if (card == null) { onArrived?.Invoke(); yield break; }
 
-            // TODO: full shrink-to-slot animation once ReactionsBar exists in scene
-            // Requires _reactionSlotTransform to be wired in Inspector
-            GameEventBus.FireCardDrawn(card);
-            yield return null;
+            CardView view = _playerCards.Find(v => v != null && v.CardData == card);
+            if (view == null) { onArrived?.Invoke(); yield break; }
+
+            var drag = view.GetComponent<CardDragHandler>();
+            if (drag != null)
+            {
+                drag.OnDragStarted -= OnCardDragStarted;
+                drag.OnDragEnded   -= OnCardDragEnded;
+            }
+
+            _playerCards.Remove(view);
+            DisableHover(view);
+            RefreshPlayerLayout(animated: true);
+
+            var rect        = view.GetComponent<RectTransform>();
+            var canvasGroup = view.GetComponent<CanvasGroup>();
+            if (canvasGroup == null) canvasGroup = view.gameObject.AddComponent<CanvasGroup>();
+            canvasGroup.blocksRaycasts = false;
+
+            // Convert the badge anchor's world position into playerHandContainer-local space —
+            // same technique AnimateManualDraw uses for the deck position — so this works
+            // regardless of whether the badge row lives under a different canvas/hierarchy.
+            Vector2 targetLocalPos = rect.anchoredPosition;
+            if (_reactionBadgeAnchor != null)
+            {
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    _playerHandContainer,
+                    RectTransformUtility.WorldToScreenPoint(null, _reactionBadgeAnchor.position),
+                    null,
+                    out targetLocalPos);
+            }
+
+            var sequence = DOTween.Sequence();
+            sequence.Append(rect.DOAnchorPos(targetLocalPos, _reactionAbsorbDuration).SetEase(Ease.InQuad));
+            sequence.Join(rect.DOScale(Vector3.zero, _reactionAbsorbDuration).SetEase(Ease.InBack));
+            sequence.Join(canvasGroup.DOFade(0f, _reactionAbsorbDuration).SetEase(Ease.InQuad));
+
+            yield return sequence.WaitForCompletion();
+
+            // The charge/badge-count increment happens exactly here — once the card has fully
+            // vanished — not before, so the badge visibly appearing/incrementing reads as a
+            // direct consequence of the card's arrival instead of happening in advance.
+            onArrived?.Invoke();
+
+            rect.localScale = Vector3.one;
+            ReleaseCardView(view);
         }
     }
 }

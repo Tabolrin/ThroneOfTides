@@ -31,7 +31,6 @@ MonoBehaviour:
   _weightActionDefense: 0.2
   _weightActionManaSteal: 0
   _weightKraken: 1.8
-  _weightBoardingParty: 1.5
   _weightDOT: 0.6
   _weightReactionCounter: 0
   _weightPlayAroundReactions: 0

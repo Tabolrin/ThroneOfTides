@@ -49,6 +49,9 @@ namespace ThroneOfTides.App
         [SerializeField] private TurnCoordinator       _turnCoordinator;
         [SerializeField] private CheatsPanel           _cheatsPanel;
         [SerializeField] private CardCheatPanel        _cardCheatPanel;
+        [SerializeField] private EnemyHandRevealPanel  _enemyHandRevealPanel;
+        [Tooltip("Wired here (App layer) rather than directly on CardPresentationPlayer, since Systems cannot reference the UI assembly EnemyHandRevealPanel lives in.")]
+        [SerializeField] private ThroneOfTides.Systems.CardPresentationPlayer _cardPresentationPlayer;
 
         [Header("Debug — Card Registry")]
         [Tooltip("Flat registry of every CardSO — required for CardCheatPanel to list all cards.")]
@@ -83,6 +86,9 @@ namespace ThroneOfTides.App
 
             if (_cardVFXHandler != null)
                 _cardVFXHandler.SetFloatingNumberDelay(_floatingNumberDelay);
+
+            if (_cardPresentationPlayer != null && _enemyHandRevealPanel != null)
+                _cardPresentationPlayer.ShowEnemyHandReveal = _enemyHandRevealPanel.ShowAndAwaitDismiss;
 
             // ── Apply upgrade modifiers ─────────────────────────────────────
             // Base values from config, with optional per-upgrade level bonuses
@@ -173,12 +179,16 @@ namespace ThroneOfTides.App
             StartCoroutine(DealPlayerOpeningHandRoutine());
         }
 
+        // How long a reaction card sits fully dealt into the hand before it flies off to the
+        // reaction badge area and shrinks away — matches TurnCoordinator's own draw-phase delay.
+        private const float ReactionAbsorbDelay = 0.4f;
+
         private IEnumerator DealPlayerOpeningHandRoutine()
         {
             _endTurnButton.interactable    = false;
             DeckClickHandler.OnDeckClicked -= OnDeckClicked;
 
-            var normalCards   = new List<CardSO>();
+            var dealtCards    = new List<CardSO>();
             var reactionCards = new List<CardSO>();
 
             // Draws until the hand itself is full, not a fixed number of draws — see the
@@ -188,24 +198,28 @@ namespace ThroneOfTides.App
                 CardSO card = _gameState.PlayerDeck.Draw();
                 if (card == null) break;
 
+                // Dealt into the visual hand in draw order regardless of type — a reaction card
+                // reads exactly like any other opening-hand card until it later flies off to
+                // charge its badge, instead of the charge silently appearing before the deal
+                // animation even starts.
+                dealtCards.Add(card);
+
                 if (card.CardType == CardType.Reaction)
                     reactionCards.Add(card);
                 else
-                {
                     _gameState.PlayerHand.AddCard(card, _config.MaxHandSize);
-                    normalCards.Add(card);
-                }
             }
-
-            foreach (var card in reactionCards)
-                ChargeReactionCard(card);
 
             _gameState.SetHasDrawnThisTurn();
 
-            yield return StartCoroutine(_handLayoutManager.DealOpeningHandAnimated(normalCards));
+            yield return StartCoroutine(_handLayoutManager.DealOpeningHandAnimated(dealtCards));
 
-            foreach (var card in reactionCards)
-                yield return StartCoroutine(_handLayoutManager.AnimateReactionDraw(card));
+            if (reactionCards.Count > 0)
+            {
+                yield return new WaitForSeconds(ReactionAbsorbDelay);
+                foreach (var card in reactionCards)
+                    StartCoroutine(_handLayoutManager.AnimateReactionAbsorb(card, () => ChargeReactionCard(card)));
+            }
 
             DeckClickHandler.OnDeckClicked += OnDeckClicked;
             RefreshHUD();

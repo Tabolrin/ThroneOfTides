@@ -1,5 +1,6 @@
 // Assets/_Game/2. Scripts/Systems/TurnCoordinator.cs
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
@@ -9,6 +10,10 @@ namespace ThroneOfTides.Systems
 {
     public class TurnCoordinator : MonoBehaviour
     {
+        // How long a reaction card sits fully dealt into the hand (looking like any other card)
+        // before it flies off to the reaction badge area and shrinks away.
+        private const float ReactionAbsorbDelay = 0.4f;
+
         private GameState          _gameState;
         private TurnStateMachine   _stateMachine;
         private EnemyAI            _enemyAI;
@@ -85,19 +90,17 @@ namespace ThroneOfTides.Systems
             CardSO drawn = _gameState.PlayerDeck.Draw();
             if (drawn == null) return false;
 
+            _gameState.SetHasDrawnThisTurn();
+            OnCardDrawn?.Invoke(drawn);
+
             if (drawn.CardType == CardType.Reaction)
             {
-                ChargeReaction(drawn);
-                _gameState.SetHasDrawnThisTurn();
-                OnCardDrawn?.Invoke(drawn);
-                StartCoroutine(_handLayout.AnimateReactionDraw(drawn));
+                StartCoroutine(DrawReactionCardThenAbsorb(drawn));
                 return true;
             }
 
             _gameState.PlayerHand.AddCard(drawn, _config.MaxHandSize);
-            _gameState.SetHasDrawnThisTurn();
             GameEventBus.FireCardDrawn(drawn);
-            OnCardDrawn?.Invoke(drawn);
             StartCoroutine(_handLayout.AnimateManualDraw(drawn));
             return true;
         }
@@ -118,8 +121,7 @@ namespace ThroneOfTides.Systems
 
             if (drawn.CardType == CardType.Reaction)
             {
-                ChargeReaction(drawn);
-                StartCoroutine(_handLayout.AnimateReactionDraw(drawn));
+                StartCoroutine(DrawReactionCardThenAbsorb(drawn));
                 return true;
             }
 
@@ -274,15 +276,21 @@ namespace ThroneOfTides.Systems
         // matching TryDrawCard's existing per-card handling.
         private IEnumerator RefillPlayerHandRoutine()
         {
+            var pendingReactionCards = new List<CardSO>();
+
             while (_gameState.PlayerHand.Count < _config.MaxHandSize && _gameState.PlayerDeck.Count > 0)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
                 if (drawn == null) break;
 
+                // Reaction cards deal into the fanned hand exactly like any other card — they
+                // only fly off to charge their badge once the whole refill is done, see below.
                 if (drawn.CardType == CardType.Reaction)
                 {
-                    ChargeReaction(drawn);
-                    yield return StartCoroutine(_handLayout.AnimateReactionDraw(drawn));
+                    pendingReactionCards.Add(drawn);
+                    GameEventBus.FireCardDrawn(drawn);
+                    OnCardDrawn?.Invoke(drawn);
+                    yield return StartCoroutine(_handLayout.AnimateManualDraw(drawn));
                     continue;
                 }
 
@@ -293,6 +301,9 @@ namespace ThroneOfTides.Systems
             }
 
             _gameState.SetHasDrawnThisTurn();
+
+            foreach (var card in pendingReactionCards)
+                StartCoroutine(AbsorbReactionCard(card));
         }
 
         // ── Enemy Turn ────────────────────────────────────────────────────────
@@ -384,8 +395,15 @@ namespace ThroneOfTides.Systems
 
             if (isAttackCard)
                 yield return StartCoroutine(ResolveEnemyAttack(playedCard));
-            else if (playedCard.CardType == CardType.Action && playedCard.AiPlayBeforeAttack)
-                _combatResolver.ResolveCard(playedCard, DamageTarget.Enemy, _handLayout);
+            else
+            {
+                if (playedCard.CardType == CardType.Action && playedCard.AiPlayBeforeAttack)
+                    _combatResolver.ResolveCard(playedCard, DamageTarget.Enemy, _handLayout);
+
+                // No reaction prompt can ever gate a non-attack card, so its presentation is
+                // always safe to show right away.
+                GameEventBus.FireEnemyCardPresentationReady(playedCard);
+            }
 
             OnHPChanged?.Invoke();
         }
@@ -398,8 +416,13 @@ namespace ThroneOfTides.Systems
             // bypassed this and dealt flat attackCard.Damage with no HP cost taken.
             int damage = _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout);
 
-            // A combo primer or a DOT application deals no immediate damage this play.
-            if (damage <= 0) yield break;
+            // A combo primer or a DOT application deals no immediate damage this play — nothing
+            // ever prompts the player over it, so its presentation is always safe immediately.
+            if (damage <= 0)
+            {
+                GameEventBus.FireEnemyCardPresentationReady(attackCard);
+                yield break;
+            }
 
             bool isKraken      = attackCard.Id == CardId.Kraken;
             bool isUnblockable = _gameState.SirenSongActive || isKraken;
@@ -410,14 +433,23 @@ namespace ThroneOfTides.Systems
             if (isKraken && playerHasKraken)
             {
                 yield return StartCoroutine(KrakenVsKrakenPrompt(attackCard));
+                // Standoff already carries its own dedicated prompt/VFX (KrakenVsKrakenPrompt) —
+                // no separate presentation entry to defer here.
                 yield break;
             }
 
             bool canReact = !isUnblockable && (hasDMT || hasCounterGale);
 
+            // The attack's own VFX/SFX (fireball, cannon flash, etc.) must not play until the
+            // player has actually made their choice — spawning it earlier would show/sound the
+            // attack while the negation prompt is still on screen, before the player has decided
+            // anything.
             if (canReact)
                 yield return StartCoroutine(ReactionPrompt(attackCard, damage, hasDMT, hasCounterGale));
-            else
+
+            GameEventBus.FireEnemyCardPresentationReady(attackCard);
+
+            if (!canReact)
             {
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
                 GameDebug.Log($"Enemy attack — {attackCard.Name}: {damage} dmg");
@@ -516,6 +548,25 @@ namespace ThroneOfTides.Systems
         {
             if (card.Id == CardId.DeadMansTurn)   _gameState.AddDeadMansTurnCharge(side);
             else if (card.Id == CardId.CounterGale) _gameState.AddCounterGaleCharge(side);
+        }
+
+        // Single-draw path (TryDrawCard / TryDrawCardSecondary): the reaction card deals into
+        // the hand exactly like a normal card, then absorbs into its badge on its own — there's
+        // no "rest of the draw" to wait for since it was the only card drawn this call.
+        private IEnumerator DrawReactionCardThenAbsorb(CardSO card)
+        {
+            GameEventBus.FireCardDrawn(card);
+            yield return StartCoroutine(_handLayout.AnimateManualDraw(card));
+            yield return StartCoroutine(AbsorbReactionCard(card));
+        }
+
+        // Waits the post-draw beat, then flies the already-dealt reaction card to its badge and
+        // applies the actual charge the instant it vanishes. Multiple pending reaction cards each
+        // run their own instance of this in parallel, so they all move together.
+        private IEnumerator AbsorbReactionCard(CardSO card)
+        {
+            yield return new WaitForSeconds(ReactionAbsorbDelay);
+            yield return StartCoroutine(_handLayout.AnimateReactionAbsorb(card, () => ChargeReaction(card)));
         }
 
         private void FireMatchResult()
