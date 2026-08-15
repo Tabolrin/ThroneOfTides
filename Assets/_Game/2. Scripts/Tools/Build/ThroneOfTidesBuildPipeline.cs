@@ -78,6 +78,14 @@ namespace ThroneOfTides.Tools
         }
 
         // ── Build A: Development (Windows) ─────────────────────────────────────
+        // Deliberately does NOT call ApplySceneOverrides - unlike every other build type here,
+        // this one builds Match.unity exactly as it's currently authored in the Editor (whatever
+        // deck overrides, if any, are already sitting in GameBootstrapper's Inspector fields, and
+        // whatever active/inactive state the CheatsPanel/CardCheatPanel/ForceEnemyCardCheatPanel
+        // GameObjects are already in). Cheats still work regardless of their GameObject's own
+        // active state, since each panel's own Awake() only hides itself when
+        // !Debug.isDebugBuild - BuildOptions.Development below keeps that true, so they show up
+        // as long as nothing has explicitly deactivated them in the scene.
 
         [MenuItem("ThroneOfTides/Build/Development Build (Windows)  %#1")]
         public static void BuildDevelopment()
@@ -98,20 +106,13 @@ namespace ThroneOfTides.Tools
                                  | BuildOptions.AllowDebugging
             };
 
-            var backup = ApplySceneOverrides(BuildProfileType.Development, disableCheats: false);
-            BuildReport report;
-            try
-            {
-                report = BuildPipeline.BuildPlayer(options);
-            }
-            finally
-            {
-                backup.Restore();
-            }
+            BuildReport report = BuildPipeline.BuildPlayer(options);
 
             if (report.summary.result == BuildResult.Succeeded)
                 EditorUtility.DisplayDialog("Dev Build Complete",
-                    $"Development build ready:\n{path}\n\nProfiler and debugger enabled.",
+                    $"Development build ready:\n{path}\n\n" +
+                    "Built exactly as currently configured in the Editor - no deck/config overrides applied.\n" +
+                    "Profiler, debugger, and cheats enabled.",
                     "OK");
         }
 
