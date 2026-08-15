@@ -10,30 +10,42 @@ namespace ThroneOfTides.Systems.VFX
     /// <summary>
     /// Essence Plunder: a lantern (UI-canvas sprite, same convention as Torch/Gunpowder Barrel)
     /// fades in on the activating player's ship. Once fully visible, a mana-flow particle system
-    /// plays from the opponent's ship toward the caster's - always correct regardless of which
-    /// side actually cast the card, since it's positioned/oriented from
-    /// CardEffectSpawnContext.OpponentAnchor toward CasterAnchor (both already resolved relative
-    /// to the caster) rather than any hardcoded "enemy"/"player" assumption. Only once the
-    /// particle finishes does the "+N mana" popup appear (the actual mana transfer itself already
-    /// happened synchronously when the card resolved - CombatResolver has no async capability -
-    /// so this suppresses the generic instant popup and fires its own deferred one instead, timed
-    /// to this animation). The lantern then fades out.
+    /// plays between the two ships - which ship it starts on is configurable via Mana Flow
+    /// Origin, but it always travels toward the OTHER ship automatically. Both ends are resolved
+    /// relative to whoever cast the card (CardEffectSpawnContext.CasterAnchor/OpponentAnchor),
+    /// so this is correct regardless of which side actually cast it - never a hardcoded
+    /// "enemy"/"player" assumption. Only once the particle finishes does the "+N mana" popup
+    /// appear (the actual mana transfer itself already happened synchronously when the card
+    /// resolved - CombatResolver has no async capability - so this suppresses the generic
+    /// instant popup and fires its own deferred one instead, timed to this animation). The
+    /// lantern then fades out.
     ///
-    /// The particle prefab ships empty on purpose - configure its Shape/Velocity/Color/etc.
-    /// freely. This controller only positions and rotates the GameObject each play so its local
-    /// +Y (up) points from the opponent's ship toward the caster's; aim your emission shape's
-    /// "forward" along local +Y to match.
+    /// The mana-flow prefab's root is an empty rig (no ParticleSystem of its own) holding one or
+    /// more child ParticleSystems - configure each child's Shape/Velocity/Color/etc. and local
+    /// tilt freely (e.g. several streams at slightly different angles to sell the suction
+    /// illusion). This controller only positions and rotates the root each play so its local +Y
+    /// (up) points from the start ship toward the end ship, then finds and plays every child
+    /// ParticleSystem underneath it - aim each child's emission shape "forward" along local +Y
+    /// to match, however many children there are.
     /// </summary>
     public class EssencePlunderVFXController : MonoBehaviour, ICardPlayEffect
     {
+        /// <summary>Which ship the mana-flow particle spawns on - see ManaFlowOrigin field below.</summary>
+        public enum ManaFlowOrigin { Opponent, Caster }
+
         [Header("References")]
         [SerializeField] private Image _lanternImage;
-        [Tooltip("Ships empty - fully configure its Shape/Velocity/Color/etc. yourself. Rotated at runtime so its local +Y (up) points from the opponent's ship toward the caster's.")]
-        [SerializeField] private ParticleSystem _manaFlowParticlesPrefab;
+        [Tooltip("An empty root GameObject holding one or more child ParticleSystems (e.g. several tilted streams to sell the suction illusion) - fully configure them yourself. The whole prefab is rotated at runtime so its local +Y (up) points from the Mana Flow Origin ship toward the other ship; all child particle systems are found and played together automatically, however many there are.")]
+        [SerializeField] private GameObject _manaFlowParticlesPrefab;
+
+        [Tooltip("Which ship the mana-flow particle spawns on - it always travels toward the OTHER ship automatically, regardless of this choice. Both are resolved relative to whoever cast the card, so 'Opponent'/'Caster' stay correct no matter which side plays it.")]
+        [SerializeField] private ManaFlowOrigin _manaFlowOrigin = ManaFlowOrigin.Opponent;
 
         [Header("Lantern Fade")]
         [SerializeField] private float _fadeInDuration = 0.2f;
         [SerializeField] private Ease  _fadeInEase = Ease.OutSine;
+        [Tooltip("Beat after the mana-flow particle finishes, with the lantern still fully visible, before the fade-out itself starts - long enough to read as 'done', short enough not to feel like a stall.")]
+        [SerializeField] private float _postParticleHoldDuration = 0.25f;
         [SerializeField] private float _fadeOutDuration = 0.3f;
         [SerializeField] private Ease  _fadeOutEase = Ease.InSine;
 
@@ -48,7 +60,7 @@ namespace ThroneOfTides.Systems.VFX
         private Camera        _gameCamera;
         private CardEffectSpawnContext _context;
         private CanvasGroup   _canvasGroup;
-        private ParticleSystem _particleInstance;
+        private GameObject    _particleInstance;
         private Sequence _sequence;
 
         private void Awake()
@@ -89,18 +101,30 @@ namespace ThroneOfTides.Systems.VFX
 
             if (_manaFlowParticlesPrefab != null)
             {
-                Vector3 from = _context.OpponentAnchor.position;
-                Vector3 to   = _context.CasterAnchor.position;
+                bool startsOnCaster = _manaFlowOrigin == ManaFlowOrigin.Caster;
+                Vector3 from = startsOnCaster ? _context.CasterAnchor.position   : _context.OpponentAnchor.position;
+                Vector3 to   = startsOnCaster ? _context.OpponentAnchor.position : _context.CasterAnchor.position;
                 Vector3 direction = (to - from).normalized;
 
-                // Local +Y (up) points along the opponent->caster direction - see class remarks.
+                // Local +Y (up) points along the configured start->end direction - see class remarks.
                 float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
 
                 _particleInstance = Instantiate(_manaFlowParticlesPrefab, from, Quaternion.Euler(0f, 0f, angle));
                 _context.PlaySfx?.Invoke(from);
-                _particleInstance.Play();
 
-                waitDuration = _particleInstance.main.duration + _particleInstance.main.startLifetime.constantMax;
+                // The root itself has no ParticleSystem - it's just a rig holding one or more
+                // child streams (e.g. several tilted copies to sell the suction illusion) - so
+                // each child is found and started individually rather than relying on
+                // ParticleSystem.Play's own withChildren cascade, which needs a root system to
+                // cascade FROM. Wait for whichever one actually finishes last, not just the
+                // first, or the mana popup/fade-out could fire while another stream is still
+                // visibly playing.
+                foreach (var system in _particleInstance.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    system.Play();
+                    float systemDuration = system.main.duration + system.main.startLifetime.constantMax;
+                    waitDuration = Mathf.Max(waitDuration, systemDuration);
+                }
             }
 
             _sequence = DOTween.Sequence();
@@ -110,11 +134,14 @@ namespace ThroneOfTides.Systems.VFX
 
         private void OnParticleComplete()
         {
-            if (_particleInstance != null) Destroy(_particleInstance.gameObject, 2f);
+            if (_particleInstance != null) Destroy(_particleInstance, 2f);
 
             _context.SpawnManaGainedNumber?.Invoke(_manaAmountForDisplay, _context.CasterAnchor.position);
 
             _sequence = DOTween.Sequence();
+            // Lantern stays fully visible (not fading) for this beat - the particle is already
+            // done, but starting the fade immediately read as too abrupt.
+            _sequence.AppendInterval(_postParticleHoldDuration);
             _sequence.Append(_canvasGroup.DOFade(0f, _fadeOutDuration).SetEase(_fadeOutEase));
             _sequence.OnComplete(() => Completed?.Invoke());
         }

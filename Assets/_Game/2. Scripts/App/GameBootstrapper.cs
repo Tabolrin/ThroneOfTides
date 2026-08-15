@@ -178,8 +178,10 @@ namespace ThroneOfTides.App
             // Draws a fixed number of cards (MaxHandSize, since the opening hand always starts
             // empty) rather than looping until the hand reaches MaxHandSize - a Reaction card
             // still counts as one of the opening draws even though it charges a badge instead of
-            // occupying a hand slot, matching TurnCoordinator's own draw-phase rule.
-            int drawsRemaining = _config.MaxHandSize - _gameState.EnemyHand.Count;
+            // occupying a hand slot, matching TurnCoordinator's own draw-phase rule. Charges are
+            // always 0 at match start, but counting them here too keeps this the same formula
+            // TurnCoordinator's per-turn refill uses, in case that ever changes.
+            int drawsRemaining = _config.MaxHandSize - (_gameState.EnemyHand.Count + _gameState.EnemyDeadMansTurnCharges + _gameState.EnemyCounterGaleCharges);
             for (int i = 0; i < drawsRemaining && _gameState.EnemyDeck.Count > 0; i++)
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
@@ -212,8 +214,9 @@ namespace ThroneOfTides.App
 
             // Same fixed-draw-count rule as DealOpeningHand - a Reaction card still counts as
             // one of the opening draws even though it ends up as a badge charge rather than a
-            // hand card.
-            int drawsRemaining = _config.MaxHandSize - _gameState.PlayerHand.Count;
+            // hand card. Charges are always 0 at match start, but counting them here too keeps
+            // this the same formula TurnCoordinator's per-turn refill uses.
+            int drawsRemaining = _config.MaxHandSize - (_gameState.PlayerHand.Count + _gameState.PlayerDeadMansTurnCharges + _gameState.PlayerCounterGaleCharges);
             for (int i = 0; i < drawsRemaining && _gameState.PlayerDeck.Count > 0; i++)
             {
                 CardSO card = _gameState.PlayerDeck.Draw();

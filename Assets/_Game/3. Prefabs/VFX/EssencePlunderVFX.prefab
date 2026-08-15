@@ -102,9 +102,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.VFX.EssencePlunderVFXController
   _lanternImage: {fileID: 2844513198498945066}
-  _manaFlowParticlesPrefab: {fileID: 3840855430194901845, guid: 198aca294cf609e4c85df5def8ee4862, type: 3}
+  _manaFlowParticlesPrefab: {fileID: 5610314369217627110, guid: 198aca294cf609e4c85df5def8ee4862, type: 3}
+  _manaFlowOrigin: 0
   _fadeInDuration: 0.2
   _fadeInEase: 3
+  _postParticleHoldDuration: 0.25
   _fadeOutDuration: 0.3
   _fadeOutEase: 2
   _manaAmountForDisplay: 2

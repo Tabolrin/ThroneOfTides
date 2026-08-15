@@ -327,7 +327,14 @@ namespace ThroneOfTides.Systems
         {
             var pendingReactionCards = new List<CardSO>();
 
-            int drawsRemaining = _config.MaxHandSize - _gameState.PlayerHand.Count;
+            // MaxHandSize caps the player's total held resources - hand cards AND already-charged
+            // reactions together - not just the hand alone. Reaction charges are a persistent,
+            // match-long resource that never goes away on its own (only consumed by actually
+            // firing Dead Man's Turn/Counter Gale), so counting only PlayerHand.Count here would
+            // let the total climb past 4 turn after turn as more reaction cards get drawn and
+            // charged, without ever reducing how many MORE cards get drawn on top.
+            int currentTotal   = _gameState.PlayerHand.Count + _gameState.PlayerDeadMansTurnCharges + _gameState.PlayerCounterGaleCharges;
+            int drawsRemaining = _config.MaxHandSize - currentTotal;
             for (int i = 0; i < drawsRemaining && _gameState.PlayerDeck.Count > 0; i++)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
@@ -377,8 +384,11 @@ namespace ThroneOfTides.Systems
             // this turn's draws even though it charges a badge instead of occupying a hand slot,
             // so drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand.
             // EnemyAI.PickCard never plays Reaction-type cards, so leaving one in hand would
-            // strand it there permanently unplayable.
-            int enemyDrawsRemaining = _config.MaxHandSize - _gameState.EnemyHand.Count;
+            // strand it there permanently unplayable. Also mirrors the player's own fix: charges
+            // count toward the total so it can't climb past MaxHandSize turn after turn - see
+            // RefillPlayerHandRoutine's remarks.
+            int enemyCurrentTotal   = _gameState.EnemyHand.Count + _gameState.EnemyDeadMansTurnCharges + _gameState.EnemyCounterGaleCharges;
+            int enemyDrawsRemaining = _config.MaxHandSize - enemyCurrentTotal;
             for (int i = 0; i < enemyDrawsRemaining && _gameState.EnemyDeck.Count > 0; i++)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
