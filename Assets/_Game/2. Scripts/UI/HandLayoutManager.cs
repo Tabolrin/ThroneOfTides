@@ -18,6 +18,34 @@ namespace ThroneOfTides.UI
         [SerializeField] private Canvas        _dragCanvas;
         [SerializeField] private CardInspectController _inspectController;
 
+        // Exposed for effects (e.g. Monkey Grab) that fly a temporary card visual toward
+        // wherever the hand actually sits on screen - see CardPresentationPlayer.GetHandAreaPosition.
+        public Vector3 PlayerHandAreaPosition => _playerHandContainer.position;
+        public Vector3 EnemyHandAreaPosition  => _enemyHandContainer.position;
+
+        // Spawns a throwaway, non-interactive copy of the real card prefab - for effects (e.g.
+        // Monkey Grab) that need to show the actual card (frame, cost, art, text) flying across
+        // the screen before it's really added to a hand, rather than a bare art sprite. Mirrors
+        // CardPreviewTooltip's read-only-copy pattern (strip CardDragHandler, block raycasts).
+        // Caller owns positioning/animating/destroying the returned GameObject.
+        public GameObject SpawnStolenCardPreview(CardSO card, Transform parent)
+        {
+            if (_cardPrefab == null || card == null) return null;
+
+            CardView view = Instantiate(_cardPrefab, parent);
+
+            var drag = view.GetComponent<CardDragHandler>();
+            if (drag != null) Destroy(drag);
+
+            var canvasGroup = view.GetComponent<CanvasGroup>();
+            if (canvasGroup == null) canvasGroup = view.gameObject.AddComponent<CanvasGroup>();
+            canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable   = false;
+
+            view.Setup(card);
+            return view.gameObject;
+        }
+
         [Header("Player Hand Layout")]
         [SerializeField] private float _cardSpacing = -18f;
         [SerializeField] private float _maxYOffset  = 15f;
@@ -31,9 +59,9 @@ namespace ThroneOfTides.UI
         [Tooltip("Fallback hold duration used only if GameplaySettings is unassigned.")]
         [SerializeField] private float _cardDisplayDuration = 1.5f;
         [SerializeField] private float _enlargedCardScale = 1.75f;
-        [Tooltip("Whether the enemy's played-card reveal waits for a click or auto-dismisses — see OptionsPanel's Gameplay section.")]
+        [Tooltip("Whether the enemy's played-card reveal waits for a click or auto-dismisses - see OptionsPanel's Gameplay section.")]
         [SerializeField] private ThroneOfTides.Data.GameplaySettingsSO _gameplaySettings;
-        [Tooltip("Shown only while RequireClickToDismissEnemyCard is on — click it (or the card) to continue.")]
+        [Tooltip("Shown only while RequireClickToDismissEnemyCard is on - click it (or the card) to continue.")]
         [SerializeField] private UnityEngine.UI.Button _enemyCardDismissButton;
 
 
@@ -58,7 +86,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private MMF_Player    _feedbackDeckDraw;
 
         [Header("Reaction Charge Absorb")]
-        [Tooltip("Where a reaction card (Dead Man's Turn, Counter Gale) flies to and shrinks away once the draw phase is done — the player's reaction badge row on ActiveEffectsBar.")]
+        [Tooltip("Where a reaction card (Dead Man's Turn, Counter Gale) flies to and shrinks away once the draw phase is done - the player's reaction badge row on ActiveEffectsBar.")]
         [SerializeField] private RectTransform _reactionBadgeAnchor;
         [SerializeField] private float         _reactionAbsorbDuration = 0.35f;
 
@@ -70,11 +98,11 @@ namespace ThroneOfTides.UI
         private void Awake()
         {
             // One-time fallback if the scene/prefab hasn't had this new field wired up in the
-            // Inspector yet — avoids silently breaking card inspect after this refactor.
+            // Inspector yet - avoids silently breaking card inspect after this refactor.
             if (_inspectController == null)
                 _inspectController = FindFirstObjectByType<CardInspectController>();
 
-            // Pools card view instances instead of Instantiate/Destroy per draw/play — hands
+            // Pools card view instances instead of Instantiate/Destroy per draw/play - hands
             // churn cards constantly (every draw, every enemy play, every discard).
             _cardViewPool = new ObjectPool<CardView>(
                 createFunc: () => Instantiate(_cardPrefab),
@@ -83,11 +111,18 @@ namespace ThroneOfTides.UI
                     view.gameObject.SetActive(true);
                     view.transform.localScale = Vector3.one;
                     var canvasGroup = view.GetComponent<CanvasGroup>();
-                    if (canvasGroup != null) canvasGroup.alpha = 1f;
+                    if (canvasGroup != null)
+                    {
+                        canvasGroup.alpha          = 1f;
+                        // Defensive reset - some sequences (e.g. AnimateReactionAbsorb) turn
+                        // raycasts off mid-animation; a pooled instance must never come back out
+                        // still non-interactive from a previous, unrelated use.
+                        canvasGroup.blocksRaycasts = true;
+                    }
                 },
                 actionOnRelease: view =>
                 {
-                    // Destroy() used to clean up in-flight DOTween tweens automatically —
+                    // Destroy() used to clean up in-flight DOTween tweens automatically -
                     // pooled objects only get deactivated, so kill tweens explicitly.
                     view.transform.DOKill();
                     var canvasGroup = view.GetComponent<CanvasGroup>();
@@ -107,7 +142,7 @@ namespace ThroneOfTides.UI
             view.transform.SetParent(parent, false);
             view.OnInspectRequested = ShowCardInspect;
 
-            // Only the player's own hand grows/lifts/fronts on hover — the enemy's hand is
+            // Only the player's own hand grows/lifts/fronts on hover - the enemy's hand is
             // face-down and not meant to invite interaction.
             if (parent == _playerHandContainer) EnableHover(view);
             else                                DisableHover(view);
@@ -116,7 +151,7 @@ namespace ThroneOfTides.UI
         }
 
         // Pooled views can move between the player's hand and the enemy's hand (or the reveal
-        // panel briefly borrows one) across their lifetime — hover must be explicitly set every
+        // panel briefly borrows one) across their lifetime - hover must be explicitly set every
         // time a view is (re)placed rather than assumed from whatever it had before.
         private void EnableHover(CardView view)
         {
@@ -160,7 +195,7 @@ namespace ThroneOfTides.UI
         void IHandLayoutManager.AddCardToEnemyHand(ICard card) =>
             AddCardToEnemyHand(card as CardSO);
 
-        // ICard parameter to satisfy interface — cast to CardSO internally
+        // ICard parameter to satisfy interface - cast to CardSO internally
         IEnumerator IHandLayoutManager.AnimateManualDraw(ICard card) =>
             AnimateManualDraw(card as CardSO);
 
@@ -274,10 +309,22 @@ namespace ThroneOfTides.UI
                 float targetY = inHand[i].HandYOffset;
 
                 if (animated)
+                {
+                    // Completes (not just stops) any tween already animating this card's
+                    // position - e.g. a still-running gap-close from the previous refresh, or a
+                    // hover-effect tween - before starting this one. Without this, two position
+                    // tweens can run on the same RectTransform at once and fight every frame,
+                    // and a hover-enter that captures "current position" as its base mid-fight
+                    // would lock in a wrong value (see CardHoverEffect's matching comment).
+                    rect.DOKill(true);
                     rect.DOAnchorPos(new Vector2(targetX, targetY), _gapCloseDuration)
                         .SetEase(Ease.OutCubic);
+                }
                 else
+                {
+                    rect.DOKill(true);
                     rect.anchoredPosition = new Vector2(targetX, targetY);
+                }
 
                 inHand[i].transform.SetSiblingIndex(i);
             }
@@ -359,13 +406,13 @@ namespace ThroneOfTides.UI
         null,
         out deckLocalPos);
 
-    // Teleport card to deck position to begin arc — size stays correct since parent unchanged
+    // Teleport card to deck position to begin arc - size stays correct since parent unchanged
     rect.anchoredPosition = deckLocalPos;
 
     float midX  = (deckLocalPos.x + targetPos.x) / 2f;
     float peakY = Mathf.Max(deckLocalPos.y, targetPos.y) + _drawArcHeight;
 
-    // Not raycast-interactive while flying to its slot — otherwise the cursor merely sitting
+    // Not raycast-interactive while flying to its slot - otherwise the cursor merely sitting
     // anywhere along the arc triggers CardHoverEffect mid-flight, whose enlarge/rise tween then
     // fights this arc tween over the same RectTransform and corrupts the final hand layout.
     if (canvasGroup != null) canvasGroup.blocksRaycasts = false;
@@ -382,7 +429,7 @@ namespace ThroneOfTides.UI
 
     if (canvasGroup != null) canvasGroup.blocksRaycasts = true;
 
-    // Already in playerHandContainer — just settle remaining cards
+    // Already in playerHandContainer - just settle remaining cards
     RefreshPlayerLayout(animated: true);
 }
 
@@ -429,12 +476,12 @@ namespace ThroneOfTides.UI
             }
 
             // Reparenting with worldPositionStays keeps the card exactly where it visually was
-            // (still inside the enemy hand's on-screen area) — the animated RefreshPlayerLayout
+            // (still inside the enemy hand's on-screen area) - the animated RefreshPlayerLayout
             // right after is what makes it read as "flying" from the enemy's hand into the
             // player's, rather than teleporting straight into its final fanned slot.
             view.transform.SetParent(_playerHandContainer, true);
             // PlayerHandContainer and EnemyHandContainer apply different local scales (the
-            // player's own hand renders larger) — worldPositionStays preserves the card's old
+            // player's own hand renders larger) - worldPositionStays preserves the card's old
             // *world* scale, which lands on a non-1 local scale here that renders smaller than
             // its new sibling cards. Reset explicitly, matching what pool Get() does for a
             // normal spawn.
@@ -447,7 +494,7 @@ namespace ThroneOfTides.UI
             RefreshPlayerLayout(animated: true);
         }
 
-        // Mirror of StealCardFromEnemyHand — reuses the player's existing CardView (flipped
+        // Mirror of StealCardFromEnemyHand - reuses the player's existing CardView (flipped
         // face-down) instead of destroying it and spawning a fresh enemy-hand card, so Monkey
         // Grab reads as the same card flying away rather than the player's card vanishing and
         // an unrelated card appearing in the enemy's hand.
@@ -468,7 +515,7 @@ namespace ThroneOfTides.UI
             RefreshPlayerLayout(animated: true);
 
             view.transform.SetParent(_enemyHandContainer, true);
-            // See the matching reset in StealCardFromEnemyHand — worldPositionStays otherwise
+            // See the matching reset in StealCardFromEnemyHand - worldPositionStays otherwise
             // carries over the player hand's larger local scale.
             view.transform.localScale = Vector3.one;
             view.SetFaceDown(card);
@@ -487,10 +534,23 @@ namespace ThroneOfTides.UI
 
             for (int i = 0; i < _enemyCards.Count; i++)
             {
-                var rect        = _enemyCards[i].GetComponent<RectTransform>();
-                var current     = rect.anchoredPosition;
-                var targetPos   = new Vector2(startX + i * _enemyCardSpacing, current.y);
+                var rect      = _enemyCards[i].GetComponent<RectTransform>();
+                // Y is always a fixed baseline (enemy cards have no per-card vertical jitter,
+                // unlike the player's hand) - must NOT be read from the card's current position.
+                // A card arriving via StealCardFromPlayerHand was just SetParent(..., true)'d
+                // from the player's hand container, which preserves *world* position by
+                // recomputing a new local anchoredPosition under the enemy container - since the
+                // two containers sit in very different places on screen, that recomputed Y can
+                // be wildly off-baseline. Preserving "whatever Y it already has" would leave that
+                // wrong value in place forever (only X ever gets animated below), which is
+                // exactly how a stolen card ended up stuck floating near the player's hand area
+                // instead of joining the enemy's row.
+                var targetPos = new Vector2(startX + i * _enemyCardSpacing, 0f);
 
+                // See the matching comment in RefreshPlayerLayout - completes any tween already
+                // running on this card (e.g. from back-to-back draws in the same refill) before
+                // starting a new one, instead of letting two position tweens fight.
+                rect.DOKill(true);
                 if (animated)
                     rect.DOAnchorPos(targetPos, _gapCloseDuration).SetEase(Ease.OutCubic);
                 else
@@ -519,7 +579,7 @@ namespace ThroneOfTides.UI
 
             // Capture the enemy hand card size as the start scale
             Vector3 startScale = rect.localScale;
-            // Target display scale — how large it grows at the play zone
+            // Target display scale - how large it grows at the play zone
             Vector3 displayScale = startScale * _enlargedCardScale;
 
             // Flip to face-up so the card art is visible during travel
@@ -533,7 +593,7 @@ namespace ThroneOfTides.UI
 
             yield return new WaitForSeconds(_cardMoveDuration);
 
-            // Hold at display size — either until the player clicks to continue, or for a fixed
+            // Hold at display size - either until the player clicks to continue, or for a fixed
             // duration, per OptionsPanel's Gameplay toggle.
             bool requireClick = _gameplaySettings != null && _gameplaySettings.RequireClickToDismissEnemyCard;
 
@@ -570,19 +630,19 @@ namespace ThroneOfTides.UI
 
             yield return new WaitForSeconds(_cardFadeDuration);
 
-            // Reset scale before releasing — avoids DOTween leaving dirty state
+            // Reset scale before releasing - avoids DOTween leaving dirty state
             rect.localScale = startScale;
             ReleaseCardView(view);
             onComplete?.Invoke();
         }
         
-        // Explicit interface — ICard parameter, delegates to public CardSO method
+        // Explicit interface - ICard parameter, delegates to public CardSO method
         IEnumerator IHandLayoutManager.AnimateReactionAbsorb(ICard card, System.Action onArrived) =>
             AnimateReactionAbsorb(card as CardSO, onArrived);
 
-        // Public method — accessible from concrete type references (GameBootstrapper).
+        // Public method - accessible from concrete type references (GameBootstrapper).
         // Card must already have a live CardView sitting in _playerCards (from AnimateManualDraw
-        // or DealOpeningHandAnimated) — this just flies that existing view to the reaction badge
+        // or DealOpeningHandAnimated) - this just flies that existing view to the reaction badge
         // area and shrinks/fades it away, then releases it.
         public IEnumerator AnimateReactionAbsorb(CardSO card, System.Action onArrived)
         {
@@ -607,8 +667,8 @@ namespace ThroneOfTides.UI
             if (canvasGroup == null) canvasGroup = view.gameObject.AddComponent<CanvasGroup>();
             canvasGroup.blocksRaycasts = false;
 
-            // Convert the badge anchor's world position into playerHandContainer-local space —
-            // same technique AnimateManualDraw uses for the deck position — so this works
+            // Convert the badge anchor's world position into playerHandContainer-local space -
+            // same technique AnimateManualDraw uses for the deck position - so this works
             // regardless of whether the badge row lives under a different canvas/hierarchy.
             Vector2 targetLocalPos = rect.anchoredPosition;
             if (_reactionBadgeAnchor != null)
@@ -627,12 +687,17 @@ namespace ThroneOfTides.UI
 
             yield return sequence.WaitForCompletion();
 
-            // The charge/badge-count increment happens exactly here — once the card has fully
-            // vanished — not before, so the badge visibly appearing/incrementing reads as a
+            // The charge/badge-count increment happens exactly here - once the card has fully
+            // vanished - not before, so the badge visibly appearing/incrementing reads as a
             // direct consequence of the card's arrival instead of happening in advance.
             onArrived?.Invoke();
 
-            rect.localScale = Vector3.one;
+            // Reset before releasing - a pooled instance must come back out fully interactive
+            // the next time it's reused for a real hand card, not still non-raycasting from
+            // this absorb (the actionOnGet reset below is a second line of defense, not a
+            // substitute for cleaning up after ourselves here).
+            rect.localScale            = Vector3.one;
+            canvasGroup.blocksRaycasts = true;
             ReleaseCardView(view);
         }
     }

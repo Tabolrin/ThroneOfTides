@@ -162,13 +162,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.VFX.HailstormVFXController
   _cloudImage: {fileID: 7281067152854895278}
   _hailAnchor: {fileID: 3201454299630096288}
-  _feedbackHailstorm: {fileID: 0}
+  _hailstormSfx:
+    _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+    _songName: HailStorm
+    _volumeMultiplier: 1
+    _pitchMultiplier: 1
   _canvasSpawnOffset: {x: 0, y: 0}
   _cloudFadeInDuration: 0.4
   _cloudFadeInEase: 6
-  _holdBeforeHail: 0.3
-  _hailDuration: 2
-  _damageDelay: 0.3
-  _holdAfterHail: 0.2
   _cloudFadeOutDuration: 0.5
   _cloudFadeOutEase: 5

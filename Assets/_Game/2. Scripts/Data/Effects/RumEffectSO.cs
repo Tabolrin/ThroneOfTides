@@ -12,7 +12,7 @@ namespace ThroneOfTides.Data
         protected override void Execute(IHealEffects context)
         {
             context.HealPlayer(_healAmount);
-            GameDebug.Log($"Rum — healed {_healAmount} HP");
+            GameDebug.Log($"Rum - healed {_healAmount} HP");
         }
     }
 }

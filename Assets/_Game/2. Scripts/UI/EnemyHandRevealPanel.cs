@@ -10,7 +10,7 @@ namespace ThroneOfTides.UI
     /// <summary>
     /// Modal popup for Recon Parrot: shows the enemy's revealed hand centered over the play
     /// zone until the player dismisses it (Close button or clicking the dimmed background).
-    /// Spawns its own CardView instances directly (not through HandLayoutManager's hand pool —
+    /// Spawns its own CardView instances directly (not through HandLayoutManager's hand pool -
     /// this is a short-lived, independent display, not part of either hand's live layout).
     /// Driven directly by ReconParrotVFXController (via CardEffectSpawnContext.ShowEnemyHandReveal)
     /// rather than a global event, so its on-screen timing can be sequenced around the parrot's
@@ -37,7 +37,7 @@ namespace ThroneOfTides.UI
 
         /// <summary>
         /// Shows the panel and invokes onDismissed once the player closes it (Close button or
-        /// clicking the dimmed background) — for callers (e.g. ReconParrotVFXController) that
+        /// clicking the dimmed background) - for callers (e.g. ReconParrotVFXController) that
         /// need to sequence their own animation around the panel's lifetime instead of it firing
         /// on a global event the instant the underlying effect resolves.
         /// </summary>
@@ -69,7 +69,7 @@ namespace ThroneOfTides.UI
                 var rect = view.GetComponent<RectTransform>();
                 rect.anchoredPosition = new Vector2(startX + i * _cardSpacing, 0f);
 
-                // Added after positioning — CardHoverEffect captures its base position in
+                // Added after positioning - CardHoverEffect captures its base position in
                 // OnEnable, which fires synchronously the instant AddComponent runs.
                 view.gameObject.AddComponent<CardHoverEffect>();
 

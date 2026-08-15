@@ -17,13 +17,20 @@ namespace ThroneOfTides.Systems.VFX
 
     public static class ScreenShake
     {
+        // Amplitude is in world units, applied directly as the camera's position-wiggle range
+        // (see MMCameraShaker.ShakeCamera) - with the match camera at orthographicSize 5.4 (10.8
+        // units tall), these were previously tuned far too low to read as a hit (Level 1 at 0.3
+        // is under 3% of the screen's half-height) and were inconsistently used besides - most
+        // weapon VFX controllers had their own unrelated, ad-hoc duration/amplitude/frequency
+        // fields instead of going through this shared table at all. Bumped across the board and
+        // consolidated so every card's shake now comes from here.
         private static readonly (float duration, float amplitude, float frequency)[] Presets =
         {
-            (0.15f, 0.3f, 25f), // Level 1
-            (0.20f, 0.6f, 28f), // Level 2
-            (0.25f, 1.0f, 30f), // Level 3
-            (0.30f, 1.6f, 35f), // Level 4 - very strong
-            (0.40f, 2.4f, 40f), // Level 5 - strongest in the game
+            (0.15f, 0.45f, 25f), // Level 1
+            (0.20f, 0.85f, 28f), // Level 2
+            (0.25f, 1.35f, 30f), // Level 3
+            (0.30f, 1.9f,  35f), // Level 4 - very strong
+            (0.40f, 2.7f,  40f), // Level 5 - strongest in the game
         };
 
         public static void Trigger(ScreenShakeLevel level)

@@ -21,10 +21,13 @@ namespace ThroneOfTides.Systems
         private CombatResolver     _combatResolver;
         private GameConfigSO       _config;
 
+        // Playtest-only cheat override - see ForceEnemyToPlayCard.
+        private CardSO _forcedEnemyCard;
+
         public System.Action OnTurnChanged;
         public System.Action OnHPChanged;
 
-        // negateLabel/onNegate and counterGaleLabel/onCounterGale each come as a pair — pass
+        // negateLabel/onNegate and counterGaleLabel/onCounterGale each come as a pair - pass
         // both null to hide that option entirely (e.g. Kraken-vs-Kraken has no Counter Gale
         // option; a lone-Dead-Man's-Turn defense has no Counter Gale option either).
         public delegate void ReactionPromptHandler(
@@ -68,7 +71,7 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.IsPlayerTurn)
             {
-                GameDebug.Log("EndTurn ignored — not the player's turn (already ended, or match over).");
+                GameDebug.Log("EndTurn ignored - not the player's turn (already ended, or match over).");
                 return;
             }
 
@@ -105,16 +108,25 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
-        // Does not consume HasDrawnThisTurn — used by Treasure Chest secondary draw.
-        // ignoreHandLimit lets a card (e.g. Treasure Chest) force its draws into the hand even
-        // past MaxHandSize — passing an effectively unlimited cap through to Hand.AddCard too,
-        // since it enforces the same limit itself and would otherwise silently drop the card.
+        // Does not consume HasDrawnThisTurn - used by Treasure Chest secondary draw.
+        // ignoreHandLimit lets a card (e.g. Treasure Chest) push its draws past the normal
+        // MaxHandSize, but only up to GameState.BonusMaxHandSize - never truly unlimited. Once
+        // the hand is already at that absolute ceiling, the draw is skipped (not just capped
+        // silently) and logged so the player understands why a guaranteed draw didn't happen.
         public bool TryDrawCardSecondary(bool ignoreHandLimit = false)
         {
             if (_gameState.PlayerDeck.Count == 0) return false;
 
-            int maxHandSize = ignoreHandLimit ? int.MaxValue : _config.MaxHandSize;
-            if (!ignoreHandLimit && _gameState.PlayerHand.Count >= maxHandSize) return false;
+            int maxHandSize = ignoreHandLimit ? _gameState.BonusMaxHandSize : _config.MaxHandSize;
+            if (_gameState.PlayerHand.Count >= maxHandSize)
+            {
+                if (ignoreHandLimit)
+                {
+                    GameDebug.Log($"Player hand at max capacity ({maxHandSize}) - bonus draw skipped.");
+                    GameEventBus.FireMatchNote($"Hand is full (max {maxHandSize}) - a bonus card was skipped.");
+                }
+                return false;
+            }
 
             CardSO drawn = _gameState.PlayerDeck.Draw();
             if (drawn == null) return false;
@@ -131,14 +143,19 @@ namespace ThroneOfTides.Systems
             return true;
         }
 
-        // Enemy-side mirror of TryDrawCardSecondary — used by caster-relative Action effects
+        // Enemy-side mirror of TryDrawCardSecondary - used by caster-relative Action effects
         // (e.g. Treasure Chest) so an enemy-cast draw goes into the enemy's own hand.
         public bool TryDrawCardSecondaryEnemy(bool ignoreHandLimit = false)
         {
             if (_gameState.EnemyDeck.Count == 0) return false;
 
-            int maxHandSize = ignoreHandLimit ? int.MaxValue : _config.MaxHandSize;
-            if (!ignoreHandLimit && _gameState.EnemyHand.Count >= maxHandSize) return false;
+            int maxHandSize = ignoreHandLimit ? _gameState.BonusMaxHandSize : _config.MaxHandSize;
+            if (_gameState.EnemyHand.Count >= maxHandSize)
+            {
+                if (ignoreHandLimit)
+                    GameDebug.Log($"Enemy hand at max capacity ({maxHandSize}) - bonus draw skipped.");
+                return false;
+            }
 
             CardSO drawn = _gameState.EnemyDeck.Draw();
             if (drawn == null) return false;
@@ -158,22 +175,22 @@ namespace ThroneOfTides.Systems
         {
             if (!_gameState.CanPlayCard(cardSO))
             {
-                GameDebug.Log($"Cannot play {cardSO.Name} — check draw, mana, or play limit");
+                GameDebug.Log($"Cannot play {cardSO.Name} - check draw, mana, or play limit");
                 return;
             }
 
             // Dead Man's Turn's cost (if pending) taxes only the very next card, whatever it
-            // turns out to be — applied here rather than baked into ManaCost so it never shows
+            // turns out to be - applied here rather than baked into ManaCost so it never shows
             // up on the card itself.
             int surcharge = _gameState.PlayerNextCardManaSurcharge;
             if (!_gameState.SpendPlayerMana(cardSO.ManaCost + surcharge))
             {
-                GameDebug.Log($"Cannot play {cardSO.Name} — insufficient mana");
+                GameDebug.Log($"Cannot play {cardSO.Name} - insufficient mana");
                 return;
             }
             if (surcharge > 0) _gameState.ClearPlayerNextCardManaSurcharge();
 
-            // Committed the instant mana is spent — the card leaves the hand regardless of
+            // Committed the instant mana is spent - the card leaves the hand regardless of
             // which target ends up chosen. CardView listens for this so it stops treating the
             // drag as "rejected, snap back" while a target-selection prompt is still pending;
             // OnCardPlayAccepted (below/later) fires the actual resolution once the target is
@@ -213,12 +230,15 @@ namespace ThroneOfTides.Systems
             if (_gameState.IsGameOver()) FireMatchResult();
         }
 
-        // Enemy-side mirror of ResolveEnemyAttack/ReactionPrompt — the enemy has no UI to prompt,
+        // Enemy-side mirror of ResolveEnemyAttack/ReactionPrompt - the enemy has no UI to prompt,
         // so EnemyAI.ChooseReaction (a weighted decision, same idea as picking which card to
         // play) decides whether it negates or reflects instead of a player button click.
         private void ApplyPlayerAttackToEnemy(CardSO attackCard, int damage)
         {
-            bool isUnblockable = _gameState.SirenSongActive;
+            // See ConsumeSirenIfActive - without this, one player Siren cast would silently make
+            // every later player attack this turn (and beyond) unblockable too, not just the
+            // next one.
+            bool isUnblockable = ConsumeSirenIfActive(DamageTarget.Player);
             bool hasDMT         = _gameState.EnemyDeadMansTurnCharges > 0;
             bool hasCounterGale = _gameState.EnemyCounterGaleCharges  > 0;
 
@@ -228,7 +248,12 @@ namespace ThroneOfTides.Systems
 
             if (chosen == ReactionType.DeadMansTurn && _gameState.ConsumeDeadMansTurn(DamageTarget.Enemy))
             {
-                GameDebug.Log("Enemy used Dead Man's Turn — attack negated");
+                // Same cost as the player's own use: not free - costs 1 HP and taxes the
+                // enemy's next card played by +1 mana.
+                _gameState.ApplyDamage(DamageTarget.Enemy, 1);
+                _gameState.AddEnemyNextCardManaSurcharge(1);
+                GameDebug.Log("Enemy used Dead Man's Turn - attack negated (-1 HP, next card +1 mana)");
+                GameEventBus.FireMatchNote("Enemy used Dead Man's Turn - negated the attack, but it cost 1 HP and its next card costs +1 mana.");
                 return;
             }
 
@@ -237,7 +262,11 @@ namespace ThroneOfTides.Systems
                 int reflected = _combatResolver.ResolveCounterGale(damage);
                 _gameState.ApplyDamage(DamageTarget.Player, reflected);
                 _gameState.ApplyDamage(DamageTarget.Enemy, damage);
-                GameDebug.Log($"Enemy used Counter Gale — reflected {reflected}, took {damage}");
+                // Same bonus as the player's own use: refunds 1 mana and draws a replacement card.
+                _gameState.RefundEnemyMana(1);
+                bool drewCard = TryDrawCardSecondaryEnemy();
+                string drawSuffix = drewCard ? ", drew a card" : ", hand full - no card drawn";
+                GameDebug.Log($"Enemy used Counter Gale - reflected {reflected}, took {damage}, refunded 1 mana{drawSuffix}");
                 return;
             }
 
@@ -251,18 +280,37 @@ namespace ThroneOfTides.Systems
         }
 
         // Lets callers outside the normal turn flow (e.g. CheatsPanel's HP buttons) trigger the
-        // win/loss check — IsGameOver() is otherwise only evaluated at specific points in the
+        // win/loss check - IsGameOver() is otherwise only evaluated at specific points in the
         // normal card-play/enemy-turn flow, so a cheat-driven HP change would never show results.
         public void CheckGameOver()
         {
             if (_gameState.IsGameOver()) FireMatchResult();
         }
 
+        // Playtest-only cheat hook (see ForceEnemyCardCheatPanel) - guarantees the given card is
+        // the very next one the enemy plays, bypassing EnemyAI's own selection heuristics and
+        // mana-affordability filtering entirely (consumed one-shot by the enemy turn loop above).
+        // Forces the card into the enemy's hand first (past the normal hand-size limit, since
+        // this is a debug override) if it isn't already there.
+        public void ForceEnemyToPlayCard(CardSO card)
+        {
+            if (card == null || _gameState == null) return;
+
+            if (!_gameState.EnemyHand.CardsSO.Contains(card))
+            {
+                _gameState.EnemyHand.AddCard(card, int.MaxValue);
+                _handLayout.AddCardToEnemyHand(card);
+            }
+
+            _forcedEnemyCard = card;
+            GameDebug.Log($"[Cheat] Forcing enemy to play {card.Name} next.");
+        }
+
         // ── Auto Draw ─────────────────────────────────────────────────────────
 
         // Called at the end of each enemy turn. Short delay lets the turn
         // transition visual settle before the cards animate in.
-        // Not called on turn 1 — GameBootstrapper handles the opening hand deal.
+        // Not called on turn 1 - GameBootstrapper handles the opening hand deal.
         private IEnumerator AutoDrawRoutine()
         {
             yield return new WaitForSeconds(0.3f);
@@ -270,20 +318,22 @@ namespace ThroneOfTides.Systems
             OnHPChanged?.Invoke();
         }
 
-        // Draws until the hand is full (or the deck runs out) — the hand fully refills at the
-        // start of each player turn rather than drawing a single card. Reaction cards are
-        // charged instead of occupying a hand slot and don't count toward the fill target,
-        // matching TryDrawCard's existing per-card handling.
+        // Draws a fixed number of cards (MaxHandSize minus whatever's already in hand) rather
+        // than looping until the hand reaches MaxHandSize - a Reaction card still counts as one
+        // of this turn's draws even though it ends up as a badge charge instead of a hand card,
+        // so drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand, never with
+        // the draw continuing until 4 non-Reaction cards have been found.
         private IEnumerator RefillPlayerHandRoutine()
         {
             var pendingReactionCards = new List<CardSO>();
 
-            while (_gameState.PlayerHand.Count < _config.MaxHandSize && _gameState.PlayerDeck.Count > 0)
+            int drawsRemaining = _config.MaxHandSize - _gameState.PlayerHand.Count;
+            for (int i = 0; i < drawsRemaining && _gameState.PlayerDeck.Count > 0; i++)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
                 if (drawn == null) break;
 
-                // Reaction cards deal into the fanned hand exactly like any other card — they
+                // Reaction cards deal into the fanned hand exactly like any other card - they
                 // only fly off to charge their badge once the whole refill is done, see below.
                 if (drawn.CardType == CardType.Reaction)
                 {
@@ -322,11 +372,14 @@ namespace ThroneOfTides.Systems
 
             _gameState.ResetEnemyMana();
 
-            // The enemy hand fully refills at the start of its turn too, mirroring the player.
-            // Reaction cards charge the enemy's own counter instead of occupying a hand slot —
+            // The enemy hand fully refills at the start of its turn too, mirroring the player -
+            // including the same fixed-draw-count rule: a Reaction card still counts as one of
+            // this turn's draws even though it charges a badge instead of occupying a hand slot,
+            // so drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand.
             // EnemyAI.PickCard never plays Reaction-type cards, so leaving one in hand would
             // strand it there permanently unplayable.
-            while (_gameState.EnemyHand.Count < _config.MaxHandSize && _gameState.EnemyDeck.Count > 0)
+            int enemyDrawsRemaining = _config.MaxHandSize - _gameState.EnemyHand.Count;
+            for (int i = 0; i < enemyDrawsRemaining && _gameState.EnemyDeck.Count > 0; i++)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
                 if (enemyDrawn == null) break;
@@ -343,19 +396,35 @@ namespace ThroneOfTides.Systems
 
             bool attackPlayedThisTurn = false;
 
-            // Keeps playing cards until mana/HP/hand constraints leave nothing playable —
+            // Keeps playing cards until mana/HP/hand constraints leave nothing playable -
             // mana is the only balancing lever now, so the enemy uses as much of its turn as
             // it can afford rather than stopping after a single card.
             while (true)
             {
-                CardSO playedCard = _enemyAI.PickCard(
-                    _gameState.EnemyHand.CardsSO,
-                    _gameState.EnemyMana,
-                    _gameState.EnemyHP,
-                    comboPrimed: _gameState.EnemyComboStackCount > 0 && _gameState.EnemyActiveComboCard != null,
-                    playerHasDeadMansTurn: _gameState.PlayerDeadMansTurnCharges > 0,
-                    playerHasCounterGale: _gameState.PlayerCounterGaleCharges > 0,
-                    selfUnblockable: _gameState.SirenSongActive);
+                // Playtest-only cheat override (see ForceEnemyCardCheatPanel/ForceEnemyToPlayCard) -
+                // bypasses the AI's own selection heuristics and mana-affordability filtering
+                // entirely, guaranteeing this exact card is what the enemy plays next.
+                CardSO playedCard;
+                if (_forcedEnemyCard != null && _gameState.EnemyHand.CardsSO.Contains(_forcedEnemyCard))
+                {
+                    playedCard = _forcedEnemyCard;
+                    _forcedEnemyCard = null;
+                }
+                else
+                {
+                    // Mana available for THIS pick must already account for the Dead Man's Turn
+                    // surcharge (if pending) the same way CanPlayCard does for the player -
+                    // otherwise the AI could pick a card it can no longer actually afford once
+                    // the surcharge is added on top of its mana cost.
+                    playedCard = _enemyAI.PickCard(
+                        _gameState.EnemyHand.CardsSO,
+                        _gameState.EnemyMana - _gameState.EnemyNextCardManaSurcharge,
+                        _gameState.EnemyHP,
+                        comboPrimed: _gameState.EnemyComboStackCount > 0 && _gameState.EnemyActiveComboCard != null,
+                        playerHasDeadMansTurn: _gameState.PlayerDeadMansTurnCharges > 0,
+                        playerHasCounterGale: _gameState.PlayerCounterGaleCharges > 0,
+                        selfUnblockable: _gameState.SirenSongActive);
+                }
 
                 if (playedCard == null) break;
 
@@ -369,7 +438,7 @@ namespace ThroneOfTides.Systems
                 if (_gameState.IsGameOver()) { FireMatchResult(); yield break; }
             }
 
-            // Siren Song is only meaningful if consumed by an attack the same turn it's cast —
+            // Siren Song is only meaningful if consumed by an attack the same turn it's cast -
             // mirrors the player-side clear in EndTurn() so a cast-but-unused Siren doesn't
             // linger and incorrectly buff some future enemy attack.
             if (_gameState.SirenSongActive && !attackPlayedThisTurn)
@@ -382,7 +451,12 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator PlayEnemyCard(CardSO playedCard, bool isAttackCard)
         {
-            _gameState.SpendEnemyMana(playedCard.ManaCost);
+            // Mirrors HandleCardPlayed's surcharge handling for the player - taxes only the very
+            // next card the enemy plays, whatever it turns out to be, then clears.
+            int surcharge = _gameState.EnemyNextCardManaSurcharge;
+            _gameState.SpendEnemyMana(playedCard.ManaCost + surcharge);
+            if (surcharge > 0) _gameState.ClearEnemyNextCardManaSurcharge();
+
             _gameState.EnemyHand.RemoveCard(playedCard);
             _gameState.DiscardEnemyCard(playedCard);
 
@@ -410,22 +484,43 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator ResolveEnemyAttack(CardSO attackCard)
         {
+            // Gunpowder Barrel (a Combo primer) and DOT cards apply their entire effect as a
+            // side effect of resolving (adding the stack / registering the DOT) rather than
+            // returning a damage number for the caller to apply afterward the way Weapon/
+            // Combo-ignition cards do - so by the time CombatResolver.ResolveCard returns for
+            // one of these, it's already too late to let Dead Man's Turn dodge it. Routed
+            // through a dedicated path that checks the reaction BEFORE resolving.
+            if ((attackCard.CardType == CardType.Combo && attackCard.ComboStackBonus > 0) ||
+                attackCard.CardType == CardType.DOT)
+            {
+                yield return StartCoroutine(ResolveReactableZeroDamageCard(attackCard));
+                yield break;
+            }
+
             // Routed through CombatResolver for every attack type (not just Combo/DOT) so
             // enemy-side gunpowder stacking, damage-over-time tracking, and HP-cost deduction
-            // (e.g. The Kraken's self-damage) all actually apply — previously Weapon cards
+            // (e.g. The Kraken's self-damage) all actually apply - previously Weapon cards
             // bypassed this and dealt flat attackCard.Damage with no HP cost taken.
             int damage = _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout);
 
-            // A combo primer or a DOT application deals no immediate damage this play — nothing
-            // ever prompts the player over it, so its presentation is always safe immediately.
+            // Combo primers and DOT applications are already routed above and never reach this
+            // point - zero here now only means a genuinely harmless resolution (e.g. Torch with
+            // no active combo still deals its base 1, so this shouldn't normally trigger, but is
+            // handled defensively).
             if (damage <= 0)
             {
                 GameEventBus.FireEnemyCardPresentationReady(attackCard);
                 yield break;
             }
 
-            bool isKraken      = attackCard.Id == CardId.Kraken;
-            bool isUnblockable = _gameState.SirenSongActive || isKraken;
+            bool isKraken    = attackCard.Id == CardId.Kraken;
+            // Consumed the instant it's used to make an attack unblockable - without this, Siren
+            // Song's "next attack" would silently keep making EVERY subsequent enemy attack this
+            // turn (and beyond, since nothing else clears it once an attack has been played)
+            // unblockable, permanently locking the player out of Dead Man's Turn/Counter Gale
+            // even with charges available.
+            bool sirenConsumed = ConsumeSirenIfActive(DamageTarget.Enemy);
+            bool isUnblockable = sirenConsumed || isKraken;
             bool hasDMT        = _gameState.PlayerDeadMansTurnCharges > 0;
             bool hasCounterGale = _gameState.PlayerCounterGaleCharges > 0;
 
@@ -433,7 +528,7 @@ namespace ThroneOfTides.Systems
             if (isKraken && playerHasKraken)
             {
                 yield return StartCoroutine(KrakenVsKrakenPrompt(attackCard));
-                // Standoff already carries its own dedicated prompt/VFX (KrakenVsKrakenPrompt) —
+                // Standoff already carries its own dedicated prompt/VFX (KrakenVsKrakenPrompt) -
                 // no separate presentation entry to defer here.
                 yield break;
             }
@@ -441,7 +536,7 @@ namespace ThroneOfTides.Systems
             bool canReact = !isUnblockable && (hasDMT || hasCounterGale);
 
             // The attack's own VFX/SFX (fireball, cannon flash, etc.) must not play until the
-            // player has actually made their choice — spawning it earlier would show/sound the
+            // player has actually made their choice - spawning it earlier would show/sound the
             // attack while the negation prompt is still on screen, before the player has decided
             // anything.
             if (canReact)
@@ -452,8 +547,64 @@ namespace ThroneOfTides.Systems
             if (!canReact)
             {
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
-                GameDebug.Log($"Enemy attack — {attackCard.Name}: {damage} dmg");
+                GameDebug.Log($"Enemy attack - {attackCard.Name}: {damage} dmg");
             }
+        }
+
+        // Gunpowder Barrel (Combo primer) and DOT cards have no immediate damage number - their
+        // whole effect IS the side effect CombatResolver.ResolveCard applies. Dead Man's Turn can
+        // still dodge them entirely, but only by checking BEFORE that call runs, since there's no
+        // way to undo it afterward. Counter Gale never applies here (it reflects damage, and
+        // there's none yet to reflect) - matches the "a lone-Dead-Man's-Turn defense has no
+        // Counter Gale option" case ReactionPromptHandler already documents.
+        private IEnumerator ResolveReactableZeroDamageCard(CardSO attackCard)
+        {
+            bool sirenConsumed = ConsumeSirenIfActive(DamageTarget.Enemy);
+            bool hasDMT        = _gameState.PlayerDeadMansTurnCharges > 0;
+
+            if (sirenConsumed || !hasDMT)
+            {
+                GameEventBus.FireEnemyCardPresentationReady(attackCard);
+                _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout);
+                yield break;
+            }
+
+            bool usedDMT     = false;
+            bool playerChose = false;
+
+            OnShowReactionPrompt?.Invoke(
+                attackCard, 0,
+                "Dead Man's Turn\n(Avoid entirely - costs 1 HP, next card +1 mana)", () => { usedDMT = true;  playerChose = true; },
+                null, null, // Counter Gale never applies to a zero-damage effect
+                () => { usedDMT = false; playerChose = true; });
+
+            yield return new WaitUntil(() => playerChose);
+
+            // The attack's own VFX/SFX must not play until the player has actually made their
+            // choice - matches ResolveEnemyAttack's own ordering for damage-dealing attacks.
+            GameEventBus.FireEnemyCardPresentationReady(attackCard);
+
+            if (usedDMT && _gameState.ConsumeDeadMansTurn())
+            {
+                _gameState.ApplyDamage(DamageTarget.Player, 1);
+                _gameState.AddPlayerNextCardManaSurcharge(1);
+                GameDebug.Log($"Dead Man's Turn fired - {attackCard.Name} avoided entirely (-1 HP, next card +1 mana)");
+                GameEventBus.FireMatchNote($"Dead Man's Turn - avoided {attackCard.Name} entirely, but it cost 1 HP and your next card costs +1 mana.");
+                yield break;
+            }
+
+            _combatResolver.ResolveCard(attackCard, DamageTarget.Enemy, _handLayout);
+        }
+
+        // Consumes Siren Song's unblockable status the instant it's spent on an attack - the
+        // status itself (SirenSongActive) has no other "used up" signal, so without this, one
+        // Siren cast would silently make every later attack this turn (and any turn after, since
+        // nothing else clears it once an attack has been played) unblockable too.
+        private bool ConsumeSirenIfActive(DamageTarget caster)
+        {
+            if (!_gameState.SirenSongActive) return false;
+            _gameState.ClearSiren(caster);
+            return true;
         }
 
         private IEnumerator KrakenVsKrakenPrompt(CardSO attackCard)
@@ -491,16 +642,16 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator ReactionPrompt(CardSO attackCard, int damage, bool hasDMT, bool hasCounterGale)
         {
-            // Preview-only math — must match CombatResolver.ResolveCounterGale's own formula.
+            // Preview-only math - must match CombatResolver.ResolveCounterGale's own formula.
             // Not calling that method here since it also logs, which would misfire if the
             // player ends up picking a different option than the one being previewed.
             int reflectedPreview = Mathf.FloorToInt(damage * 0.5f);
 
             string negateLabel = hasDMT
-                ? "Dead Man's Turn\n(Take 0 damage — costs 1 HP, next card +1 mana)"
+                ? "Dead Man's Turn\n(Take 0 damage - costs 1 HP, next card +1 mana)"
                 : null;
             string counterGaleLabel = hasCounterGale
-                ? $"Counter Gale\n(Take {damage}, deal {reflectedPreview} back — refund 1 mana, draw a card)"
+                ? $"Counter Gale\n(Take {damage}, deal {reflectedPreview} back - refund 1 mana, draw a card)"
                 : null;
 
             // null = no choice made yet / Take the Hit; true = Dead Man's Turn; false = Counter Gale.
@@ -527,8 +678,8 @@ namespace ThroneOfTides.Systems
                 // but you get banged up") and taxes the next card played by +1 mana.
                 _gameState.ApplyDamage(DamageTarget.Player, 1);
                 _gameState.AddPlayerNextCardManaSurcharge(1);
-                GameDebug.Log("Dead Man's Turn fired — attack negated (-1 HP, next card +1 mana)");
-                GameEventBus.FireMatchNote("Dead Man's Turn — attack negated, but it cost 1 HP and your next card costs +1 mana.");
+                GameDebug.Log("Dead Man's Turn fired - attack negated (-1 HP, next card +1 mana)");
+                GameEventBus.FireMatchNote("Dead Man's Turn - attack negated, but it cost 1 HP and your next card costs +1 mana.");
             }
             else if (usedDMT == false && _gameState.ConsumeCounterGale())
             {
@@ -537,8 +688,8 @@ namespace ThroneOfTides.Systems
                 _gameState.ApplyDamage(DamageTarget.Player, damage);
                 _gameState.RefundPlayerMana(1);
                 bool drewCard = TryDrawCardSecondary();
-                string drawSuffix = drewCard ? ", drew a card" : ", hand full — no card drawn";
-                GameDebug.Log($"Counter Gale fired — reflected {reflected}, took {damage}, refunded 1 mana{drawSuffix}");
+                string drawSuffix = drewCard ? ", drew a card" : ", hand full - no card drawn";
+                GameDebug.Log($"Counter Gale fired - reflected {reflected}, took {damage}, refunded 1 mana{drawSuffix}");
             }
         }
 
@@ -551,7 +702,7 @@ namespace ThroneOfTides.Systems
         }
 
         // Single-draw path (TryDrawCard / TryDrawCardSecondary): the reaction card deals into
-        // the hand exactly like a normal card, then absorbs into its badge on its own — there's
+        // the hand exactly like a normal card, then absorbs into its badge on its own - there's
         // no "rest of the draw" to wait for since it was the only card drawn this call.
         private IEnumerator DrawReactionCardThenAbsorb(CardSO card)
         {
@@ -572,7 +723,7 @@ namespace ThroneOfTides.Systems
         private void FireMatchResult()
         {
             Winner winner = _gameState.GetWinner();
-            GameDebug.Log($"Match over — winner: {winner} " +
+            GameDebug.Log($"Match over - winner: {winner} " +
                 $"(PlayerHP: {_gameState.PlayerHP}, PlayerDeck: {_gameState.PlayerDeck.Count}, PlayerHand: {_gameState.PlayerHand.Count}, " +
                 $"EnemyHP: {_gameState.EnemyHP}, EnemyDeck: {_gameState.EnemyDeck.Count}, EnemyHand: {_gameState.EnemyHand.Count})");
 

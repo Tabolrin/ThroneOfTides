@@ -5,7 +5,7 @@ using ThroneOfTides.Systems;
 
 namespace ThroneOfTides.Tools
 {
-    // Scene view overlay — appears when a GameObject with Oscillator is selected.
+    // Scene view overlay - appears when a GameObject with Oscillator is selected.
     // Allows live tuning of oscillation values with immediate visual feedback in Play Mode.
     [Overlay(typeof(SceneView), "Oscillator Tuner", true)]
     public class ShipOscillatorOverlay : IMGUIOverlay, ITransientOverlay
@@ -16,7 +16,7 @@ namespace ThroneOfTides.Tools
         private Oscillator  _cachedOscillator;
         private SerializedObject _cachedSO;
 
-        // ITransientOverlay — only show when a Oscillator is selected
+        // ITransientOverlay - only show when a Oscillator is selected
         public bool visible
         {
             get
@@ -79,7 +79,7 @@ namespace ThroneOfTides.Tools
                     oscillator.RestartOscillation();
 
                 EditorGUILayout.LabelField(
-                    "✓ Live — changes apply immediately",
+                    "✓ Live - changes apply immediately",
                     new GUIStyle(EditorStyles.centeredGreyMiniLabel)
                         { normal = { textColor = new Color(0.4f, 0.9f, 0.4f) } });
             }
@@ -123,7 +123,7 @@ namespace ThroneOfTides.Tools
             // Disable controls when axis is toggled off
             GUI.enabled = enabled.boolValue;
 
-            // Amplitude slider — clamped to sensible range per axis
+            // Amplitude slider - clamped to sensible range per axis
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Amplitude", EditorStyles.miniLabel, GUILayout.Width(64));
             amplitude.floatValue = EditorGUILayout.Slider(amplitude.floatValue, 0f, 2f);

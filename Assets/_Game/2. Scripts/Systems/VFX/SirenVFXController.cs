@@ -1,9 +1,9 @@
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
+using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Systems.VFX
 {
@@ -15,8 +15,8 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private Image         _sirenImage;
         [SerializeField] private RectTransform _mouthAnchor; // child of SirenBody, positioned at the siren's mouth
 
-        [Header("FEEL")]
-        [SerializeField] private MMF_Player _feedbackSirenSong;
+        [Header("SFX")]
+        [SerializeField] private CardSfxCue _sirenSongSfx;
 
         [Header("Spawn Offset (canvas units, applied left of target)")]
         [SerializeField] private Vector2 _canvasSpawnOffset = new Vector2(-80f, 0f);
@@ -41,7 +41,7 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully sunk. Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
-        /// <summary>ICardPlayEffect — fired when fully sunk, so CardPresentationPlayer destroys the instance.</summary>
+        /// <summary>ICardPlayEffect - fired when fully sunk, so CardPresentationPlayer destroys the instance.</summary>
         public event Action Completed;
 
         // ── Private ───────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ namespace ThroneOfTides.Systems.VFX
 
         /// <summary>
         /// Injected by CardPresentationPlayer after instantiation.
-        /// musicNoteParticles is a persistent scene-level world-space ParticleSystem —
+        /// musicNoteParticles is a persistent scene-level world-space ParticleSystem -
         /// sized once in the editor and repositioned each use. Never destroyed.
         /// </summary>
         public void Inject(RectTransform canvasRect, Camera gameCamera, ParticleSystem musicNoteParticles)
@@ -74,7 +74,7 @@ namespace ThroneOfTides.Systems.VFX
         }
 
         /// <summary>
-        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Siren always rises at
+        /// ICardPlayEffect entry point - hosted by CardPresentationPlayer. Siren always rises at
         /// the opponent's ship (bewitching the target), matching this card's authored
         /// PresentationEntry (AnchorSide: Opponent). MusicNoteParticles is the persistent
         /// scene-level ParticleSystem passed through the shared spawn context.
@@ -128,14 +128,14 @@ namespace ThroneOfTides.Systems.VFX
 
         private void BuildSequence()
         {
-            // Start below rest position — siren rises into frame while filling
+            // Start below rest position - siren rises into frame while filling
             // bottom-to-top, giving the illusion of emerging from the water.
             // Image FillOrigin must be set to Bottom in the Inspector.
             _rectTransform.anchoredPosition = _restPosition - new Vector2(0f, _riseDistance);
 
             _seq = DOTween.Sequence();
 
-            // Phase 1 — Rise: move upward to rest while filling 0→1.
+            // Phase 1 - Rise: move upward to rest while filling 0→1.
             // Explicit (float x) cast resolves DOTween.To overload ambiguity.
             _seq.Append(_rectTransform
                 .DOAnchorPosY(_restPosition.y, _riseDuration)
@@ -146,18 +146,18 @@ namespace ThroneOfTides.Systems.VFX
                     1f, _riseDuration)
                 .SetEase(_riseEase));
 
-            // Phase 2 — Risen: notify caller, start particles and audio.
+            // Phase 2 - Risen: notify caller, start particles and audio.
             _seq.AppendCallback(() =>
             {
                 OnSirenReady?.Invoke();
                 _musicNoteParticles.Play();
-                _feedbackSirenSong?.PlayFeedbacks();
+                CardSfxPlayer.Play(_sirenSongSfx, transform.position);
             });
 
-            // Phase 3 — Hold.
+            // Phase 3 - Hold.
             _seq.AppendInterval(_holdDuration);
 
-            // Phase 4 — Sink: move downward while unfilling 1→0, reversing the rise.
+            // Phase 4 - Sink: move downward while unfilling 1→0, reversing the rise.
             _seq.Append(_rectTransform
                 .DOAnchorPosY(_restPosition.y - _riseDistance, _sinkDuration)
                 .SetEase(_sinkEase));
@@ -167,7 +167,7 @@ namespace ThroneOfTides.Systems.VFX
                     0f, _sinkDuration)
                 .SetEase(_sinkEase));
 
-            // Phase 5 — Gone: stop particles (scene object — never destroyed) and notify caller.
+            // Phase 5 - Gone: stop particles (scene object - never destroyed) and notify caller.
             _seq.AppendCallback(() =>
             {
                 _musicNoteParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);

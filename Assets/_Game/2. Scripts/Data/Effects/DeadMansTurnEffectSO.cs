@@ -10,7 +10,7 @@ namespace ThroneOfTides.Data
         protected override void Execute(IReactionChargeEffects context)
         {
             context.AddDeadMansTurnCharge();
-            GameDebug.Log("Dead Man's Turn — reaction charge added");
+            GameDebug.Log("Dead Man's Turn - reaction charge added");
         }
     }
 }

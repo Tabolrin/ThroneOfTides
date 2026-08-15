@@ -8,7 +8,7 @@ namespace _Game._2._Scripts.rum
     /// <summary>
     /// Animates the fillAmount of a UI Image to simulate liquid rising/falling,
     /// with an optional idle "wave" wobble and a hit/damage system for health-bar
-    /// style usage. Does NOT change the sprite, texture, or any visual asset —
+    /// style usage. Does NOT change the sprite, texture, or any visual asset -
     /// it only animates the existing "Filled" Image component over time.
     ///
     /// Setup:

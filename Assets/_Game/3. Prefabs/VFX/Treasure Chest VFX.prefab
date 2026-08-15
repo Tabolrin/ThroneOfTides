@@ -103,9 +103,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.VFX.TreasureChestVFXController
   _chestImage: {fileID: 4119528014043523099}
   _coinParticlesPrefab: {fileID: 5978382566097320969, guid: ae37225a3467be3448bbc3b53d06b89b, type: 3}
-  _fillDuration: 1
+  _fillDuration: 0.65
   _fillEase: 1
-  _riseDistance: 20
+  _riseDistance: 30
   _enlargeScale: 1.3
   _enlargeDuration: 0.15
   _enlargeEase: 27

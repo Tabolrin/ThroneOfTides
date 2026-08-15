@@ -312,7 +312,7 @@ namespace ThroneOfTides.Tools
             EditorUtility.SetDirty(_targetDeck);
             AssetDatabase.SaveAssets();
             _isDirty = false;
-            Debug.Log($"[ThroneOfTides] Deck '{_targetDeck.name}' saved — {total} cards.");
+            Debug.Log($"[ThroneOfTides] Deck '{_targetDeck.name}' saved - {total} cards.");
         }
 
         private void AddCardToDeck(CardSO card)

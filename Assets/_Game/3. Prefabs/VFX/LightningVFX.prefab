@@ -55,7 +55,11 @@ MonoBehaviour:
   _lightningImage: {fileID: 4145348717778944793}
   _strikeAnchor: {fileID: 2194116197731095762}
   _canvasGroup: {fileID: 8946072559563258366}
-  _feedbackLightningStrike: {fileID: 0}
+  _lightningStrikeSfx:
+    _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
+    _songName: Lightning
+    _volumeMultiplier: 1
+    _pitchMultiplier: 1
   _canvasSpawnOffset: {x: 0, y: 0}
   _cloudFadeDuration: 0.4
   _cloudFadeEase: 6

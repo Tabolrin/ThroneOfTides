@@ -1,5 +1,6 @@
 // Assets/_Game/2. Scripts/UI/CardDragHandler.cs
 using System;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -11,9 +12,9 @@ namespace ThroneOfTides.UI
         [SerializeField] private Canvas      _dragCanvas;
         [SerializeField] private CanvasGroup _canvasGroup;
 
-        // Fired when drag starts — HandLayoutManager closes the gap
+        // Fired when drag starts - HandLayoutManager closes the gap
         public Action<CardView> OnDragStarted;
-        // Fired when drag ends — HandLayoutManager reopens or confirms removal
+        // Fired when drag ends - HandLayoutManager reopens or confirms removal
         public Action<CardView> OnDragEnded;
 
         private RectTransform    _rectTransform;
@@ -22,7 +23,7 @@ namespace ThroneOfTides.UI
         private int              _originalSiblingIndex;
         private Vector2          _originalPosition;
         // Offset between the pointer and the card's anchored position, captured once at drag
-        // start (in drag-canvas local space) — added back every frame so the card keeps whatever
+        // start (in drag-canvas local space) - added back every frame so the card keeps whatever
         // offset it was grabbed at instead of snapping its pivot under the cursor.
         private Vector2          _pointerToCardOffset;
         private CardView         _cardView;
@@ -39,17 +40,24 @@ namespace ThroneOfTides.UI
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            // Must happen before capturing original position/scale below — otherwise a card
+            // Must happen before capturing original position/scale below - otherwise a card
             // picked up mid-hover snaps back to its enlarged/raised hover state instead of its
             // true resting slot when a drag is later cancelled.
             _hoverEffect?.CancelHover();
+
+            // CancelHover only acts if hover was actually active - if the card is grabbed before
+            // any hover-enter fires (or mid a hand-layout gap-close from a card just added or
+            // removed elsewhere), HandLayoutManager's own position tween could still be running
+            // on this transform. Complete it now so _originalPosition below is always the true
+            // resting slot, not a mid-tween snapshot the card would incorrectly snap back to.
+            _rectTransform.DOKill(true);
 
             _originalParent       = transform.parent;
             _originalSiblingIndex = transform.GetSiblingIndex();
             _originalPosition     = _rectTransform.anchoredPosition;
 
             // worldPositionStays reparenting recalculates local scale to preserve *world* scale,
-            // so this must be reset after moving to _dragCanvas, not before — the hand containers
+            // so this must be reset after moving to _dragCanvas, not before - the hand containers
             // and the drag canvas apply different local scales, so resetting beforehand just gets
             // overwritten by the reparent itself. OnDrag's anchoredPosition += delta math assumes
             // local scale == 1 relative to the drag canvas; a card that carries over any other
@@ -61,7 +69,7 @@ namespace ThroneOfTides.UI
             _canvasGroup.alpha          = 0.8f;
 
             // Recomputed from the absolute pointer position every frame in OnDrag rather than
-            // accumulating eventData.delta frame-to-frame — delta accumulation can drift out of
+            // accumulating eventData.delta frame-to-frame - delta accumulation can drift out of
             // sync with the actual cursor position under fast mouse movement (dropped/coalesced
             // move events), producing a growing offset the longer/faster a drag goes on.
             _dragCanvasRect = _dragCanvas.transform as RectTransform;
@@ -69,13 +77,13 @@ namespace ThroneOfTides.UI
                 _dragCanvasRect, eventData.position, null, out var pointerLocal);
             _pointerToCardOffset = _rectTransform.anchoredPosition - pointerLocal;
 
-            // Notify HandLayoutManager — triggers gap close
+            // Notify HandLayoutManager - triggers gap close
             OnDragStarted?.Invoke(_cardView);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            // null camera is correct here — _dragCanvas is Screen Space Overlay (see
+            // null camera is correct here - _dragCanvas is Screen Space Overlay (see
             // CardPresentationPlayer's WorldToCanvasLocalPoint for the same rule/rationale).
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _dragCanvasRect, eventData.position, null, out var pointerLocal);
@@ -87,7 +95,7 @@ namespace ThroneOfTides.UI
             _canvasGroup.blocksRaycasts = true;
             _canvasGroup.alpha          = 1f;
 
-            // Card was accepted by play zone — release-to-pool handled by HandLayoutManager
+            // Card was accepted by play zone - release-to-pool handled by HandLayoutManager
             // via OnDragEnded (it owns the CardView pool and knows the card's release state).
             if (_cardView != null && _cardView.WasPlayed)
             {
@@ -104,7 +112,7 @@ namespace ThroneOfTides.UI
             transform.SetSiblingIndex(_originalSiblingIndex);
             _rectTransform.anchoredPosition = _originalPosition;
 
-            // Notify HandLayoutManager — triggers slot reopen
+            // Notify HandLayoutManager - triggers slot reopen
             OnDragEnded?.Invoke(_cardView);
         }
     }

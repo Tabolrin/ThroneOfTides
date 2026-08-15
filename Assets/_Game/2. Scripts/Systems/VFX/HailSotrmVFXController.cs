@@ -1,9 +1,9 @@
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
+using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Systems.VFX
 {
@@ -12,7 +12,7 @@ namespace ThroneOfTides.Systems.VFX
     /// controllers, this one stays alive for the DOT's whole duration instead of a fixed sequence:
     ///
     ///   1. Cloud fades in, hail particles start looping.
-    ///   2. Stays looping — tracks GameEventBus.OnShipStatusCountChanged for HailStorm on the
+    ///   2. Stays looping - tracks GameEventBus.OnShipStatusCountChanged for HailStorm on the
     ///      target ship, so it keeps playing across turns for exactly as many turns as the
     ///      card's DOT duration says (no hardcoded turn count here).
     ///   3. When that count reaches 0 (DOT expired), hail stops and cloud fades out.
@@ -20,10 +20,10 @@ namespace ThroneOfTides.Systems.VFX
     /// Scene setup requirements:
     ///   - _cloudImage      : Image with alpha driven by color.a.
     ///   - _hailAnchor      : Empty RectTransform child of CloudImage, placed at
-    ///                        the bottom edge — converted to world space for particles.
+    ///                        the bottom edge - converted to world space for particles.
     ///   - _hailParticles   : Scene-level world-space ParticleSystem, passed via Inject().
     ///                        Needs its own Looping enabled so it rains continuously while active.
-    ///                        Never destroyed — stopped and cleared after each use.
+    ///                        Never destroyed - stopped and cleared after each use.
     /// </summary>
     public class HailstormVFXController : MonoBehaviour, ICardPlayEffect
     {
@@ -33,8 +33,8 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private Image         _cloudImage;
         [SerializeField] private RectTransform _hailAnchor; // bottom edge of cloud sprite
 
-        [Header("FEEL")]
-        [SerializeField] private MMF_Player _feedbackHailstorm;
+        [Header("SFX")]
+        [SerializeField] private CardSfxCue _hailstormSfx;
 
         [Header("Spawn Offset (canvas units, applied left of target)")]
         [SerializeField] private Vector2 _canvasSpawnOffset = new Vector2(-80f, 0f);
@@ -55,7 +55,7 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully faded out (DOT expired). Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
-        /// <summary>ICardPlayEffect — fired when fully faded, so CardPresentationPlayer destroys the instance.</summary>
+        /// <summary>ICardPlayEffect - fired when fully faded, so CardPresentationPlayer destroys the instance.</summary>
         public event Action Completed;
 
         // ── Private ───────────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ namespace ThroneOfTides.Systems.VFX
         }
 
         /// <summary>
-        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Hail Storm always
+        /// ICardPlayEffect entry point - hosted by CardPresentationPlayer. Hail Storm always
         /// strikes the opponent's ship, matching this card's authored PresentationEntry
         /// (AnchorSide: Opponent). Stays alive across turns until GameState's DOT tracking
         /// reports the HailStorm status on that ship has run out.
@@ -132,7 +132,7 @@ namespace ThroneOfTides.Systems.VFX
                 {
                     PositionParticles();
                     _hailParticles.Play();
-                    _feedbackHailstorm?.PlayFeedbacks();
+                    CardSfxPlayer.Play(_hailstormSfx, transform.position);
                     OnAttackMoment?.Invoke();
                 });
         }
@@ -141,7 +141,7 @@ namespace ThroneOfTides.Systems.VFX
         {
             if (type != ShipStatusType.HailStorm || ship != _targetShip || count > 0) return;
 
-            // DOT expired — stop raining and fade the cloud out.
+            // DOT expired - stop raining and fade the cloud out.
             Unsubscribe();
             _hailParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 

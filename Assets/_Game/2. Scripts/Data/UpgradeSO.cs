@@ -16,7 +16,7 @@ namespace ThroneOfTides.Data
         [Header("Levels")]
         public int MaxLevel = 3;
 
-        // Value added per upgrade level — index 0 is the value gained at level 1
+        // Value added per upgrade level - index 0 is the value gained at level 1
         public int[] ValuePerLevel = { 1, 1, 1 };
 
         [Header("Coin cost per level (index 0 = cost to reach level 1)")]

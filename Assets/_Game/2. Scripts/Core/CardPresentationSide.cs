@@ -12,7 +12,7 @@ namespace ThroneOfTides.Core
 
         /// Uses the explicitly chosen target ship from a targeting prompt (see
         /// CardCasterFilter/CardSO.RequiresTargetSelection) instead of caster/opponent
-        /// inference — for cards like Tidal Wave where the caster picks either ship.
+        /// inference - for cards like Tidal Wave where the caster picks either ship.
         ExplicitTarget
     }
 }

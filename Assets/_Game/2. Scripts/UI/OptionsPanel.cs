@@ -10,7 +10,7 @@ namespace ThroneOfTides.UI
 {
     /// <summary>
     /// Simple options panel: Master/Music/Sfx volume (Sfx slider drives both the Sfx and UI
-    /// mixer tracks together — the game only ever exposes one combined "sound effects" slider
+    /// mixer tracks together - the game only ever exposes one combined "sound effects" slider
     /// to the player), fullscreen, resolution, and VSync. Audio volumes are persisted by
     /// MMSoundManager's own settings system; display settings persist via their own small save
     /// file here, independent of everything else.
@@ -168,7 +168,7 @@ namespace ThroneOfTides.UI
             _initialising = false;
         }
 
-        // Screen.resolutions repeats each size once per supported refresh rate — collapse to
+        // Screen.resolutions repeats each size once per supported refresh rate - collapse to
         // one entry per width/height. Built once and reused so the saved dropdown index and
         // Screen.resolutions' index never disagree with each other.
         private void BuildDistinctResolutions()
@@ -249,7 +249,7 @@ namespace ThroneOfTides.UI
             RefreshDismissDurationLabel();
         }
 
-        // The duration only matters when NOT waiting for a click — grey it out otherwise so the
+        // The duration only matters when NOT waiting for a click - grey it out otherwise so the
         // player isn't left wondering why changing it does nothing.
         private void RefreshDismissDurationInteractable()
         {

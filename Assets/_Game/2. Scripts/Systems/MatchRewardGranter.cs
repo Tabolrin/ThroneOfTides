@@ -39,7 +39,7 @@ namespace ThroneOfTides.Systems
         public static MatchRewardResult GrantLoss(
             PlayerInventory inventory, LevelRewardSO reward, int playerHP)
         {
-            // Loss — coins only at 50%, no card reward.
+            // Loss - coins only at 50%, no card reward.
             int coins = reward.GetCoinReward(playerHP, isWin: false);
             inventory.AddCoins(coins);
 

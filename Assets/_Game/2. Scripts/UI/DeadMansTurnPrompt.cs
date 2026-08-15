@@ -5,7 +5,7 @@ using ThroneOfTides.Data;
 
 namespace ThroneOfTides.UI
 {
-    // Shown during an enemy attack when the player can react to it — either the full
+    // Shown during an enemy attack when the player can react to it - either the full
     // Dead Man's Turn / Counter Gale choice, or (reusing this same panel) the Kraken-vs-Kraken
     // negate prompt. Negate and Counter Gale are independently optional: pass a null action for
     // either to hide that button entirely, so a single panel serves every case (only Dead Man's

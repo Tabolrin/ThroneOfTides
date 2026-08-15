@@ -10,17 +10,17 @@ namespace ThroneOfTides.Systems.VFX
     /// Gunpowder Barrel: a UI-canvas sprite thrown from the caster's ship to the target's,
     /// spinning, trailing a world-space dust particle system the whole flight. On impact,
     /// reveals the target ship's Gunpowder world-space indicator (ShipStatusIndicator) if it
-    /// wasn't already visible — timed to this throw's landing rather than the instant GameState
+    /// wasn't already visible - timed to this throw's landing rather than the instant GameState
     /// registers the stack.
     ///
-    /// Uses ProjectileThrow for the shared spin-and-arc motion — also used by
+    /// Uses ProjectileThrow for the shared spin-and-arc motion - also used by
     /// TorchVFXController, and intended for Cannonball/Pistol to adopt later.
     ///
     /// Scene/prefab setup requirements:
     ///   - Root prefab is a UI Image (RectTransform), same canvas-space convention as
-    ///     Kraken/Siren/Lightning/Hail Storm — positioned via anchoredPosition, not world position.
+    ///     Kraken/Siren/Lightning/Hail Storm - positioned via anchoredPosition, not world position.
     ///   - Dust trail is a persistent scene-level ParticleSystem (like Siren's music notes or
-    ///     Lightning's strike burst) injected via CardEffectSpawnContext.GunpowderDustParticles —
+    ///     Lightning's strike burst) injected via CardEffectSpawnContext.GunpowderDustParticles -
     ///     reused and repositioned every frame rather than instantiated/destroyed per throw.
     /// </summary>
     public class GunpowderBarrelVFXController : MonoBehaviour, ICardPlayEffect
@@ -104,7 +104,7 @@ namespace ThroneOfTides.Systems.VFX
             if (_dustParticles == null) return;
 
             // Convert the dust anchor's current on-screen world position back to a 3D world
-            // point every frame, so the trail tracks the moving barrel — same conversion as
+            // point every frame, so the trail tracks the moving barrel - same conversion as
             // Lightning's _strikeAnchor / Siren's _mouthAnchor, just re-run continuously instead
             // of once, since this anchor is moving rather than static.
             Transform anchor = _dustAnchor != null ? _dustAnchor : _rectTransform;
@@ -119,12 +119,12 @@ namespace ThroneOfTides.Systems.VFX
         {
             _dustParticles?.Stop(true, ParticleSystemStopBehavior.StopEmitting);
 
-            // Always call this — RevealNow() is idempotent (the activation burst only ever
+            // Always call this - RevealNow() is idempotent (the activation burst only ever
             // fires once per genuine 0->active transition, gated by its own internal
             // _burstPending flag; re-fading an already-visible icon is harmless). It must NOT be
             // gated here on IsOpponentStatusVisible: that reflects live game-state count, which
-            // GameState.IncrementCombo already set the instant the card resolved — before this
-            // throw animation even started — so it would always read "already visible" and skip
+            // GameState.IncrementCombo already set the instant the card resolved - before this
+            // throw animation even started - so it would always read "already visible" and skip
             // the reveal entirely, silently killing the activation burst.
             _context.RevealOpponentStatusIndicator?.Invoke(ShipStatusType.Gunpowder);
 

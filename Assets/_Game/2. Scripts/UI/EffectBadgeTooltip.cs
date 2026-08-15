@@ -8,7 +8,7 @@ namespace ThroneOfTides.UI
     /// <summary>
     /// Small floating tooltip shown above a hovered persistent-effect badge, explaining what it
     /// means in one short line. One shared instance reused by every EffectBadgeView on both
-    /// ActiveEffectsBars — position it under the same Canvas as the badges.
+    /// ActiveEffectsBars - position it under the same Canvas as the badges.
     /// </summary>
     public class EffectBadgeTooltip : MonoBehaviour
     {
@@ -26,7 +26,7 @@ namespace ThroneOfTides.UI
             _rect.position = anchor.position + (Vector3)_offset;
 
             // Text length varies per card/effect, so the rect only reflects its true footprint
-            // after layout catches up with the new text — rebuild now so the clamp below measures
+            // after layout catches up with the new text - rebuild now so the clamp below measures
             // this frame's size instead of whatever was left over from the previous Show().
             LayoutRebuilder.ForceRebuildLayoutImmediate(_rect);
             ClampToScreen();
@@ -35,7 +35,7 @@ namespace ThroneOfTides.UI
         private void ClampToScreen()
         {
             // Lives on a Screen Space - Overlay canvas (TopUICanvas), where a RectTransform's
-            // world position maps 1:1 to screen pixels regardless of CanvasScaler — so clamping
+            // world position maps 1:1 to screen pixels regardless of CanvasScaler - so clamping
             // against Screen.width/height is enough to keep it fully visible without needing a
             // Canvas reference or any camera/viewport math.
             Vector2 size = _rect.rect.size * _rect.lossyScale;
@@ -49,7 +49,7 @@ namespace ThroneOfTides.UI
         {
             // Guards against Unity's "fake null": callers may still hold a reference to this
             // component after its GameObject was destroyed (e.g. mid scene-teardown ordering),
-            // and `this == null` — unlike a bare `?.` at the call site — respects Unity's
+            // and `this == null` - unlike a bare `?.` at the call site - respects Unity's
             // overloaded equality check that correctly detects that case.
             if (this == null) return;
             gameObject.SetActive(false);

@@ -121,6 +121,4 @@ MonoBehaviour:
     _songName: Cannonball
     _volumeMultiplier: 1
     _pitchMultiplier: 0.9
-  _shakeDuration: 0.25
-  _shakeAmplitude: 0.5
-  _shakeFrequency: 30
+  _shakeLevel: 2

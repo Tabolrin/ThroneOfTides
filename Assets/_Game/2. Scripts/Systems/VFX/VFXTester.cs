@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // Assembly: ThroneOfTides.Systems
 // Location: Scripts/Systems/VFX/VFXTester.cs
 // Attach to: any GameObject in the scene alongside the VFX controllers
-// Remove or strip from builds — development testing only.
+// Remove or strip from builds - development testing only.
 
 namespace ThroneOfTides.Systems.VFX
 {
@@ -20,7 +20,7 @@ namespace ThroneOfTides.Systems.VFX
         [Header("Test Position")]
         [SerializeField] private Vector3 _testWorldPosition = Vector3.zero;
 
-        [Header("Shared Inject — required for canvas positioning")]
+        [Header("Shared Inject - required for canvas positioning")]
         [SerializeField] private RectTransform _canvasRect;
         [SerializeField] private Camera        _gameCamera;
 
@@ -36,28 +36,28 @@ namespace ThroneOfTides.Systems.VFX
 
         private void Update()
         {
-            // Space — Kraken attack
+            // Space - Kraken attack
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
                 _krakenVFX.Inject(_canvasRect, _gameCamera);
                 _krakenVFX.StartSequence(_testWorldPosition);
             }
 
-            // S — Siren song
+            // S - Siren song
             if (Keyboard.current.sKey.wasPressedThisFrame)
             {
                 _sirenVFX.Inject(_canvasRect, _gameCamera, _musicNoteParticles);
                 _sirenVFX.StartSequence(_testWorldPosition);
             }
 
-            // L — Lightning strike
+            // L - Lightning strike
             if (Keyboard.current.lKey.wasPressedThisFrame)
             {
                 _lightningVFX.Inject(_canvasRect, _gameCamera, _strikeParticles, _whiteoutImage);
                 _lightningVFX.StartSequence(_testWorldPosition);
             }
 
-            // H — Hailstorm
+            // H - Hailstorm
             if (Keyboard.current.hKey.wasPressedThisFrame)
             {
                 _hailstormVFX.Inject(_canvasRect, _gameCamera, _hailParticles);

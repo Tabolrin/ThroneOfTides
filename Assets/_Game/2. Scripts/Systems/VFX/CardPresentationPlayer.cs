@@ -9,23 +9,23 @@ using ThroneOfTides.Data;
 namespace ThroneOfTides.Systems
 {
     /// <summary>
-    /// Spawns each played card's authored CardPresentationEntry list — sprite-only prefabs or
+    /// Spawns each played card's authored CardPresentationEntry list - sprite-only prefabs or
     /// paired UI-sprite + world-particle prefabs, at the anchor each entry specifies, with its
     /// SFX cue. Reacts to both player and enemy plays, closing the gap where enemy-played cards
     /// previously got no per-card VFX at all.
     ///
     /// Deliberately separate from CardVFXHandler, which owns generic system-wide combat feedback
-    /// (hit impact, HP/mana bars, win/loss) — a different responsibility from per-card unique
+    /// (hit impact, HP/mana bars, win/loss) - a different responsibility from per-card unique
     /// presentation. Migrate a card here by populating its PresentationEntries, then delete that
     /// card's now-redundant case from CardVFXHandler.PlayCardVFX so it doesn't double-fire.
     /// </summary>
     public class CardPresentationPlayer : MonoBehaviour
     {
         [Header("Ship Anchors")]
-        [Tooltip("The ShipVfxAnchors on the player's ship — resolves anchor points when the player is the caster, opponent, or explicitly chosen target.")]
+        [Tooltip("The ShipVfxAnchors on the player's ship - resolves anchor points when the player is the caster, opponent, or explicitly chosen target.")]
         [SerializeField] private ShipVfxAnchors _playerShipAnchors;
 
-        [Tooltip("The ShipVfxAnchors on the enemy's ship — resolves anchor points when the enemy is the caster, opponent, or explicitly chosen target.")]
+        [Tooltip("The ShipVfxAnchors on the enemy's ship - resolves anchor points when the enemy is the caster, opponent, or explicitly chosen target.")]
         [SerializeField] private ShipVfxAnchors _enemyShipAnchors;
 
         [Header("UI")]
@@ -35,7 +35,7 @@ namespace ThroneOfTides.Systems
         [Tooltip("The camera used to convert world spawn points into screen/canvas space. Should match the camera CardVFXHandler uses.")]
         [SerializeField] private Camera _gameCamera;
 
-        [Tooltip("Persistent scene-level ParticleSystem reused by Siren Song's music notes — sized once in the editor and repositioned each use, never destroyed.")]
+        [Tooltip("Persistent scene-level ParticleSystem reused by Siren Song's music notes - sized once in the editor and repositioned each use, never destroyed.")]
         [SerializeField] private ParticleSystem _musicNoteParticles;
 
         [Tooltip("Persistent scene-level ParticleSystem reused by Lightning's strike burst.")]
@@ -54,23 +54,44 @@ namespace ThroneOfTides.Systems
         [SerializeField] private Transform _uiEffectParent;
 
         [Header("World")]
-        [Tooltip("Parent Transform that spawned world-space prefabs (world sprites and particles) are instantiated under, purely to keep the scene hierarchy tidy — does not affect their spawn position.")]
+        [Tooltip("Parent Transform that spawned world-space prefabs (world sprites and particles) are instantiated under, purely to keep the scene hierarchy tidy - does not affect their spawn position.")]
         [SerializeField] private Transform _worldEffectParent;
 
-        [Tooltip("Same assembly as this class — used for Essence Plunder's deferred mana-gain popup (suppresses the generic instant one, then fires its own once its own animation finishes).")]
+        [Tooltip("Same assembly as this class - used for Essence Plunder's deferred mana-gain popup (suppresses the generic instant one, then fires its own once its own animation finishes).")]
         [SerializeField] private CardVFXHandler _cardVFXHandler;
 
         /// <summary>
         /// Wired by GameBootstrapper (the composition root) to EnemyHandRevealPanel.ShowAndAwaitDismiss
-        /// — kept as a plain delegate rather than a direct field since Systems cannot reference the
+        /// - kept as a plain delegate rather than a direct field since Systems cannot reference the
         /// UI assembly (UI already depends on Systems; the reverse would be a circular reference).
         /// </summary>
         public Action<IReadOnlyList<ICard>, Action> ShowEnemyHandReveal { get; set; }
 
+        /// <summary>
+        /// Wired by GameBootstrapper to HandLayoutManager's hand-container world position for the
+        /// given side - lets a self-driving effect (e.g. Monkey Grab) fly a temporary card visual
+        /// toward wherever the hand actually sits on screen.
+        /// </summary>
+        public Func<DamageTarget, Vector3> GetHandAreaPosition { get; set; }
+
+        /// <summary>
+        /// Wired by GameBootstrapper to HandLayoutManager's StealCardFromEnemyHand/StealCardFromPlayerHand
+        /// - triggers the actual persistent hand-card visual once a stolen-card VFX's own flight
+        /// animation finishes, instead of it appearing the instant the card resolves.
+        /// </summary>
+        public Action<ICard, DamageTarget> FinalizeStolenCardVisual { get; set; }
+
+        /// <summary>
+        /// Wired by GameBootstrapper to HandLayoutManager.SpawnStolenCardPreview - spawns the
+        /// actual card prefab (not just its art sprite) for a self-driving effect to fly across
+        /// the screen.
+        /// </summary>
+        public Func<ICard, Transform, GameObject> SpawnStolenCardVisual { get; set; }
+
         private void OnEnable()
         {
             GameEventBus.OnCardPlayAccepted += HandlePlayerCardPlayed;
-            // Not OnEnemyCardPlayed — that fires immediately (drives the slide-in animation and
+            // Not OnEnemyCardPlayed - that fires immediately (drives the slide-in animation and
             // match log), before any reaction prompt the player might still be looking at.
             // OnEnemyCardPresentationReady is TurnCoordinator's signal that it's actually safe to
             // show this card's own VFX/SFX (immediately for non-attacks, otherwise only once a
@@ -117,11 +138,11 @@ namespace ThroneOfTides.Systems
 
             if (entry.SpritePrefab == null)
             {
-                // SFX-only entry (e.g. Rum) — no visual, just play the cue at the caster's anchor.
+                // SFX-only entry (e.g. Rum) - no visual, just play the cue at the caster's anchor.
                 if (entry.Sfx.Playlist != null)
                     CardSfxPlayer.Play(entry.Sfx, casterPoint.position);
                 else
-                    Debug.LogWarning($"{card.Name}: a presentation entry has no Sprite Prefab or SFX assigned — skipping.");
+                    Debug.LogWarning($"{card.Name}: a presentation entry has no Sprite Prefab or SFX assigned - skipping.");
                 return;
             }
 
@@ -149,7 +170,7 @@ namespace ThroneOfTides.Systems
                 var explicitTargetAnchors = ResolveExplicitTargetAnchors(explicitTarget);
 
                 // Self-driving effects decide when their SFX actually happens (e.g. on impact,
-                // not at spawn) — hand them a bound callback instead of firing it here.
+                // not at spawn) - hand them a bound callback instead of firing it here.
                 var context = new CardEffectSpawnContext(
                     casterPoint,
                     opponentPoint,
@@ -179,14 +200,18 @@ namespace ThroneOfTides.Systems
                         CardPresentationSide.Opponent => opponentAnchors.Get(type),
                         CardPresentationSide.ExplicitTarget => explicitTargetAnchors?.Get(type),
                         _ => null
-                    });
+                    },
+                    getHandAreaPosition: GetHandAreaPosition,
+                    finalizeStolenCardVisual: FinalizeStolenCardVisual,
+                    spawnStolenCardVisual: SpawnStolenCardVisual,
+                    suppressNextDamageCameraShake: () => _cardVFXHandler?.SuppressNextDamageCameraShake());
 
                 playEffect.Initialize(context);
                 playEffect.Completed += () => Destroy(spriteInstance);
             }
             else
             {
-                // Simple spawns have no sequence to sync against — play immediately.
+                // Simple spawns have no sequence to sync against - play immediately.
                 Destroy(spriteInstance, entry.Lifetime);
                 CardSfxPlayer.Play(entry.Sfx, spawnTransform.position);
             }
@@ -198,7 +223,7 @@ namespace ThroneOfTides.Systems
             {
                 Debug.LogWarning(
                     "A presentation entry uses Explicit Target anchoring but no target was selected for " +
-                    "this play (card is missing Requires Target Selection) — falling back to the player's ship.");
+                    "this play (card is missing Requires Target Selection) - falling back to the player's ship.");
                 return _playerShipAnchors.Get(positionType);
             }
 
@@ -207,7 +232,7 @@ namespace ThroneOfTides.Systems
         }
 
         // Null (not the player-ship fallback ResolveExplicitTargetPoint uses) when there's no
-        // explicit target — callers only use this for optional extra lookups, not the primary
+        // explicit target - callers only use this for optional extra lookups, not the primary
         // spawn point, so silently doing nothing is the right failure mode here.
         private ShipVfxAnchors ResolveExplicitTargetAnchors(DamageTarget? explicitTarget)
         {
@@ -235,7 +260,7 @@ namespace ThroneOfTides.Systems
         private Vector2 WorldToCanvasLocalPoint(Vector3 worldPosition)
         {
             Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(_gameCamera, worldPosition);
-            // null camera is correct for Screen Space Overlay canvases — see HailstormVFXController's
+            // null camera is correct for Screen Space Overlay canvases - see HailstormVFXController's
             // PositionAtWorldPoint, which follows the same rule. Passing the real camera here (as
             // opposed to the WorldToScreenPoint call above, which needs it) makes this conversion
             // collapse to roughly the canvas's corner regardless of the input world position.

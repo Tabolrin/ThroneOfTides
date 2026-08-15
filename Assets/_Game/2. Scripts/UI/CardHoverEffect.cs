@@ -9,7 +9,7 @@ namespace ThroneOfTides.UI
     // jumping to the front of its parent's draw order, reverting on exit. Attach to a card-like
     // RectTransform that should react to hover without needing to be draggable/playable (e.g.
     // EnemyHandRevealPanel's read-only card display, or a hand card via Configure()).
-    // Base scale/position are captured fresh on every hover-enter rather than once in OnEnable —
+    // Base scale/position are captured fresh on every hover-enter rather than once in OnEnable -
     // pooled hand cards get repositioned by hand-layout re-fanning throughout their lifetime, so
     // a one-time cached base would go stale and snap back to the wrong spot.
     public class CardHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -41,6 +41,16 @@ namespace ThroneOfTides.UI
             if (_isHovering) return;
             _isHovering = true;
 
+            // Complete (not just stop) any tween already running on this transform BEFORE
+            // reading its current values - a plain DOKill() freezes a tween wherever it happened
+            // to be mid-flight, so a hover-enter that arrives while the hand layout's gap-close
+            // tween (or a previous hover's not-yet-finished shrink-back) is still animating would
+            // otherwise capture that half-finished, wrong position/scale as "base". Every
+            // subsequent enlarge/restore cycle would then compound on top of that wrong base,
+            // which is how a card ends up visibly stuck enlarged or offset after rapid
+            // hover/drag interactions.
+            _rect.DOKill(true);
+
             _baseScale = _rect.localScale;
             _basePos   = _rect.anchoredPosition;
 
@@ -50,7 +60,6 @@ namespace ThroneOfTides.UI
                 _rect.SetAsLastSibling();
             }
 
-            _rect.DOKill();
             _rect.DOScale(_baseScale * _hoverScale, _tweenDuration).SetEase(_ease);
             _rect.DOAnchorPos(_basePos + new Vector2(0f, _hoverRise), _tweenDuration).SetEase(_ease);
         }
@@ -60,19 +69,21 @@ namespace ThroneOfTides.UI
             if (!_isHovering) return;
             _isHovering = false;
 
-            _rect.DOKill();
+            // See the matching comment in OnPointerEnter - completes any in-flight tween first so
+            // this shrink-back always starts from the true enlarged state, not an interrupted one.
+            _rect.DOKill(true);
             _rect.DOScale(_baseScale, _tweenDuration).SetEase(_ease);
             _rect.DOAnchorPos(_basePos, _tweenDuration).SetEase(_ease)
                 .OnComplete(() =>
                 {
-                    // Restored only after the tween settles — reordering mid-tween would make
+                    // Restored only after the tween settles - reordering mid-tween would make
                     // an overlapping neighbor draw on top of the still-animating card.
                     if (_bringToFront) _rect.SetSiblingIndex(_baseSiblingIndex);
                 });
         }
 
-        // A card can be disabled mid-hover — played away, or released back to HandLayoutManager's
-        // pool via DisableHover — with no OnPointerExit ever firing. Without restoring here too,
+        // A card can be disabled mid-hover - played away, or released back to HandLayoutManager's
+        // pool via DisableHover - with no OnPointerExit ever firing. Without restoring here too,
         // the card would stay at its enlarged scale/raised position; the *next* hover-enter would
         // then capture that already-enlarged state as its "base" and enlarge again on top of it,
         // compounding on every subsequent hover. Reset unconditionally (not just when
@@ -84,7 +95,7 @@ namespace ThroneOfTides.UI
             _isHovering = false;
         }
 
-        // Called by CardDragHandler the instant a drag begins — a card picked up mid-hover (a
+        // Called by CardDragHandler the instant a drag begins - a card picked up mid-hover (a
         // very common "hover to preview, then drag" flow) would otherwise start the drag still
         // enlarged/raised, and OnDrag's anchoredPosition += delta math assumes scale == 1, so a
         // lingering hover scale makes the card visibly drift away from the cursor. Snaps back
@@ -96,7 +107,7 @@ namespace ThroneOfTides.UI
             _isHovering = false;
         }
 
-        // Snaps (no tween) straight back to the last captured base — shared by CancelHover and
+        // Snaps (no tween) straight back to the last captured base - shared by CancelHover and
         // OnDisable so there's exactly one place that knows how to fully undo the hover state.
         private void RestoreToBase()
         {
@@ -107,7 +118,7 @@ namespace ThroneOfTides.UI
             _rect.anchoredPosition = _basePos;
 
             // gameObject.activeSelf is still true here when OnDisable fired because a PARENT
-            // (e.g. PlayerHandContainer) is being deactivated and cascaded down to us — Unity
+            // (e.g. PlayerHandContainer) is being deactivated and cascaded down to us - Unity
             // forbids sibling-index changes during that cascade ("Cannot change sibling position
             // ... while activating or deactivating the parent"). Only reorder when this object
             // was deactivated directly (activeSelf already false by the time OnDisable runs),

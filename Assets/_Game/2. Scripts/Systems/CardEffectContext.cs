@@ -39,7 +39,7 @@ namespace ThroneOfTides.Systems
         public void ApplyDamage(DamageTarget target, int amount) =>
             _gameState.ApplyDamage(target, amount);
 
-        // Heals whichever side cast this card — works for either side so Rum behaves
+        // Heals whichever side cast this card - works for either side so Rum behaves
         // correctly when the enemy plays it too.
         public void HealPlayer(int amount)
         {
@@ -64,7 +64,7 @@ namespace ThroneOfTides.Systems
         public void SpendPlayerMana(int amount) =>
             _gameState.SpendPlayerMana(amount);
 
-        // Grants max mana to whoever cast this card — works for either side so Treasure
+        // Grants max mana to whoever cast this card - works for either side so Treasure
         // Chest/High Spirits behave correctly when the enemy plays them too.
         public void AddPlayerMaxMana(int amount)
         {
@@ -74,7 +74,7 @@ namespace ThroneOfTides.Systems
                 _gameState.AddEnemyMaxMana(amount);
         }
 
-        // Steals mana from whoever did NOT cast this card, into the caster's own pool — works
+        // Steals mana from whoever did NOT cast this card, into the caster's own pool - works
         // for either side so Stolen Wind/Essence Plunder behave correctly when the enemy plays them.
         public void StealEnemyMana(int amount)
         {
@@ -84,7 +84,7 @@ namespace ThroneOfTides.Systems
                 _gameState.StealPlayerMana(amount);
         }
 
-        // Charges whichever side cast this card — works for either side so an enemy-drawn
+        // Charges whichever side cast this card - works for either side so an enemy-drawn
         // reaction card charges the enemy's own counter, not the player's.
         public void AddDeadMansTurnCharge() =>
             _gameState.AddDeadMansTurnCharge(Caster);
@@ -93,7 +93,7 @@ namespace ThroneOfTides.Systems
             _gameState.AddCounterGaleCharge(Caster);
 
         // Draws from the shared original-deck snapshot pool but returns the cards into whoever
-        // cast this card's own deck — works for either side so Treasure Chest behaves correctly
+        // cast this card's own deck - works for either side so Treasure Chest behaves correctly
         // when the enemy plays it too.
         public void ReturnFromSnapshot(int count)
         {
@@ -109,13 +109,32 @@ namespace ThroneOfTides.Systems
         {
             var cardSO = card as CardSO;
             if (cardSO == null) return;
-            _gameState.PlayerHand.AddCard(cardSO, _gameState.PlayerDeck.Count);
+
+            if (_gameState.PlayerHand.Count >= _gameState.MaxHandSize)
+            {
+                GameDebug.Log($"Player hand at max capacity ({_gameState.MaxHandSize}) - card skipped.");
+                GameEventBus.FireMatchNote($"Hand is full (max {_gameState.MaxHandSize}) - a card was skipped.");
+                return;
+            }
+
+            _gameState.PlayerHand.AddCard(cardSO, _gameState.MaxHandSize);
             _handLayout.AddCardToPlayerHand(card);
             GameEventBus.FireCardDrawn(card);
         }
 
-        // Steals a random card from whoever did NOT cast this card, into the caster's own hand —
+        // Steals a random card from whoever did NOT cast this card, into the caster's own hand -
         // works for either side so Monkey Grab behaves correctly when the enemy plays it too.
+        // The GameState ownership change happens instantly here (Execute() has no async
+        // capability), but the persistent hand-visual CardView is deliberately NOT touched -
+        // MonkeyGrabVFXController subscribes to OnCardStolen and decides the moment its own
+        // "carrying the card home" animation calls context.FinalizeStolenCardVisual, which is
+        // what actually invokes _handLayout.StealCardFrom*Hand under the hood.
+        //
+        // The receiving hand is checked BEFORE removing the card from the victim's hand - Monkey
+        // Grab is a guaranteed bonus gain (like Treasure Chest), so it's allowed past the normal
+        // MaxHandSize up to GameState.BonusMaxHandSize, but never past that absolute ceiling.
+        // Checking first (rather than removing then finding AddCard silently no-ops when full)
+        // avoids the card vanishing into neither hand.
         public void StealFromEnemyHand()
         {
             if (Caster == DamageTarget.Player)
@@ -123,27 +142,39 @@ namespace ThroneOfTides.Systems
                 var enemyHand = _gameState.EnemyHand.CardsSO;
                 if (enemyHand.Count == 0) return;
 
+                if (_gameState.PlayerHand.Count >= _gameState.BonusMaxHandSize)
+                {
+                    GameDebug.Log($"Player hand at max capacity ({_gameState.BonusMaxHandSize}) - Monkey Grab steal skipped.");
+                    GameEventBus.FireMatchNote($"Hand is full (max {_gameState.BonusMaxHandSize}) - the stolen card was skipped.");
+                    return;
+                }
+
                 int    index = UnityEngine.Random.Range(0, enemyHand.Count);
                 CardSO card  = enemyHand[index];
                 _gameState.EnemyHand.RemoveCard(card);
-                _gameState.PlayerHand.AddCard(card, _gameState.PlayerDeck.Count);
-                _handLayout.StealCardFromEnemyHand(card);
-                GameEventBus.FireCardDrawn(card);
+                _gameState.PlayerHand.AddCard(card, _gameState.BonusMaxHandSize);
+                GameEventBus.FireCardStolen(card, DamageTarget.Player);
             }
             else
             {
                 var playerHand = _gameState.PlayerHand.CardsSO;
                 if (playerHand.Count == 0) return;
 
+                if (_gameState.EnemyHand.Count >= _gameState.BonusMaxHandSize)
+                {
+                    GameDebug.Log($"Enemy hand at max capacity ({_gameState.BonusMaxHandSize}) - Monkey Grab steal skipped.");
+                    return;
+                }
+
                 int    index = UnityEngine.Random.Range(0, playerHand.Count);
                 CardSO card  = playerHand[index];
                 _gameState.PlayerHand.RemoveCard(card);
-                _gameState.EnemyHand.AddCard(card, _gameState.EnemyDeck.Count);
-                _handLayout.StealCardFromPlayerHand(card);
+                _gameState.EnemyHand.AddCard(card, _gameState.BonusMaxHandSize);
+                GameEventBus.FireCardStolen(card, DamageTarget.Enemy);
             }
         }
 
-        // Discards a random card from whoever did NOT cast this card's hand — works for either
+        // Discards a random card from whoever did NOT cast this card's hand - works for either
         // side so Chain Shot behaves correctly when the enemy plays it too.
         public void DiscardRandomFromOpponentHand()
         {
@@ -176,7 +207,7 @@ namespace ThroneOfTides.Systems
         public IReadOnlyList<ICard> GetEnemyHand()  => _gameState.EnemyHand.Cards;
         public IReadOnlyList<ICard> GetPlayerHand() => _gameState.PlayerHand.Cards;
 
-        // Only the player has a tracked coin balance — a no-op when the enemy casts a card
+        // Only the player has a tracked coin balance - a no-op when the enemy casts a card
         // that happens to touch coins (e.g. an enemy Treasure Chest).
         public void AddCoins(int amount)
         {

@@ -131,7 +131,7 @@ namespace ThroneOfTides.Tools
 
             if ((type == CardType.Action || type == CardType.Reaction)
                 && _actionEffect.objectReferenceValue == null)
-                EditorGUILayout.HelpBox("No Effect SO — card will do nothing.", MessageType.Error);
+                EditorGUILayout.HelpBox("No Effect SO - card will do nothing.", MessageType.Error);
 
             if (type == CardType.Combo && _comboPartner.objectReferenceValue == null)
                 EditorGUILayout.HelpBox("Combo card has no partner.", MessageType.Error);
@@ -141,11 +141,11 @@ namespace ThroneOfTides.Tools
                 EditorGUILayout.HelpBox("DOT has zero duration or damage.", MessageType.Warning);
 
             if (_storageCost.intValue == 0)
-                EditorGUILayout.HelpBox("Storage cost is 0 — intentional?", MessageType.Info);
+                EditorGUILayout.HelpBox("Storage cost is 0 - intentional?", MessageType.Info);
         }
 
         // Custom labels replace a property's default display name, which would otherwise
-        // silently drop its [Tooltip] text too — pulling property.tooltip through keeps it.
+        // silently drop its [Tooltip] text too - pulling property.tooltip through keeps it.
         private static GUIContent Label(SerializedProperty property, string text)
             => new GUIContent(text, property.tooltip);
 
@@ -154,7 +154,7 @@ namespace ThroneOfTides.Tools
             // ── Identity ──────────────────────────────────────────────────────
             EditorGUILayout.LabelField("Identity", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_name,        Label(_name, "Card Name"));
-            EditorGUILayout.PropertyField(_id,          Label(_id, "Card Id (code identity — leave None only for unused/generic cards)"));
+            EditorGUILayout.PropertyField(_id,          Label(_id, "Card Id (code identity - leave None only for unused/generic cards)"));
             EditorGUILayout.PropertyField(_description, Label(_description, "Description"));
             EditorGUILayout.PropertyField(_cardType,    Label(_cardType, "Card Type"));
             EditorGUILayout.Space(6);
@@ -165,7 +165,7 @@ namespace ThroneOfTides.Tools
             EditorGUILayout.PropertyField(_storageCost, Label(_storageCost, "Storage Cost (deck slots)"));
 
             // HP cost only shown when already non-zero or when the card type
-            // could plausibly have one — keeps the inspector uncluttered
+            // could plausibly have one - keeps the inspector uncluttered
             if (_hpCost.intValue > 0 || type == CardType.Weapon || type == CardType.Action)
                 EditorGUILayout.PropertyField(_hpCost, Label(_hpCost, "HP Cost (0 = none)"));
 
@@ -176,7 +176,7 @@ namespace ThroneOfTides.Tools
             EditorGUILayout.PropertyField(_art, Label(_art, "Card Art"));
             EditorGUILayout.HelpBox(
                 "The type symbol icon is defined on the CardTypePaletteSO asset, not per card. " +
-                "Banner background color no longer varies by type — only the Port deck-list row still uses a type band color.",
+                "Banner background color no longer varies by type - only the Port deck-list row still uses a type band color.",
                 MessageType.None);
             EditorGUILayout.Space(6);
 
@@ -197,7 +197,7 @@ namespace ThroneOfTides.Tools
                 case CardType.Weapon:
                     EditorGUILayout.LabelField("Weapon", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(_damage, Label(_damage, "Damage"));
-                    EditorGUILayout.PropertyField(_actionEffect, Label(_actionEffect, "Effect (optional — overrides legacy weapon logic)"));
+                    EditorGUILayout.PropertyField(_actionEffect, Label(_actionEffect, "Effect (optional - overrides legacy weapon logic)"));
                     break;
 
                 case CardType.Combo:
@@ -219,7 +219,7 @@ namespace ThroneOfTides.Tools
                     EditorGUILayout.LabelField("Reaction", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(_actionEffect, Label(_actionEffect, "Charge Effect SO"));
                     EditorGUILayout.HelpBox(
-                        "Reaction cards animate to the charge slot on draw — they never enter the hand.\n" +
+                        "Reaction cards animate to the charge slot on draw - they never enter the hand.\n" +
                         "The Charge Effect SO adds a charge to GameState.",
                         MessageType.Info);
                     break;

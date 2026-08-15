@@ -1,9 +1,9 @@
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
+using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Systems.VFX
 {
@@ -16,8 +16,8 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private Image                  _tentacleImage;
         [SerializeField] private KrakenTentacleAnimator _tentacleAnimator;
         
-        [Header("FEEL")]
-        [SerializeField] private MMF_Player _feedbackKrakenAttack;
+        [Header("SFX")]
+        [SerializeField] private CardSfxCue _krakenAttackSfx;
 
         [Header("Spawn Offset (canvas units, applied left of target)")]
         [SerializeField] private Vector2 _canvasSpawnOffset = new Vector2(-80f, 0f);
@@ -48,19 +48,19 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully sunk. Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
-        /// <summary>ICardPlayEffect — fired when fully sunk, so CardPresentationPlayer destroys the instance.</summary>
+        /// <summary>ICardPlayEffect - fired when fully sunk, so CardPresentationPlayer destroys the instance.</summary>
         public event Action Completed;
 
         // ── Private ───────────────────────────────────────────────────────────
 
-        // Rest positions captured after positioning — never overwritten so
+        // Rest positions captured after positioning - never overwritten so
         // ResetState always returns images to their post-position anchors.
         private RectTransform _rectTransform;
         private Vector2       _bodyRestPosition;
         private Vector2       _tentacleRestPosition;
         private Sequence      _masterSequence;
 
-        // Injected by CardPresentationPlayer via Initialize — scene objects cannot be baked into the prefab.
+        // Injected by CardPresentationPlayer via Initialize - scene objects cannot be baked into the prefab.
         private RectTransform _rootCanvasRect;
         private Camera        _gameCamera;
 
@@ -79,7 +79,7 @@ namespace ThroneOfTides.Systems.VFX
         // ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Injected by CardPresentationPlayer after instantiation — these are scene objects
+        /// Injected by CardPresentationPlayer after instantiation - these are scene objects
         /// that cannot be serialized into the prefab.
         /// </summary>
         public void Inject(RectTransform canvasRect, Camera gameCamera)
@@ -89,13 +89,16 @@ namespace ThroneOfTides.Systems.VFX
         }
 
         /// <summary>
-        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Kraken always rises
+        /// ICardPlayEffect entry point - hosted by CardPresentationPlayer. Kraken always rises
         /// at the opponent's ship (the caster summons it against their target), matching this
         /// card's authored PresentationEntry (AnchorSide: Opponent).
         /// </summary>
         public void Initialize(CardEffectSpawnContext context)
         {
             Inject(context.GameCanvas, context.GameCamera);
+            // Shakes the camera itself at the tentacle strike (see OnAttackMoment's invoker) -
+            // the generic instant on-damage shake would otherwise double up with it.
+            context.SuppressNextDamageCameraShake?.Invoke();
             OnAttackMoment += GameEventBus.FireKrakenAttackMoment;
             OnSequenceEnd  += () => Completed?.Invoke();
             StartSequence(context.OpponentAnchor.position);
@@ -138,7 +141,7 @@ namespace ThroneOfTides.Systems.VFX
 
             Sequence seq = DOTween.Sequence();
 
-            // Phase 1 — Body rises: position and fill animate together.
+            // Phase 1 - Body rises: position and fill animate together.
             // Explicit (float x) cast resolves DOTween.To overload ambiguity.
             seq.Append(_bodyImage.rectTransform
                 .DOAnchorPosY(_bodyRestPosition.y, _bodyRiseDuration)
@@ -151,7 +154,7 @@ namespace ThroneOfTides.Systems.VFX
 
             seq.AppendInterval(_holdBeforeAttack);
 
-            // Phase 2 — Tentacle rises.
+            // Phase 2 - Tentacle rises.
             seq.Append(_tentacleImage.rectTransform
                 .DOAnchorPosY(_tentacleRestPosition.y, _tentacleRiseDuration)
                 .SetEase(_tentacleRiseEase));
@@ -161,14 +164,14 @@ namespace ThroneOfTides.Systems.VFX
                     1f, _tentacleRiseDuration)
                 .SetEase(_tentacleRiseEase));
 
-            // Phase 3 — Attack swing via KrakenTentacleAnimator.
+            // Phase 3 - Attack swing via KrakenTentacleAnimator.
             seq.AppendCallback(() => _tentacleAnimator.PlayAttack(OnAttackPeak));
             // Hold matches the animator's total swing duration to keep sequence timing in sync.
             seq.AppendInterval(_tentacleAnimator.TotalAttackDuration);
 
             seq.AppendInterval(_holdAfterAttack);
 
-            // Phase 4 — Sink: body and tentacle sink simultaneously.
+            // Phase 4 - Sink: body and tentacle sink simultaneously.
             seq.Append(_bodyImage.rectTransform
                 .DOAnchorPosY(_bodyRestPosition.y - _bodyRiseDistance, _sinkDuration)
                 .SetEase(_sinkEase));
@@ -212,7 +215,7 @@ namespace ThroneOfTides.Systems.VFX
 
         private void OnAttackPeak()
         {
-            _feedbackKrakenAttack?.PlayFeedbacks();
+            CardSfxPlayer.Play(_krakenAttackSfx, transform.position);
             ScreenShake.Trigger(ScreenShakeLevel.Level5);
             OnAttackMoment?.Invoke();
         }

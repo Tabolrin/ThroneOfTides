@@ -9,7 +9,7 @@ namespace ThroneOfTides.Systems
     /// Caches this ship's VFXSpawnPosition markers once so card-play effects can resolve a
     /// spawn transform by anchor type without any per-play GetComponentsInChildren/Find calls.
     /// Place on each ship root (PlayerShip, EnemyShip) alongside its VFXSpawnPosition children.
-    /// Does not handle spawning or presentation logic itself — see CardPresentationPlayer.
+    /// Does not handle spawning or presentation logic itself - see CardPresentationPlayer.
     /// </summary>
     public class ShipVfxAnchors : MonoBehaviour
     {
@@ -26,7 +26,7 @@ namespace ThroneOfTides.Systems
                 if (_anchors.ContainsKey(marker.Type))
                 {
                     Debug.LogWarning(
-                        $"{name}: multiple VFXSpawnPosition markers of type {marker.Type} found — " +
+                        $"{name}: multiple VFXSpawnPosition markers of type {marker.Type} found - " +
                         $"keeping the first, ignoring '{marker.name}'.", marker);
                     continue;
                 }
@@ -56,13 +56,13 @@ namespace ThroneOfTides.Systems
         /// <summary>
         /// This ship's whole-sprite Gunpowder visual (null if this ship has none placed).
         /// Lets a VFX controller hold the powdered look on screen past the instant the game
-        /// state actually clears it — see ShipGunpowderVisual.BeginOverride/EndOverride.
+        /// state actually clears it - see ShipGunpowderVisual.BeginOverride/EndOverride.
         /// </summary>
         public ShipGunpowderVisual GetGunpowderVisual() => _gunpowderVisual;
 
         /// <summary>
         /// Resolves the transform for the given anchor type on this ship. Falls back to this
-        /// ship's own root transform (with a warning) if no marker of that type is placed yet —
+        /// ship's own root transform (with a warning) if no marker of that type is placed yet -
         /// keeps effects spawning somewhere sensible rather than throwing mid-match.
         /// </summary>
         public Transform Get(VfxAnchorType anchorType)
@@ -71,7 +71,7 @@ namespace ThroneOfTides.Systems
                 return anchor;
 
             Debug.LogWarning(
-                $"{name}: no VFXSpawnPosition marker of type {anchorType} found — falling back to ship root.",
+                $"{name}: no VFXSpawnPosition marker of type {anchorType} found - falling back to ship root.",
                 this);
             return transform;
         }

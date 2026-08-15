@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ThroneOfTides.Systems.VFX
 {
-    // Counter Gale reaction VFX — spawned directly by CardVFXHandler.OnReactionFired, always at
+    // Counter Gale reaction VFX - spawned directly by CardVFXHandler.OnReactionFired, always at
     // the player's sky anchor regardless of which side actually fired the reaction (see
     // CardVFXHandler for that side-independent spawn call). Reactions bypass
     // CardPresentationPlayer/ICardPlayEffect entirely, so this manages its own full lifecycle.
@@ -17,7 +17,7 @@ namespace ThroneOfTides.Systems.VFX
         [Header("Wander")]
         [SerializeField] private float _wanderDuration   = 0.65f;
         [SerializeField] private float _stepDuration     = 0.08f;
-        [Tooltip("Max distance from the spawn point any single random step can land — keeps the wander confined to a tight area instead of drifting away.")]
+        [Tooltip("Max distance from the spawn point any single random step can land - keeps the wander confined to a tight area instead of drifting away.")]
         [SerializeField] private float _maxMoveDistance  = 0.5f;
         [SerializeField] private Ease  _stepEase         = Ease.InOutSine;
 

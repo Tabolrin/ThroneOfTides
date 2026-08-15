@@ -2,7 +2,7 @@
 namespace ThroneOfTides.Core
 {
     // Stable AI-facing archetype for an action effect, used by CaptainSO to weight cards by
-    // role instead of switching on individual CardIds — a new Action card just needs its
+    // role instead of switching on individual CardIds - a new Action card just needs its
     // ActionEffectSO to declare a Role, and every captain's existing per-role weight applies
     // automatically.
     public enum EffectRole

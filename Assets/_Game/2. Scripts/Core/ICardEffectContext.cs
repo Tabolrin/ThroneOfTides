@@ -5,7 +5,7 @@ namespace ThroneOfTides.Core
 {
     // Segregated capability interfaces, grouped by what most individual card effects actually
     // touch. Single-purpose effects (e.g. Rum, Siren Song) declare ActionEffectSO<TCapability>
-    // with just the one they need — see ActionEffectSO.cs. ICardEffectContext below composes
+    // with just the one they need - see ActionEffectSO.cs. ICardEffectContext below composes
     // all of them for the small number of effects that are genuinely multi-concern (Tidal Wave,
     // Treasure Chest, High Spirits) and for CardEffectContext, the single concrete implementer.
 
@@ -43,11 +43,11 @@ namespace ThroneOfTides.Core
         IReadOnlyList<ICard> GetPlayerHand();
 
         /// Discards one random card from whoever did NOT cast this card's hand entirely (not
-        /// stolen into the caster's hand — see StealFromEnemyHand for that). Used by Chain Shot.
+        /// stolen into the caster's hand - see StealFromEnemyHand for that). Used by Chain Shot.
         void DiscardRandomFromOpponentHand();
     }
 
-    // A terse one-off line for the match log (e.g. "Recovered 3 cards from the discard") — for
+    // A terse one-off line for the match log (e.g. "Recovered 3 cards from the discard") - for
     // effects whose outcome is worth calling out but has no dedicated event of its own to log.
     public interface INoteEffects
     {
@@ -86,7 +86,7 @@ namespace ThroneOfTides.Core
         DamageTarget? SelectedTarget { get; }
     }
 
-    // The player's persistent coin economy (Port currency) — a no-op when the enemy is the
+    // The player's persistent coin economy (Port currency) - a no-op when the enemy is the
     // caster, since only the player has a tracked coin balance. Deliberately separate from the
     // per-match IManaEffects/IDamageEffects (session state): coins survive across matches.
     public interface IEconomyEffects
@@ -99,7 +99,7 @@ namespace ThroneOfTides.Core
         IDiscardEffects, IStatusEffects, IReactionChargeEffects, ITargetSelectionContext,
         IEconomyEffects, INoteEffects
     {
-        /// Which side played the card that owns this effect — lets effects that benefit
+        /// Which side played the card that owns this effect - lets effects that benefit
         /// "whoever cast this" (Siren Song, Monkey Grab) work correctly for either caster.
         DamageTarget Caster { get; }
     }

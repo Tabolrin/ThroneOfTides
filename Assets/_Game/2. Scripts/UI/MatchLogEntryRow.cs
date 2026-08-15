@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 namespace ThroneOfTides.UI
 {
     // One line in the match log. If Setup is given a card, hovering the line shows that card's
-    // name/description via the shared EffectBadgeTooltip — reused as-is since it's already a
+    // name/description via the shared EffectBadgeTooltip - reused as-is since it's already a
     // generic "text near this RectTransform" tooltip, not badge-specific.
     public class MatchLogEntryRow : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {

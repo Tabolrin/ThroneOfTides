@@ -19,7 +19,7 @@ namespace ThroneOfTides.Systems.VFX
     {
         [Header("References")]
         [SerializeField] private Image _chestImage;
-        [Tooltip("Default coin-burst particle system — spawned right on top of the chest sprite and played the instant the chest reaches full size. Placeholder settings; tweak freely.")]
+        [Tooltip("Default coin-burst particle system - spawned right on top of the chest sprite and played the instant the chest reaches full size. Placeholder settings; tweak freely.")]
         [SerializeField] private ParticleSystem _coinParticlesPrefab;
 
         [Header("Fill")]
@@ -52,6 +52,7 @@ namespace ThroneOfTides.Systems.VFX
         private Vector2       _basePosition;
         private Vector3       _baseScale;
         private ParticleSystem _coinParticlesInstance;
+        private Action<Vector3> _playSfx;
         private Sequence _sequence;
 
         private void Awake()
@@ -65,6 +66,7 @@ namespace ThroneOfTides.Systems.VFX
         public void Initialize(CardEffectSpawnContext context)
         {
             _gameCamera = context.GameCamera;
+            _playSfx = context.PlaySfx;
             _basePosition = _rect.anchoredPosition;
 
             if (_coinParticlesPrefab != null)
@@ -76,7 +78,7 @@ namespace ThroneOfTides.Systems.VFX
             BuildAndPlaySequence();
         }
 
-        // The chest is a Screen Space - Overlay UI element — RectTransform.position for it is in
+        // The chest is a Screen Space - Overlay UI element - RectTransform.position for it is in
         // screen-pixel space, not the actual 3D world space the (world-space) coin particle
         // system lives in. Converting through the game camera, same pattern as the other
         // controllers' world/UI sync (e.g. GunpowderBarrel's dust trail), is what actually keeps
@@ -111,9 +113,11 @@ namespace ThroneOfTides.Systems.VFX
 
         private void PlayCoinBurst()
         {
+            _playSfx?.Invoke(WorldPointOnChest());
+
             if (_coinParticlesInstance == null) return;
 
-            // The chest has risen and enlarged since spawn — re-snap to its current position so
+            // The chest has risen and enlarged since spawn - re-snap to its current position so
             // the burst plays exactly on top of the sprite, not where it started.
             _coinParticlesInstance.transform.position = WorldPointOnChest();
             _coinParticlesInstance.Play();

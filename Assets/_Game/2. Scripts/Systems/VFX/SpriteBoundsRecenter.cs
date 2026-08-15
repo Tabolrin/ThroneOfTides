@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ThroneOfTides.Systems.VFX
 {
     // Keeps this SpriteRenderer visually centered on its parent and capped to a consistent max
-    // on-screen size, frame by frame — for animated spritesheets (e.g. Explosion) whose frames
+    // on-screen size, frame by frame - for animated spritesheets (e.g. Explosion) whose frames
     // were trimmed to wildly different pixel dimensions with inconsistent pivots, so the effect
     // doesn't balloon or drift off-center on whichever frame the animator happens to land on.
     [RequireComponent(typeof(SpriteRenderer))]

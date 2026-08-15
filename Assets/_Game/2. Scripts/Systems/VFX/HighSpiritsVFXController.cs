@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace ThroneOfTides.Systems.VFX
 {
-    // High Spirits VFX — spawned by CardVFXHandler's legacy PlayCardVFX routing (no
+    // High Spirits VFX - spawned by CardVFXHandler's legacy PlayCardVFX routing (no
     // CardPresentationEntry for this card; see its _highSpiritsPrefab field). Two mug sprites
-    // start apart and move toward each other for a "cheers" — on collision, plays a clink SFX
+    // start apart and move toward each other for a "cheers" - on collision, plays a clink SFX
     // and fires a droplet burst (same instantiate/stop/play-on-payoff pattern as Treasure
     // Chest's coin burst), then both mugs fade out and the whole effect self-destroys.
     public class HighSpiritsVFXController : MonoBehaviour
@@ -20,13 +20,13 @@ namespace ThroneOfTides.Systems.VFX
         [Header("Setup")]
         [Tooltip("How far apart the two mugs start, split evenly to either side of this GameObject's position.")]
         [SerializeField] private float _startSeparation = 2f;
-        [Tooltip("Empty child transform marking where the droplet particle burst plays — falls back to this GameObject's own position if left unassigned.")]
+        [Tooltip("Empty child transform marking where the droplet particle burst plays - falls back to this GameObject's own position if left unassigned.")]
         [SerializeField] private Transform _particleAnchor;
 
         [Header("Approach")]
         [SerializeField] private float _approachDuration = 0.35f;
         [SerializeField] private Ease  _approachEase     = Ease.InQuad;
-        [Tooltip("Gap left between the two mugs when they stop — 0 means they meet exactly in the middle.")]
+        [Tooltip("Gap left between the two mugs when they stop - 0 means they meet exactly in the middle.")]
         [SerializeField] private float _stopDistance = 0f;
 
         [Header("Hold & Fade Out")]

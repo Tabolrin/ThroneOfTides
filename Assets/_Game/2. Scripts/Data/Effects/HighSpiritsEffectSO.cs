@@ -11,7 +11,7 @@ namespace ThroneOfTides.Data
         {
             context.AddPlayerMaxMana(1);
             context.RegisterHighSpiritsPlayed();
-            GameDebug.Log("High Spirits — +1 max mana this match");
+            GameDebug.Log("High Spirits - +1 max mana this match");
         }
     }
 }

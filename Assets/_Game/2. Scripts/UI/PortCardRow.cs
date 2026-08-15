@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // One row per card TYPE in the deck list (not one row per copy) — a stepper showing the
+    // One row per card TYPE in the deck list (not one row per copy) - a stepper showing the
     // current copy count, a "−" that decrements (removing the row entirely once count hits 0)
     // and a "+" that increments (disabled once storage or the card's own MaxCopiesInDeck would
     // be exceeded). Mirrors DeckBuilderWindow's editor-only equivalent.

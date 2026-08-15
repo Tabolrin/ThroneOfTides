@@ -105,9 +105,7 @@ MonoBehaviour:
   _fillEase: 5
   _moveDuration: 1.25
   _moveEase: 5
-  _shakeDuration: 0.3
-  _shakeAmplitude: 3
-  _shakeFrequency: 35
+  _shakeLevel: 4
   _contactSfx:
     _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
     _songName: Cannonball

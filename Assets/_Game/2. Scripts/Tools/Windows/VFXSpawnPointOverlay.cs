@@ -6,13 +6,13 @@ using ThroneOfTides.Core;
 
 namespace ThroneOfTides.Tools
 {
-    // Scene view overlay — draws labeled gizmos for every VFXSpawnPoint in the scene
+    // Scene view overlay - draws labeled gizmos for every VFXSpawnPoint in the scene
     // and shows a live legend panel in the Scene view corner.
     [Overlay(typeof(SceneView), "VFX Spawn Points", true)]
     [Icon("Assets/Editor Default Resources/Icons/d_ParticleSystem Icon.png")]
     public class VFXSpawnPointOverlay : IMGUIOverlay, ITransientOverlay
     {
-        // Colour per spawn point type — matches CardVFXHandler usage intent
+        // Colour per spawn point type - matches CardVFXHandler usage intent
         private static readonly Color _hitColor     = new Color(1.00f, 0.25f, 0.25f, 1f); // red
         private static readonly Color _deckColor    = new Color(1.00f, 0.80f, 0.10f, 1f); // yellow
         private static readonly Color _frontColor   = new Color(0.25f, 0.70f, 1.00f, 1f); // blue
@@ -28,10 +28,10 @@ namespace ThroneOfTides.Tools
         private double          _lastCacheTime   = -1.0;
         private const double    CacheIntervalSec = 1.0;
 
-        // Lazily created and reused across repaints — GUIStyle allocates on construction.
+        // Lazily created and reused across repaints - GUIStyle allocates on construction.
         private GUIStyle _labelStyle;
 
-        // ITransientOverlay — hide the panel when no VFXSpawnPoints exist in the scene
+        // ITransientOverlay - hide the panel when no VFXSpawnPoints exist in the scene
         public bool visible
         {
             get
@@ -123,7 +123,7 @@ namespace ThroneOfTides.Tools
             Handles.color = new Color(color.r, color.g, color.b, 0.4f);
             Handles.DrawWireDisc(pos, Vector3.forward, GizmoRadius + 0.04f);
 
-            // Label above the disc — style allocated once per gizmo draw call.
+            // Label above the disc - style allocated once per gizmo draw call.
             // [DrawGizmo] methods are static so the per-instance cache on the overlay
             // class is unavailable here; the allocation is editor-only and infrequent.
             var labelStyle = new GUIStyle(EditorStyles.miniLabel)

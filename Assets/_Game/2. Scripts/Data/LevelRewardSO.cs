@@ -12,12 +12,12 @@ namespace ThroneOfTides.Data
         // Guaranteed on win only
         [SerializeField] private List<CardSO> _rewardCards;
 
-        [Header("Coin Rewards — Win")]
+        [Header("Coin Rewards - Win")]
         [SerializeField] private int _highHPCoinReward = 30;
         [SerializeField] private int _midHPCoinReward  = 20;
         [SerializeField] private int _lowHPCoinReward  = 10;
 
-        // HP thresholds — High >20, Mid 10-20, Low <10
+        // HP thresholds - High >20, Mid 10-20, Low <10
         private const int HighHPThreshold = 20;
         private const int LowHPThreshold  = 10;
 

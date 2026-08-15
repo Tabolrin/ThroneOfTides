@@ -23,7 +23,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private Transform       _rewardCardsContainer;
 
         [Header("Reward Card Views")]
-        [Tooltip("Same CardView prefab used elsewhere (e.g. Port's collection grid) — spawned read-only, one per rewarded card, with a hover trigger wired to _previewTooltip.")]
+        [Tooltip("Same CardView prefab used elsewhere (e.g. Port's collection grid) - spawned read-only, one per rewarded card, with a hover trigger wired to _previewTooltip.")]
         [SerializeField] private CardView           _rewardCardViewPrefab;
         [SerializeField] private float              _rewardCardViewScale = 0.55f;
         [SerializeField] private CardPreviewTooltip _previewTooltip;
@@ -89,7 +89,7 @@ namespace ThroneOfTides.UI
                 cardView.transform.localScale = Vector3.one * _rewardCardViewScale;
                 cardView.Setup(card);
 
-                // Read-only display on the results screen — not draggable/playable.
+                // Read-only display on the results screen - not draggable/playable.
                 var drag = cardView.GetComponent<CardDragHandler>();
                 if (drag != null) Destroy(drag);
 

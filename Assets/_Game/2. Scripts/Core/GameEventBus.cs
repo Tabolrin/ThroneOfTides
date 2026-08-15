@@ -13,20 +13,20 @@ namespace ThroneOfTides.Core
         public static event Action<ICard> OnCardDrawn;
         public static event Action<ICard> OnCardPlayed;
         // Fires the instant a play is irrevocably committed (mana spent), before any target
-        // selection prompt — CardView listens for this to know it's leaving the hand, so it
+        // selection prompt - CardView listens for this to know it's leaving the hand, so it
         // doesn't snap back to hand while a target-selection card is still awaiting the
         // player's choice. Fires for every accepted play, target-selection or not.
         public static event Action<ICard> OnCardCommitted;
         // Target is null for normally-targeted cards (inferred caster/opponent); non-null when
         // the player explicitly chose a target ship via a targeting prompt (e.g. Tidal Wave).
-        // Fires once the effect actually resolves — for a target-selection card, that's after
-        // the prompt is answered, not at commit time — so VFX spawners get the real target.
+        // Fires once the effect actually resolves - for a target-selection card, that's after
+        // the prompt is answered, not at commit time - so VFX spawners get the real target.
         public static event Action<ICard, DamageTarget?> OnCardPlayAccepted;
         public static event Action<ICard> OnPlayerCardRemoved;
         public static event Action<ICard, DamageTarget?> OnEnemyCardPlayed;
         public static event Action       OnEnemyCardAnimationComplete;
 
-        // Fires when it's actually safe to play an enemy card's own presentation VFX/SFX —
+        // Fires when it's actually safe to play an enemy card's own presentation VFX/SFX -
         // immediately for non-attack cards, but only after any reaction prompt (Dead Man's Turn /
         // Counter Gale / Kraken standoff) the player was shown has been resolved, so the attack's
         // visuals/sound don't play out before the player has even made their choice. Distinct
@@ -34,14 +34,21 @@ namespace ThroneOfTides.Core
         // slide-into-play-zone animation and the match log entry.
         public static event Action<ICard, DamageTarget?> OnEnemyCardPresentationReady;
 
-        // Fires when an effect (e.g. Recon Parrot) reveals the enemy's hand — EnemyHandRevealPanel
+        // Fires when an effect (e.g. Recon Parrot) reveals the enemy's hand - EnemyHandRevealPanel
         // displays the given cards until the player dismisses it.
         public static event Action<IReadOnlyList<ICard>> OnEnemyHandRevealed;
 
         // A terse, one-off flavor line for the match log (e.g. "Recovered 3 cards from the
-        // discard") — for updates worth surfacing that don't already have a dedicated event to
+        // discard") - for updates worth surfacing that don't already have a dedicated event to
         // hang a log line off of. Not every effect needs this; only ones the log should call out.
         public static event Action<string> OnMatchNote;
+
+        // Fires the instant a card changes hands (e.g. Monkey Grab), carrying which card and
+        // which side gained it - fired before that side's hand actually gets the persistent
+        // visual CardView, so a self-driving VFX (the monkey physically carrying it home) can
+        // subscribe in Initialize() to learn which card it's holding, then decide the moment the
+        // hand visual actually appears via FinalizeStolenCardVisual instead of it happening here.
+        public static event Action<ICard, DamageTarget> OnCardStolen;
 
         // ── Combat ────────────────────────────────────────────────────────────
         public static event Action<DamageTarget, int> OnDamageDealt;
@@ -93,6 +100,7 @@ namespace ThroneOfTides.Core
         public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
         public static void FireEnemyHandRevealed(IReadOnlyList<ICard> cards) => OnEnemyHandRevealed?.Invoke(cards);
         public static void FireMatchNote(string message)                    => OnMatchNote?.Invoke(message);
+        public static void FireCardStolen(ICard card, DamageTarget gainedBy) => OnCardStolen?.Invoke(card, gainedBy);
         public static void FireDamageDealt(DamageTarget target, int amount)  => OnDamageDealt?.Invoke(target, amount);
         public static void FireHealApplied(DamageTarget target, int amount) => OnHealApplied?.Invoke(target, amount);
         public static void FireHPChanged(int hp)                             => OnHPChanged?.Invoke(hp);
@@ -127,6 +135,7 @@ namespace ThroneOfTides.Core
             OnEnemyCardAnimationComplete = null;
             OnEnemyHandRevealed          = null;
             OnMatchNote                  = null;
+            OnCardStolen                 = null;
             OnDamageDealt                = null;
             OnHealApplied                = null;
             OnHPChanged                  = null;

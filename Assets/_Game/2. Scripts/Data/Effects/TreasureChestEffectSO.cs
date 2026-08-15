@@ -13,13 +13,13 @@ namespace ThroneOfTides.Data
 
         public override void Execute(ICardEffectContext context)
         {
-            // Deliberately no discard/deck replenishment here (that's Locker's Return's job) —
+            // Deliberately no discard/deck replenishment here (that's Locker's Return's job) -
             // Treasure Chest is purely a coin + card-advantage + mana-chance payoff.
             if (_maxCoinReward > 0)
             {
                 int coinReward = UnityEngine.Random.Range(_minCoinReward, _maxCoinReward + 1);
                 context.AddCoins(coinReward);
-                GameDebug.Log($"Treasure Chest — found {coinReward} coins");
+                GameDebug.Log($"Treasure Chest - found {coinReward} coins");
                 if (context.Caster == DamageTarget.Player)
                     context.LogNote($"Found {coinReward} coins.");
             }
@@ -27,14 +27,14 @@ namespace ThroneOfTides.Data
             if (UnityEngine.Random.value >= 0.5f)
             {
                 context.AddPlayerMaxMana(1);
-                GameDebug.Log("Treasure Chest — coin toss won: +1 max mana");
+                GameDebug.Log("Treasure Chest - coin toss won: +1 max mana");
             }
             else
             {
-                GameDebug.Log("Treasure Chest — coin toss lost: no mana bonus");
+                GameDebug.Log("Treasure Chest - coin toss lost: no mana bonus");
             }
 
-            // ignoreHandLimit: true — these draws are a guaranteed part of the card's payoff,
+            // ignoreHandLimit: true - these draws are a guaranteed part of the card's payoff,
             // not a normal draw, so they shouldn't silently fizzle just because the hand was
             // already full.
             for (int i = 0; i < _cardsToDraw; i++)

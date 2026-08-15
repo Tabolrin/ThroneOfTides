@@ -18,7 +18,7 @@ MonoBehaviour:
   _description: Deal 1 damage. If the enemy ship has a Gunpowder stack, ignite it
     instead for 8 damage +2 per stack (consumes the stack).
   _maxCopiesInDeck: 99
-  _manaCost: 3
+  _manaCost: 2
   _storageCost: 4
   _hpCost: 0
   _damage: 1
@@ -43,6 +43,6 @@ MonoBehaviour:
     _sfx:
       _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
       _songName: Torch
-      _volumeMultiplier: 0
-      _pitchMultiplier: 0
+      _volumeMultiplier: 1
+      _pitchMultiplier: 1
     _lifetime: 3

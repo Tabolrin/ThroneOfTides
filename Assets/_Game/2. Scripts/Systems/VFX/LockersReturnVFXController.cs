@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.Systems.VFX
 {
-    // Locker's Return VFX — spawned by CardVFXHandler's legacy PlayCardVFX routing, always at
+    // Locker's Return VFX - spawned by CardVFXHandler's legacy PlayCardVFX routing, always at
     // the player's sea-surface-right anchor regardless of which side actually played the card
-    // (matching LockerReturnEffectSO's own always-player-deck behavior — RetrieveFromDiscard
+    // (matching LockerReturnEffectSO's own always-player-deck behavior - RetrieveFromDiscard
     // always returns cards to the player's deck). The card-art tentacle fills from the top while
     // rising, then one card-back flies from the tentacle to the deck per retrieved card,
     // staggered with a delay between each, popping a "+1" over the deck on arrival. The tentacle
     // fades out once every card has landed.
     //
     // Note: the actual card retrieval (LockerReturnEffectSO → RetrieveFromDiscard) still happens
-    // instantly the moment the card is played — ActionEffectSO.Execute has no async/staggering
+    // instantly the moment the card is played - ActionEffectSO.Execute has no async/staggering
     // capability in this codebase, so this only staggers the VISUAL arrival; the cards are
     // already back in the deck by the time this sequence plays out.
     public class LockersReturnVFXController : MonoBehaviour
@@ -34,7 +34,7 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private float _delayBetweenCards  = 0.25f;
         [SerializeField] private float _cardFlightDuration = 0.4f;
         [SerializeField] private Ease  _cardFlightEase     = Ease.InOutSine;
-        [Tooltip("Uniform scale applied to each spawned card-back — independent of the CardBackVFX prefab's own authored scale.")]
+        [Tooltip("Uniform scale applied to each spawned card-back - independent of the CardBackVFX prefab's own authored scale.")]
         [SerializeField] private float _cardScale = 1f;
 
         [Header("Hold & Fade Out")]
@@ -45,8 +45,8 @@ namespace ThroneOfTides.Systems.VFX
         private System.Action _onCardArrived;
         private Sequence      _sequence;
 
-        /// <param name="cardArt">The card's own art sprite — the tentacle fills in as this.</param>
-        /// <param name="deckPoint">Always the player's deck point — see class remarks.</param>
+        /// <param name="cardArt">The card's own art sprite - the tentacle fills in as this.</param>
+        /// <param name="deckPoint">Always the player's deck point - see class remarks.</param>
         /// <param name="onCardArrived">Invoked once per card-back the instant it reaches the deck (drives the "+1" popup).</param>
         public void Setup(Sprite cardArt, Transform deckPoint, System.Action onCardArrived)
         {

@@ -43,7 +43,7 @@ namespace ThroneOfTides.UI
 
         private void Awake()
         {
-            // Pools inventory card panels instead of Instantiate/Destroy per refresh — Refresh()
+            // Pools inventory card panels instead of Instantiate/Destroy per refresh - Refresh()
             // rebuilds the whole grid on every filter click and every add-to-deck.
             _cardPool = new ObjectPool<PortInventoryCard>(
                 createFunc: () => Instantiate(_cardPanelPrefab),
@@ -88,7 +88,7 @@ namespace ThroneOfTides.UI
 
         public void Refresh()
         {
-            // Snapshot first — releasing reparents each card out of _inventoryContent
+            // Snapshot first - releasing reparents each card out of _inventoryContent
             // immediately, which would corrupt a live `foreach (Transform child in ...)`.
             var existing = new List<PortInventoryCard>(
                 _inventoryContent.GetComponentsInChildren<PortInventoryCard>(true));
@@ -102,7 +102,7 @@ namespace ThroneOfTides.UI
                 if (_activeFilter.HasValue && card.CardType != _activeFilter.Value)
                     continue;
 
-                // Ownership is per card type (unlocked or not), not per copy — how many copies
+                // Ownership is per card type (unlocked or not), not per copy - how many copies
                 // of an owned card you may run is governed by CardSO.MaxCopiesInDeck (bounded
                 // only by storage for most cards; a few singleton cards cap much lower).
                 int  inDeckCount = _deckEditor.GetCountInDeck(card);
@@ -118,7 +118,7 @@ namespace ThroneOfTides.UI
             }
         }
 
-        // Unique unlocked cards, sorted by type then name — a card's presence in the collection
+        // Unique unlocked cards, sorted by type then name - a card's presence in the collection
         // means it's unlocked; how many times it happens to appear there is not meaningful.
         private List<CardSO> BuildUnlockedCardList()
         {

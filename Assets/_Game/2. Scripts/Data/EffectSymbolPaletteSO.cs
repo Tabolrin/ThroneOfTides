@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ThroneOfTides.Data
 {
-    // Icon lookup for ActiveEffectsBar/ShipStatusIndicator — one shared asset maps each
+    // Icon lookup for ActiveEffectsBar/ShipStatusIndicator - one shared asset maps each
     // ShipStatusType to the sprite its badge/world indicator should show, plus a short
     // hover-tooltip description for the badge.
     [CreateAssetMenu(menuName = "ThroneOfTides/Data/EffectSymbolPalette")]

@@ -54,7 +54,7 @@ namespace ThroneOfTides.UI
 
         // Guards against div-by-zero and clamps to a valid 0–1 range for Image.fillAmount.
         // If a LiquidFillAnimator sits on the same object (idle wave wobble on the liquid art),
-        // route through it instead of tweening the Image directly — its own Update() loop
+        // route through it instead of tweening the Image directly - its own Update() loop
         // continuously re-applies its last-known target fill, which would otherwise fight and
         // undo DOTween's tween every frame.
         private static void SetFillAmount(Image image, int current, int max, float duration = 0.3f)

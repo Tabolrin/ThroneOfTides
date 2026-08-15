@@ -15,7 +15,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private Image      _cardBack;
 
         // ── Type banner (top strip) ────────────────────────────────────────────
-        // Banner background color no longer varies per type — only the symbol icon does.
+        // Banner background color no longer varies per type - only the symbol icon does.
         [Header("Type Banner")]
         [SerializeField] private Image _typeSymbolIcon;
 
@@ -26,18 +26,18 @@ namespace ThroneOfTides.UI
         [SerializeField] private Image           _cardArt;
 
         // ── Cost banner badges (bottom strip) ──────────────────────────────────
-        // Mana: always visible — player must always see the mana cost
-        [Header("Cost Banner — Mana")]
+        // Mana: always visible - player must always see the mana cost
+        [Header("Cost Banner - Mana")]
         [SerializeField] private GameObject      _manaCostBadge;
         [SerializeField] private TextMeshProUGUI _manaCostLabel;
 
-        // HP cost: hidden on most cards — only shown when HPCost > 0
-        [Header("Cost Banner — HP Cost")]
+        // HP cost: hidden on most cards - only shown when HPCost > 0
+        [Header("Cost Banner - HP Cost")]
         [SerializeField] private GameObject      _hpCostBadge;
         [SerializeField] private TextMeshProUGUI _hpCostLabel;
 
         // Damage: hidden on 0-damage non-DOT non-Combo cards
-        [Header("Cost Banner — Damage")]
+        [Header("Cost Banner - Damage")]
         [SerializeField] private GameObject      _damageBadge;
         [SerializeField] private TextMeshProUGUI _damageLabel;
 
@@ -70,8 +70,8 @@ namespace ThroneOfTides.UI
             GameEventBus.OnCardPlayAccepted -= OnCardPlayAccepted;
         }
 
-        // Fires the instant the play is committed (mana spent) — before any target-selection
-        // prompt — so the drag handler knows to release this card instead of snapping it back
+        // Fires the instant the play is committed (mana spent) - before any target-selection
+        // prompt - so the drag handler knows to release this card instead of snapping it back
         // to hand while the prompt is still pending an answer.
         private void OnCardCommitted(ICard card)
         {
@@ -128,7 +128,7 @@ namespace ThroneOfTides.UI
 
             if (_typeSymbolIcon != null)
             {
-                // Hide cleanly when no symbol is assigned yet — avoids a broken
+                // Hide cleanly when no symbol is assigned yet - avoids a broken
                 // white square and lets the placeholder state look intentional
                 bool hasSymbol = visuals.TypeSymbol != null;
                 _typeSymbolIcon.gameObject.SetActive(hasSymbol);

@@ -47,7 +47,7 @@ namespace ThroneOfTides.Tools
             foreach (var e in errors) errorSb.AppendLine("• " + e);
 
             bool cancel = EditorUtility.DisplayDialog(
-                "Build Blocked — Data Errors Found",
+                "Build Blocked - Data Errors Found",
                 $"{errors.Count} error(s) found:\n\n{errorSb}\nCancel to fix, or build anyway.",
                 "Cancel Build",
                 "Build Anyway");
@@ -55,7 +55,7 @@ namespace ThroneOfTides.Tools
             // BuildFailedException is the correct way to abort a build from a preprocessor
             if (cancel)
                 throw new BuildFailedException(
-                    $"[ThroneOfTides] Build cancelled — {errors.Count} unresolved error(s).");
+                    $"[ThroneOfTides] Build cancelled - {errors.Count} unresolved error(s).");
         }
 
         // ── IPostprocessBuild ───────────────────────────────────────────────────
@@ -92,7 +92,7 @@ namespace ThroneOfTides.Tools
                 scenes           = Scenes,
                 locationPathName = path,
                 target           = BuildTarget.StandaloneWindows64,
-                // Profiler + script debugger enabled — not for distribution
+                // Profiler + script debugger enabled - not for distribution
                 options          = BuildOptions.Development
                                  | BuildOptions.ConnectWithProfiler
                                  | BuildOptions.AllowDebugging
@@ -216,7 +216,7 @@ namespace ThroneOfTides.Tools
             finally
             {
                 // Restore executes regardless of whether the build succeeded, failed,
-                // or threw an exception — the asset will never be left dirty on disk.
+                // or threw an exception - the asset will never be left dirty on disk.
                 ApplyConfigOverride(config, originalHP, originalHand);
                 backup.Restore();
             }
@@ -277,7 +277,7 @@ namespace ThroneOfTides.Tools
         // ── Helpers ─────────────────────────────────────────────────────────────
 
         // SerializedObject is used here (instead of direct field assignment) so Unity
-        // tracks the modification for dirty-marking and Undo — critical for SO editing
+        // tracks the modification for dirty-marking and Undo - critical for SO editing
         // at editor-time without leaving assets in an unintended modified state.
         // GameConfigSO uses public fields (no _ prefix), so FindProperty takes the
         // exact public field name as declared on the class.
@@ -323,7 +323,7 @@ namespace ThroneOfTides.Tools
         // ── Per-Build-Type Scene Overrides ──────────────────────────────────────
         // Unity's BuildPipeline reads scenes from disk, not the in-memory Editor state, so any
         // build-specific customization (which deck each side uses, whether Cheats is reachable)
-        // has to be written into Match.unity before the build and reverted after — otherwise the
+        // has to be written into Match.unity before the build and reverted after - otherwise the
         // override would leak into the next Editor session or the next, differently-typed build.
 
         private class SceneOverrideBackup
@@ -358,7 +358,7 @@ namespace ThroneOfTides.Tools
             var bootstrapper = Object.FindAnyObjectByType<GameBootstrapper>(FindObjectsInactive.Include);
             if (bootstrapper == null)
             {
-                Debug.LogWarning("[ThroneOfTides] No GameBootstrapper found in Match.unity — build profile overrides skipped.");
+                Debug.LogWarning("[ThroneOfTides] No GameBootstrapper found in Match.unity - build profile overrides skipped.");
                 return new SceneOverrideBackup();
             }
 

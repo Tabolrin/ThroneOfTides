@@ -1,4 +1,6 @@
 // Assets/_Game/2. Scripts/UI/CardCheatPanel.cs
+using System.Collections.Generic;
+using TMPro;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
 using ThroneOfTides.Systems;
@@ -9,7 +11,7 @@ using UnityEngine.UI;
 namespace ThroneOfTides.UI
 {
     /// <summary>
-    /// Playtest-only debug panel — toggled by a button, lists every card in the CardDatabaseSO
+    /// Playtest-only debug panel - toggled by a button, lists every card in the CardDatabaseSO
     /// registry in a scrollable list; clicking a name adds that card to the player's hand.
     /// Auto-hides outside debug builds, same convention as CheatsPanel.
     /// </summary>
@@ -20,9 +22,13 @@ namespace ThroneOfTides.UI
         [SerializeField] private Button _toggleButton;
 
         [Header("List")]
-        [Tooltip("Content transform of the ScrollRect — pooled row buttons are parented here.")]
+        [Tooltip("Content transform of the ScrollRect - pooled row buttons are parented here.")]
         [SerializeField] private Transform _scrollContent;
         [SerializeField] private CardCheatEntryButton _entryPrefab;
+
+        [Header("Search")]
+        [Tooltip("Filters the list below by card name as you type - optional, leave unset to skip filtering entirely.")]
+        [SerializeField] private TMP_InputField _searchField;
 
         private GameState           _gameState;
         private IHandLayoutManager  _handLayout;
@@ -31,6 +37,10 @@ namespace ThroneOfTides.UI
 
         private ObjectPool<CardCheatEntryButton> _entryPool;
         private bool _listPopulated;
+
+        // Rows are pooled/created once and never destroyed - filtering just shows/hides them,
+        // so this tracks which CardSO each spawned row currently represents.
+        private readonly List<(CardSO card, CardCheatEntryButton entry)> _spawnedEntries = new();
 
         public void Initialise(GameState gameState, IHandLayoutManager handLayout,
                                CardDatabaseSO cardDatabase, int maxHandSize)
@@ -51,8 +61,9 @@ namespace ThroneOfTides.UI
 
             if (_panelRoot != null) _panelRoot.SetActive(false);
             if (_toggleButton != null) _toggleButton.onClick.AddListener(TogglePanel);
+            if (_searchField != null) _searchField.onValueChanged.AddListener(ApplySearchFilter);
 
-            // Pools row buttons instead of Instantiate/Destroy — keeps toggling the panel
+            // Pools row buttons instead of Instantiate/Destroy - keeps toggling the panel
             // cheap even if the card registry grows large.
             _entryPool = new ObjectPool<CardCheatEntryButton>(
                 createFunc: () => Instantiate(_entryPrefab),
@@ -74,7 +85,7 @@ namespace ThroneOfTides.UI
             _panelRoot.SetActive(willShow);
 
             // The registry's contents don't change at runtime, so the list only needs to be
-            // built once — first time the panel is opened — not rebuilt on every toggle.
+            // built once - first time the panel is opened - not rebuilt on every toggle.
             if (willShow && !_listPopulated)
                 PopulateList();
         }
@@ -90,9 +101,24 @@ namespace ThroneOfTides.UI
                 var entry = _entryPool.Get();
                 entry.transform.SetParent(_scrollContent, false);
                 entry.Setup(card, AddCardToHand);
+                _spawnedEntries.Add((card, entry));
             }
 
             _listPopulated = true;
+        }
+
+        // Rows are never destroyed once spawned - filtering just shows/hides them by whether
+        // the card's name contains the search text (case-insensitive), so re-opening the panel
+        // or clearing the search always sees the full list again.
+        private void ApplySearchFilter(string search)
+        {
+            bool hasFilter = !string.IsNullOrWhiteSpace(search);
+
+            foreach (var (card, entry) in _spawnedEntries)
+            {
+                bool matches = !hasFilter || card.Name.IndexOf(search, System.StringComparison.OrdinalIgnoreCase) >= 0;
+                entry.gameObject.SetActive(matches);
+            }
         }
 
         private void AddCardToHand(CardSO card)
@@ -101,7 +127,7 @@ namespace ThroneOfTides.UI
 
             if (_gameState.PlayerHand.Count >= _maxHandSize)
             {
-                GameDebug.Log($"[CardCheat] Cannot add {card.Name} — hand is full ({_maxHandSize}).");
+                GameDebug.Log($"[CardCheat] Cannot add {card.Name} - hand is full ({_maxHandSize}).");
                 return;
             }
 

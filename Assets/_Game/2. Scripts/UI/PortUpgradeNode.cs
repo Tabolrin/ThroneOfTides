@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // One upgrade node — icon, level pips, current value, next value preview, buy button.
+    // One upgrade node - icon, level pips, current value, next value preview, buy button.
     // Driven entirely by data pushed from PortUpgradePanel.
     public class PortUpgradeNode : MonoBehaviour
     {

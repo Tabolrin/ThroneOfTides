@@ -17,10 +17,10 @@ namespace ThroneOfTides.Systems
         [SerializeField] private Sprite _normalSprite;
         [SerializeField] private Sprite _poweredSprite;
 
-        [Tooltip("Seconds to wait before actually swapping the sprite, so the visual change doesn't snap the instant the card resolves — lines it up better with a thrown-projectile VFX's travel time.")]
+        [Tooltip("Seconds to wait before actually swapping the sprite, so the visual change doesn't snap the instant the card resolves - lines it up better with a thrown-projectile VFX's travel time.")]
         [SerializeField] private float _swapDelay = 0.5f;
 
-        // While held, incoming status changes are recorded but not applied — lets a VFX
+        // While held, incoming status changes are recorded but not applied - lets a VFX
         // sequence (e.g. Tidal Wave) keep the powdered look on screen past the instant the
         // game state actually clears it, then reveal the change at its own chosen beat.
         private bool _overriding;
@@ -55,11 +55,11 @@ namespace ThroneOfTides.Systems
 
         private void Apply(int count) => _shipRenderer.sprite = count > 0 ? _poweredSprite : _normalSprite;
 
-        /// <summary>Starts ignoring live status updates — the sprite stays exactly as it is now.</summary>
+        /// <summary>Starts ignoring live status updates - the sprite stays exactly as it is now.</summary>
         public void BeginOverride() => _overriding = true;
 
         /// <summary>
-        /// Stops ignoring updates and immediately (no delay — the caller already timed this to
+        /// Stops ignoring updates and immediately (no delay - the caller already timed this to
         /// its own sequence) applies whatever the real state became meanwhile.
         /// </summary>
         public void EndOverride()

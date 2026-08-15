@@ -9,7 +9,7 @@ namespace ThroneOfTides.Data
     /// <summary>
     /// An SFX cue: plays one specific song from a shared MMSMPlaylist as a one-shot through
     /// MMSoundManager. Leaving Playlist unset means no SFX for the entry. Leaving Song Name
-    /// blank picks a random song from the whole playlist instead — useful only if the playlist
+    /// blank picks a random song from the whole playlist instead - useful only if the playlist
     /// is dedicated to this one effect rather than shared across many cards.
     /// </summary>
     [Serializable]
@@ -18,7 +18,7 @@ namespace ThroneOfTides.Data
         [Tooltip("The shared SFX playlist to pull a clip from.")]
         [SerializeField] private MMSMPlaylist _playlist;
 
-        [Tooltip("Name of the specific song within the Playlist to play (matches that song's Name field). Leave blank to pick a random song from the whole playlist instead — only sensible for a playlist dedicated to one effect.")]
+        [Tooltip("Name of the specific song within the Playlist to play (matches that song's Name field). Leave blank to pick a random song from the whole playlist instead - only sensible for a playlist dedicated to one effect.")]
         [SerializeField] private string _songName;
 
         [Tooltip("Multiplies the song's own configured volume.")]
@@ -35,7 +35,7 @@ namespace ThroneOfTides.Data
 
     /// <summary>
     /// One spawn instruction for a card's play presentation: what to spawn, where, for which
-    /// caster, and what SFX to play alongside it. A card can carry several of these — e.g. one
+    /// caster, and what SFX to play alongside it. A card can carry several of these - e.g. one
     /// per caster side, or several anchors for effects that touch both ships.
     /// </summary>
     [Serializable]
@@ -62,7 +62,7 @@ namespace ThroneOfTides.Data
         [Tooltip("Sound played alongside this entry's spawn. Leave Playlist unset for no sound.")]
         [SerializeField] private CardSfxCue _sfx = new CardSfxCue();
 
-        [Tooltip("Seconds before auto-destroying the spawned prefab(s). Ignored if Sprite Prefab implements ICardPlayEffect — that signals completion itself instead.")]
+        [Tooltip("Seconds before auto-destroying the spawned prefab(s). Ignored if Sprite Prefab implements ICardPlayEffect - that signals completion itself instead.")]
         [SerializeField] private float _lifetime = 2f;
 
         public CardCasterFilter CasterFilter => _casterFilter;
@@ -77,7 +77,7 @@ namespace ThroneOfTides.Data
         /// <summary>
         /// Whether this entry should fire given who actually played the card this time.
         /// </summary>
-        /// <param name="actualCaster">Always Player or Enemy — never Any.</param>
+        /// <param name="actualCaster">Always Player or Enemy - never Any.</param>
         public bool MatchesCaster(CardCasterFilter actualCaster)
         {
             return _casterFilter == CardCasterFilter.Any || _casterFilter == actualCaster;

@@ -6,7 +6,7 @@ namespace ThroneOfTides.Data
 {
     /// <summary>
     /// Player-facing gameplay preferences (as opposed to ProgressionSO's campaign-state or
-    /// PlayerInventory's economy) — currently just how the enemy's played-card reveal is
+    /// PlayerInventory's economy) - currently just how the enemy's played-card reveal is
     /// dismissed. Edited via OptionsPanel, read by HandLayoutManager.
     /// </summary>
     [CreateAssetMenu(menuName = "ThroneOfTides/Data/GameplaySettings")]

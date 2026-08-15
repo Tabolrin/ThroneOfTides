@@ -9,7 +9,7 @@ namespace ThroneOfTides.UI
 {
     // A single persistent full-screen black overlay that fades in on every scene load and can
     // fade out to black before loading the next one. Self-bootstraps before the very first scene
-    // loads via RuntimeInitializeOnLoadMethod, so it needs no prefab or per-scene setup — every
+    // loads via RuntimeInitializeOnLoadMethod, so it needs no prefab or per-scene setup - every
     // scene gets the same simple fade in/out for free just by routing its scene transitions
     // through SceneFader.LoadScene instead of calling SceneManager.LoadScene directly.
     public class SceneFader : MonoBehaviour
@@ -58,7 +58,7 @@ namespace ThroneOfTides.UI
         }
 
         // sceneLoaded fires the instant the new scene's objects exist, before the engine has
-        // actually rendered a frame of it — starting the fade right then let it finish revealing
+        // actually rendered a frame of it - starting the fade right then let it finish revealing
         // a scene that hadn't visibly appeared yet, which read as "no fade-in at all". Waiting a
         // frame first (and letting the current frame actually finish rendering) makes sure
         // there's something real on screen for the fade to reveal.

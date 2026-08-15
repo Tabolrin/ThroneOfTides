@@ -35,7 +35,7 @@ namespace ThroneOfTides.Tools
             Debug.Log(sb.ToString());
 
             // Show summary dialog so non-coders see it without opening Console
-            string title   = errors.Count > 0 ? "Validation — Errors Found" : "Validation — Passed";
+            string title   = errors.Count > 0 ? "Validation - Errors Found" : "Validation - Passed";
             string message = errors.Count > 0
                 ? $"{errors.Count} error(s) and {warnings.Count} warning(s) found.\nSee Console for details."
                 : warnings.Count > 0
@@ -74,7 +74,7 @@ namespace ThroneOfTides.Tools
                 "OK");
         }
 
-        // Only available in Play Mode — simulates dealing a starting hand to the Console
+        // Only available in Play Mode - simulates dealing a starting hand to the Console
         [MenuItem("ThroneOfTides/Log Opening Hand (Play Mode)  %#h", true)]
         private static bool LogOpeningHandValidate() => Application.isPlaying;
 
@@ -162,7 +162,7 @@ namespace ThroneOfTides.Tools
 
         // ── Reusable Search Utility ─────────────────────────────────────────────
 
-        // Returns all assets of type T in the project — used by inspectors and build pipeline
+        // Returns all assets of type T in the project - used by inspectors and build pipeline
         public static List<T> LoadAll<T>() where T : ScriptableObject
         {
             var results = new List<T>();
@@ -176,7 +176,7 @@ namespace ThroneOfTides.Tools
             return results;
         }
 
-        // Finds all DeckDefinitionSOs that contain a specific card — used by deletion dialog
+        // Finds all DeckDefinitionSOs that contain a specific card - used by deletion dialog
         public static List<DeckDefinitionSO> FindDecksContaining(CardSO card)
         {
             var decks  = LoadAll<DeckDefinitionSO>();

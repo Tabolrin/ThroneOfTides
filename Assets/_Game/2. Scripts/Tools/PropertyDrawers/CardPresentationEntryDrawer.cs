@@ -22,7 +22,7 @@ namespace ThroneOfTides.Tools
             float height = BoxPadding * 2f;
             int simpleRowCount = showParticle ? 6 : 5; // caster, mode, anchor side, anchor point, sprite (+ particle)
             height += simpleRowCount * (LineHeight + Spacing);
-            height += EditorGUI.GetPropertyHeight(sfx, true) + Spacing; // SFX foldout — variable height
+            height += EditorGUI.GetPropertyHeight(sfx, true) + Spacing; // SFX foldout - variable height
             height += LineHeight + Spacing; // lifetime
 
             return height;
@@ -71,7 +71,7 @@ namespace ThroneOfTides.Tools
         }
 
         // Custom labels replace a property's default display name, which would otherwise
-        // silently drop its [Tooltip] text too — pulling property.tooltip through keeps it.
+        // silently drop its [Tooltip] text too - pulling property.tooltip through keeps it.
         private static void DrawField(ref float y, float x, float width, SerializedProperty prop, string label)
         {
             var rect = new Rect(x, y, width, LineHeight);

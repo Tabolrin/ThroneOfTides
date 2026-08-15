@@ -8,14 +8,14 @@ namespace ThroneOfTides.Systems
     public class CombatResolver
     {
         private readonly GameState       _gameState;
-        // Optional — null outside a real game session (e.g. isolated tests). Only the player has
+        // Optional - null outside a real game session (e.g. isolated tests). Only the player has
         // a tracked coin balance, so this is only ever consulted for a Player-cast Kraken.
         private readonly PlayerInventory _playerInventory;
 
         // Set once by TurnCoordinator during setup. Allows effect SOs to trigger secondary
         // draws (e.g. Treasure Chest) without assembly boundary issues. Kept per-side so a
         // caster-relative effect draws into its own hand, not always the player's. The bool
-        // parameter is ignoreHandLimit — lets a card force its draw into the hand past
+        // parameter is ignoreHandLimit - lets a card force its draw into the hand past
         // MaxHandSize (e.g. Treasure Chest).
         private System.Func<bool, bool> _secondaryDrawCallbackPlayer;
         private System.Func<bool, bool> _secondaryDrawCallbackEnemy;
@@ -42,10 +42,10 @@ namespace ThroneOfTides.Systems
             if (card.HPCost > 0)
             {
                 _gameState.ApplyDamage(caster, card.HPCost);
-                GameDebug.Log($"{card.Name} — paid {card.HPCost} HP");
+                GameDebug.Log($"{card.Name} - paid {card.HPCost} HP");
             }
 
-            // The Kraken's own text: "Sacrifice 3 HP and 33% of your materials." — only the
+            // The Kraken's own text: "Sacrifice 3 HP and 33% of your materials." - only the
             // player has coins to sacrifice; an enemy-cast Kraken skips this entirely.
             if (card.Id == CardId.Kraken && caster == DamageTarget.Player && _playerInventory != null)
             {
@@ -53,7 +53,7 @@ namespace ThroneOfTides.Systems
                 if (materialsCost > 0)
                 {
                     _playerInventory.SpendCoins(materialsCost);
-                    GameDebug.Log($"The Kraken — sacrificed {materialsCost} coins (33% of materials)");
+                    GameDebug.Log($"The Kraken - sacrificed {materialsCost} coins (33% of materials)");
                 }
             }
 
@@ -68,14 +68,14 @@ namespace ThroneOfTides.Systems
             }
         }
 
-        // Player-path convenience wrapper — kept so existing call sites don't need to name the side.
+        // Player-path convenience wrapper - kept so existing call sites don't need to name the side.
         public int ResolvePlayerCard(CardSO card, IHandLayoutManager handLayout, DamageTarget? selectedTarget = null)
             => ResolveCard(card, DamageTarget.Player, handLayout, selectedTarget);
 
         public int ResolveCounterGale(int incomingDamage)
         {
             int reflected = Mathf.FloorToInt(incomingDamage * 0.5f);
-            GameDebug.Log($"Counter Gale — reflecting {reflected} damage");
+            GameDebug.Log($"Counter Gale - reflecting {reflected} damage");
             return reflected;
         }
 
@@ -84,7 +84,7 @@ namespace ThroneOfTides.Systems
         private static DamageTarget Opponent(DamageTarget side) =>
             side == DamageTarget.Player ? DamageTarget.Enemy : DamageTarget.Player;
 
-        // Gunpowder sits on whichever ship is being attacked, not on the caster's own ship —
+        // Gunpowder sits on whichever ship is being attacked, not on the caster's own ship -
         // Gunpowder Barrel primes the opponent's ship, and Torch (played by the same attacker)
         // ignites that stack. Matches Tidal Wave's "removes Gunpowder from hit ship" wording.
         private int ResolveCombo(CardSO card, DamageTarget caster)
@@ -95,18 +95,18 @@ namespace ThroneOfTides.Systems
             if (card.ComboStackBonus > 0)
             {
                 _gameState.IncrementCombo(target, card);
-                GameDebug.Log($"Gunpowder primed on {target}'s ship — stack: {combo.ComboStackCount}");
+                GameDebug.Log($"Gunpowder primed on {target}'s ship - stack: {combo.ComboStackCount}");
                 return 0;
             }
 
             if (combo.ComboStackCount > 0 && combo.ActiveComboCard != null)
             {
                 int damage = _gameState.ResolveCombo(target);
-                GameDebug.Log($"Combo resolved on {target}'s ship — damage: {damage}");
+                GameDebug.Log($"Combo resolved on {target}'s ship - damage: {damage}");
                 return damage;
             }
 
-            GameDebug.Log("Torch with no active combo — base damage only");
+            GameDebug.Log("Torch with no active combo - base damage only");
             return card.Damage;
         }
 
@@ -114,7 +114,7 @@ namespace ThroneOfTides.Systems
         {
             DamageTarget target = Opponent(caster);
             _gameState.AddDotEffect(new DotEffect(target, card.DotDamagePerTurn, card.DotDuration, card.StatusType));
-            GameDebug.Log($"DOT applied ({target}) — {card.DotDamagePerTurn} dmg × {card.DotDuration} turns");
+            GameDebug.Log($"DOT applied ({target}) - {card.DotDamagePerTurn} dmg × {card.DotDuration} turns");
             return 0;
         }
 
@@ -135,7 +135,7 @@ namespace ThroneOfTides.Systems
         {
             // Weapons with an assigned effect (e.g. Tidal Wave, Chain Shot) fully own their own
             // resolution, including applying their own damage. Weapons with none just deal flat
-            // CardSO.Damage — every special case is now expressed as an effect SO, not a switch
+            // CardSO.Damage - every special case is now expressed as an effect SO, not a switch
             // here (Ram The Hull was cut content with no asset; its case was already a no-op).
             if (card.ActionEffect != null)
             {

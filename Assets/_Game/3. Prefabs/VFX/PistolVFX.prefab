@@ -121,6 +121,4 @@ MonoBehaviour:
     _songName: Pistol
     _volumeMultiplier: 0.5
     _pitchMultiplier: 1
-  _shakeDuration: 0.12
-  _shakeAmplitude: 0.15
-  _shakeFrequency: 25
+  _shakeLevel: 1

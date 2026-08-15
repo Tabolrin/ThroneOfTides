@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // One card panel in the collection grid — shows the card exactly as it renders in hand
+    // One card panel in the collection grid - shows the card exactly as it renders in hand
     // (embeds a real CardView) plus Port-specific info (storage cost, current/limit copies in
     // deck) and an Add button below it. Pooled by PortInventoryView, so the embedded CardView is
     // created once per panel instance and just re-Setup() on every refresh.
@@ -24,7 +24,7 @@ namespace ThroneOfTides.UI
         private CardView            _cardViewInstance;
         private CardPreviewTrigger  _previewTrigger;
 
-        // maxCopies is CardSO.MaxCopiesInDeck — ownership is unlocked-or-not, not a copy count,
+        // maxCopies is CardSO.MaxCopiesInDeck - ownership is unlocked-or-not, not a copy count,
         // so what's worth showing here is the deck-building cap, not how many you "own".
         public void Setup(CardSO card, int maxCopies, int inDeckCount, bool canAdd, System.Action onAdd,
             CardPreviewTooltip previewTooltip = null)
@@ -65,7 +65,7 @@ namespace ThroneOfTides.UI
             _cardViewInstance = Instantiate(_cardViewPrefab, _cardViewParent);
             _cardViewInstance.transform.localScale = Vector3.one * _cardViewScale;
 
-            // Read-only display — not draggable/playable, and has no inspect-overlay wired here.
+            // Read-only display - not draggable/playable, and has no inspect-overlay wired here.
             var drag = _cardViewInstance.GetComponent<CardDragHandler>();
             if (drag != null) Destroy(drag);
         }

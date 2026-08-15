@@ -42,6 +42,6 @@ MonoBehaviour:
     _sfx:
       _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
       _songName: Monkey
-      _volumeMultiplier: 0
-      _pitchMultiplier: 0
+      _volumeMultiplier: 1
+      _pitchMultiplier: 1
     _lifetime: 3

@@ -61,11 +61,11 @@ namespace ThroneOfTides.Tools
                 EditorGUILayout.HelpBox("One or more entries have no card assigned. Fix these before building.", MessageType.Error);
 
             if (total == 0)
-                EditorGUILayout.HelpBox("Deck is empty — no cards will be dealt.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Deck is empty - no cards will be dealt.", MessageType.Warning);
             else if (total < MinViableDeckSize)
                 EditorGUILayout.HelpBox($"Deck has only {total} cards. Minimum recommended is {MinViableDeckSize}.", MessageType.Warning);
             else
-                EditorGUILayout.HelpBox($"Deck looks good — {total} cards ready.", MessageType.Info);
+                EditorGUILayout.HelpBox($"Deck looks good - {total} cards ready.", MessageType.Info);
         }
 
         private int CalculateTotalCount()

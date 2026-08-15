@@ -8,7 +8,7 @@ namespace ThroneOfTides.Data
     /// <summary>
     /// Flat registry of every CardSO in the game, keyed by its stable CardId. Lets the save
     /// system reconstruct a saved card collection (a list of CardId) back into real CardSO
-    /// references without needing Resources/Addressables — populate by dragging every CardSO
+    /// references without needing Resources/Addressables - populate by dragging every CardSO
     /// asset into _allCards once.
     /// </summary>
     [CreateAssetMenu(menuName = "ThroneOfTides/Data/CardDatabase")]
@@ -18,7 +18,7 @@ namespace ThroneOfTides.Data
 
         private Dictionary<CardId, CardSO> _byId;
 
-        // Read-only enumeration of the full registry — used by dev tooling (e.g. the card
+        // Read-only enumeration of the full registry - used by dev tooling (e.g. the card
         // cheat panel) that needs to list every known card rather than look one up by id.
         public IReadOnlyList<CardSO> AllCards => _allCards.AsReadOnly();
 

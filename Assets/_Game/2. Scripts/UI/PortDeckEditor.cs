@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // Runtime deck editor — mirrors DeckBuilderWindow but as in-game UI.
+    // Runtime deck editor - mirrors DeckBuilderWindow but as in-game UI.
     // Mutates the DeckDefinitionSO's Cards list directly and in-memory; PortManager.SaveDeck
     // persists it to disk via PlayerInventory.Save() when the player presses Save.
     public class PortDeckEditor : MonoBehaviour
@@ -30,7 +30,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private TextMeshProUGUI _cardCountLabel;
         [SerializeField] private Button          _saveButton;
 
-        // Fired when the save button is pressed — PortManager handles actual save
+        // Fired when the save button is pressed - PortManager handles actual save
         public System.Action OnSaveRequested;
 
         private DeckDefinitionSO _deck;
@@ -42,7 +42,7 @@ namespace ThroneOfTides.UI
 
         private void Awake()
         {
-            // Pools deck rows instead of Instantiate/Destroy per add/remove — Refresh() rebuilds
+            // Pools deck rows instead of Instantiate/Destroy per add/remove - Refresh() rebuilds
             // the whole list on every single card add/remove/storage-upgrade.
             _rowPool = new ObjectPool<PortCardRow>(
                 createFunc: () => Instantiate(_cardRowPrefab),
@@ -138,7 +138,7 @@ namespace ThroneOfTides.UI
 
         private void ClearRows()
         {
-            // Snapshot first — releasing reparents each row out of _deckContent immediately,
+            // Snapshot first - releasing reparents each row out of _deckContent immediately,
             // which would corrupt a live `foreach (Transform child in _deckContent)` iteration.
             var rows = new List<PortCardRow>(_deckContent.GetComponentsInChildren<PortCardRow>(true));
             foreach (var row in rows)
@@ -147,7 +147,7 @@ namespace ThroneOfTides.UI
 
         private void BuildRows()
         {
-            // One row per card TYPE (not one per physical copy) — sorted by type then name.
+            // One row per card TYPE (not one per physical copy) - sorted by type then name.
             var sorted = new List<DeckDefinitionSO.CardEntry>(_deck.Cards);
             sorted.RemoveAll(e => e.Card == null || e.Count <= 0);
             sorted.Sort((a, b) =>

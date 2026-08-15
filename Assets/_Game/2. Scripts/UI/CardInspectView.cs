@@ -15,7 +15,7 @@ namespace ThroneOfTides.UI
         [SerializeField] private Image         _overlay;
         [SerializeField] private RectTransform _cardView;
 
-        // Banner background color no longer varies per type — only the symbol icon does.
+        // Banner background color no longer varies per type - only the symbol icon does.
         [Header("Type Banner")]
         [SerializeField] private Image _typeSymbolIcon;
 

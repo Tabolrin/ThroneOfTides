@@ -10,9 +10,9 @@ namespace ThroneOfTides.Data
         [System.Serializable]
         public class CardTypeVisuals
         {
-            [Tooltip("Type band color used only by PortCardRow's deck-list row. Card views (CardView, CardInspectView) and PortInventoryCard no longer tint anything with this — they rely on TypeSymbol/the type-name label instead.")]
+            [Tooltip("Type band color used only by PortCardRow's deck-list row. Card views (CardView, CardInspectView) and PortInventoryCard no longer tint anything with this - they rely on TypeSymbol/the type-name label instead.")]
             public Color  BannerColor = Color.white;
-            [Tooltip("Icon displayed inside the type banner — represents the card type category")]
+            [Tooltip("Icon displayed inside the type banner - represents the card type category")]
             public Sprite TypeSymbol;
         }
 
@@ -36,7 +36,7 @@ namespace ThroneOfTides.Data
             _                 => DefaultVisuals
         };
 
-        // Returns BannerColor — used only by PortCardRow's deck-list type band
+        // Returns BannerColor - used only by PortCardRow's deck-list type band
         public Color GetColor(CardType type) => GetVisuals(type).BannerColor;
     }
 }

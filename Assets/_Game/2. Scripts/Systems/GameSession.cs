@@ -2,7 +2,7 @@ using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Systems
 {
-    // Which map node the ship icon is currently sitting at — persisted here (rather than on
+    // Which map node the ship icon is currently sitting at - persisted here (rather than on
     // LevelSelectManager itself) because the LevelSelect scene fully reloads every time the
     // player returns to it, so the ship's position would otherwise reset every visit instead of
     // reflecting wherever it last actually traveled to.

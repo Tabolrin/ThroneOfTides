@@ -24,7 +24,7 @@ namespace ThroneOfTides.Systems
             _gameState.ResetPlayerMana();
             _gameState.IsPlayerTurn = true;
             GameEventBus.FireTurnPhaseChanged(TurnPhase.Draw);
-            Debug.Log($"Player Turn — HP: {_gameState.PlayerHP}, Mana: {_gameState.PlayerMana}/{_gameState.PlayerMaxMana}");
+            Debug.Log($"Player Turn - HP: {_gameState.PlayerHP}, Mana: {_gameState.PlayerMana}/{_gameState.PlayerMaxMana}");
         }
 
         public void Tick() { }

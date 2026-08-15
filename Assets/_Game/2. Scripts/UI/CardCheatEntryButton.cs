@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // One row in the card-cheat scroll list — name label + click-to-add button.
+    // One row in the card-cheat scroll list - name label + click-to-add button.
     // Deliberately minimal (no art/cost/type banner) since this is a dev tool, not a
     // content-browsing UI; mirrors the plain Setup(...) shape used by PortCardRow.
     public class CardCheatEntryButton : MonoBehaviour

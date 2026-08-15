@@ -15,16 +15,19 @@ MonoBehaviour:
   _icons:
   - Type: 1
     Icon: {fileID: 21300000, guid: 36b7dd41e6a0b7140b0ccdc3cc882812, type: 3}
-    Description: "Primed to explode \u2014 Torch ignites it for bonus damage."
+    Description: Torch consumes this to deal 8 damage + 2 per stack (max 4). Tidal
+      Wave clears it without damage.
   - Type: 2
     Icon: {fileID: 21300000, guid: a0cac2a058093f940bf96c5e61c54c11, type: 3}
-    Description: Dealing 3 damage per turn.
+    Description: Deals 3 damage per turn. Badge count = turns remaining.
   - Type: 3
     Icon: {fileID: 21300000, guid: c46c1f55e59d80944ab7988b18532c4b, type: 3}
-    Description: Dealing 2 damage per turn.
+    Description: Deals 2 damage per turn. Badge count = turns remaining.
   - Type: 4
     Icon: {fileID: 21300000, guid: 9e3c25b45d05a044d8bd269703e6b40f, type: 3}
-    Description: Tracks how many times High Spirits has been played.
+    Description: Each play grants +1 max mana, permanently. Badge count = times
+      played.
   - Type: 5
     Icon: {fileID: 21300000, guid: 4bbb8aca137097147bf7e9117d407f7a, type: 3}
-    Description: This ship's next attack cannot be blocked.
+    Description: Next attack this turn ignores Dead Man's Turn and Counter Gale
+      reactions.

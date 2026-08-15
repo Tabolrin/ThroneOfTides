@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // One instantiated badge — an icon plus an optional count label. Spawned on demand by
+    // One instantiated badge - an icon plus an optional count label. Spawned on demand by
     // ActiveEffectsBar when a status/reaction becomes active, destroyed when it clears.
     // Hovering shows a short explanation via the shared EffectBadgeTooltip.
     public class EffectBadgeView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler

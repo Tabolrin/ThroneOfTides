@@ -7,7 +7,7 @@ using ThroneOfTides.Data;
 namespace ThroneOfTides.Tools
 {
     // Draws CardSfxCue as a foldout with a Playlist field and a Song dropdown populated from
-    // that playlist's actual song names — avoids hand-typing a name that might not exist.
+    // that playlist's actual song names - avoids hand-typing a name that might not exist.
     [CustomPropertyDrawer(typeof(CardSfxCue))]
     public class CardSfxCueDrawer : PropertyDrawer
     {

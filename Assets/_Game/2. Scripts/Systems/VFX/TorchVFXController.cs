@@ -13,15 +13,15 @@ namespace ThroneOfTides.Systems.VFX
     /// card resolution, well before the throw's travel time elapses, so checking it again at
     /// impact would always read "already cleared"). If it was active, impact plays the explosion
     /// animation/SFX and a screen shake; if not, the throw itself is the whole show. Damage math
-    /// (base vs. combo-bonus) is already handled by CombatResolver/GameState — this only decides
+    /// (base vs. combo-bonus) is already handled by CombatResolver/GameState - this only decides
     /// what to show.
     ///
-    /// Uses ProjectileThrow for the shared spin-and-arc motion — also used by
+    /// Uses ProjectileThrow for the shared spin-and-arc motion - also used by
     /// GunpowderBarrelVFXController, and intended for Cannonball/Pistol to adopt later.
     ///
     /// Scene/prefab setup requirements:
     ///   - Root prefab is a UI Image (RectTransform), same canvas-space convention as
-    ///     Kraken/Siren/Lightning/Hail Storm — positioned via anchoredPosition, not world position.
+    ///     Kraken/Siren/Lightning/Hail Storm - positioned via anchoredPosition, not world position.
     /// </summary>
     public class TorchVFXController : MonoBehaviour, ICardPlayEffect
     {
@@ -59,12 +59,19 @@ namespace ThroneOfTides.Systems.VFX
             _rootCanvasRect = context.GameCanvas;
             _gameCamera     = context.GameCamera;
 
-            // Must be captured now, not at impact — CombatResolver ignites/clears the target's
+            // Must be captured now, not at impact - CombatResolver ignites/clears the target's
             // Gunpowder stack synchronously as part of this same card resolution, which finishes
             // well before the throw's own travel duration elapses. Checking IsOpponentStatusVisible
             // at OnImpact time would always read "already cleared", silently killing the
             // explosion on every single throw regardless of whether Gunpowder was actually active.
             _gunpowderWasActive = context.IsOpponentStatusVisible?.Invoke(ShipStatusType.Gunpowder) ?? false;
+
+            // Torch owns 100% of its own shake timing: OnImpact only shakes when Gunpowder
+            // actually ignites, and a plain non-igniting throw should shake the camera not at
+            // all - so the generic on-damage shake (which would otherwise fire for the base 1
+            // damage every throw deals, gunpowder or not) is always suppressed here, regardless
+            // of _gunpowderWasActive.
+            context.SuppressNextDamageCameraShake?.Invoke();
 
             BuildAndPlaySequence();
         }

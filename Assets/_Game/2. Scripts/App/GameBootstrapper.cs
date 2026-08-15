@@ -1,5 +1,5 @@
 // Assets/_Game/2. Scripts/App/GameBootstrapper.cs
-// Only the Start() method changes — applies upgrade modifiers to GameState init.
+// Only the Start() method changes - applies upgrade modifiers to GameState init.
 // Full file included for completeness.
 using System.Collections;
 using System.Collections.Generic;
@@ -20,15 +20,15 @@ namespace ThroneOfTides.App
         [Header("Decks")]
         [SerializeField] private DeckDefinitionSO _playerDeckDefinition;
         [Tooltip("Build-time only. Set by ThroneOfTidesBuildPipeline.ApplySceneOverrides via a " +
-                 "BuildDeckProfileSO before building, then restored afterward — takes priority " +
+                 "BuildDeckProfileSO before building, then restored afterward - takes priority " +
                  "over the Port-configured deck when assigned. Leave empty for normal Editor play.")]
         [SerializeField] private DeckDefinitionSO _playerDeckOverride;
-        [Tooltip("Build-time only. Same as above but for the enemy — takes priority over the " +
+        [Tooltip("Build-time only. Same as above but for the enemy - takes priority over the " +
                  "active Captain's own deck when assigned.")]
         [SerializeField] private DeckDefinitionSO _enemyDeckOverride;
 
         [Header("Player")]
-        // Optional — when assigned, upgrade levels are applied to HP and Mana at match start.
+        // Optional - when assigned, upgrade levels are applied to HP and Mana at match start.
         // Falls back to config base values when null (useful for testing scenes).
         [SerializeField] private PlayerInventory _playerInventory;
 
@@ -41,7 +41,7 @@ namespace ThroneOfTides.App
         [SerializeField] private HandLayoutManager     _handLayoutManager;
         [SerializeField] private UnityEngine.UI.Button _endTurnButton;
         [SerializeField] private RectTransform         _playZone;
-        [Tooltip("Where the enemy's played-card display animates to — kept off-center (right side, clear of the ships) so it doesn't cover the card's own VFX playing over the ships.")]
+        [Tooltip("Where the enemy's played-card display animates to - kept off-center (right side, clear of the ships) so it doesn't cover the card's own VFX playing over the ships.")]
         [SerializeField] private RectTransform         _enemyPlayZone;
         [SerializeField] private DeadMansTurnPrompt    _deadMansTurnPrompt;
         [SerializeField] private TargetSelectionPrompt _targetSelectionPrompt;
@@ -49,21 +49,22 @@ namespace ThroneOfTides.App
         [SerializeField] private TurnCoordinator       _turnCoordinator;
         [SerializeField] private CheatsPanel           _cheatsPanel;
         [SerializeField] private CardCheatPanel        _cardCheatPanel;
+        [SerializeField] private ForceEnemyCardCheatPanel _forceEnemyCardCheatPanel;
         [SerializeField] private EnemyHandRevealPanel  _enemyHandRevealPanel;
         [Tooltip("Wired here (App layer) rather than directly on CardPresentationPlayer, since Systems cannot reference the UI assembly EnemyHandRevealPanel lives in.")]
         [SerializeField] private ThroneOfTides.Systems.CardPresentationPlayer _cardPresentationPlayer;
 
-        [Header("Debug — Card Registry")]
-        [Tooltip("Flat registry of every CardSO — required for CardCheatPanel to list all cards.")]
+        [Header("Debug - Card Registry")]
+        [Tooltip("Flat registry of every CardSO - required for CardCheatPanel to list all cards.")]
         [SerializeField] private CardDatabaseSO _cardDatabase;
 
-        [Header("Captain — fallback for testing without level select")]
+        [Header("Captain - fallback for testing without level select")]
         [SerializeField] private CaptainSO _fallbackCaptain;
 
         [Header("VFX Timing")]
-        [Tooltip("CardVFXHandler in the scene — its floating damage/heal/mana number queue delay is configured from here so it's tunable in one place per scene.")]
+        [Tooltip("CardVFXHandler in the scene - its floating damage/heal/mana number queue delay is configured from here so it's tunable in one place per scene.")]
         [SerializeField] private ThroneOfTides.Systems.CardVFXHandler _cardVFXHandler;
-        [Tooltip("Seconds between each floating combat number when several need to appear in quick succession (e.g. a multi-hit combo) — keeps them from stacking unreadably on top of each other.")]
+        [Tooltip("Seconds between each floating combat number when several need to appear in quick succession (e.g. a multi-hit combo) - keeps them from stacking unreadably on top of each other.")]
         [SerializeField] private float _floatingNumberDelay = 0.15f;
 
         private GameState                 _gameState;
@@ -89,6 +90,19 @@ namespace ThroneOfTides.App
 
             if (_cardPresentationPlayer != null && _enemyHandRevealPanel != null)
                 _cardPresentationPlayer.ShowEnemyHandReveal = _enemyHandRevealPanel.ShowAndAwaitDismiss;
+
+            if (_cardPresentationPlayer != null && _handLayoutManager != null)
+            {
+                _cardPresentationPlayer.GetHandAreaPosition = side =>
+                    side == DamageTarget.Player ? _handLayoutManager.PlayerHandAreaPosition : _handLayoutManager.EnemyHandAreaPosition;
+                _cardPresentationPlayer.FinalizeStolenCardVisual = (card, gainedBy) =>
+                {
+                    if (gainedBy == DamageTarget.Player) _handLayoutManager.StealCardFromEnemyHand(card as CardSO);
+                    else _handLayoutManager.StealCardFromPlayerHand(card as CardSO);
+                };
+                _cardPresentationPlayer.SpawnStolenCardVisual = (card, parent) =>
+                    _handLayoutManager.SpawnStolenCardPreview(card as CardSO, parent);
+            }
 
             // ── Apply upgrade modifiers ─────────────────────────────────────
             // Base values from config, with optional per-upgrade level bonuses
@@ -127,7 +141,7 @@ namespace ThroneOfTides.App
             // ── Construct game systems ──────────────────────────────────────
             _gameState    = new GameState(effectiveMaxHP, effectiveMaxMana, _config.MaxHandSize,
                                           playerDeck, enemyDeck, originalSnapshot,
-                                          enemyMaxHP, enemyMaxMana);
+                                          enemyMaxHP, enemyMaxMana, _config.BonusMaxHandSize);
             _stateMachine = new TurnStateMachine(_gameState, _config);
 
             var combatResolver = new CombatResolver(_gameState, _playerInventory);
@@ -147,6 +161,9 @@ namespace ThroneOfTides.App
             if (_cardCheatPanel != null && _cardDatabase != null)
                 _cardCheatPanel.Initialise(_gameState, _handLayoutManager, _cardDatabase, _config.MaxHandSize);
 
+            if (_forceEnemyCardCheatPanel != null && _cardDatabase != null)
+                _forceEnemyCardCheatPanel.Initialise(_turnCoordinator, _cardDatabase);
+
             _stateMachine.SetCoroutineRunner(e => StartCoroutine(e));
 
             SubscribeToEvents();
@@ -158,10 +175,12 @@ namespace ThroneOfTides.App
 
         private void DealOpeningHand()
         {
-            // Draws until the hand itself is full, not a fixed number of draws — a Reaction
-            // card is charged instead of occupying a hand slot and must not count toward the
-            // fill target, or the opening hand ends up short whenever one is drawn early.
-            while (_gameState.EnemyHand.Count < _config.MaxHandSize && _gameState.EnemyDeck.Count > 0)
+            // Draws a fixed number of cards (MaxHandSize, since the opening hand always starts
+            // empty) rather than looping until the hand reaches MaxHandSize - a Reaction card
+            // still counts as one of the opening draws even though it charges a badge instead of
+            // occupying a hand slot, matching TurnCoordinator's own draw-phase rule.
+            int drawsRemaining = _config.MaxHandSize - _gameState.EnemyHand.Count;
+            for (int i = 0; i < drawsRemaining && _gameState.EnemyDeck.Count > 0; i++)
             {
                 CardSO card = _gameState.EnemyDeck.Draw();
                 if (card == null) break;
@@ -180,7 +199,7 @@ namespace ThroneOfTides.App
         }
 
         // How long a reaction card sits fully dealt into the hand before it flies off to the
-        // reaction badge area and shrinks away — matches TurnCoordinator's own draw-phase delay.
+        // reaction badge area and shrinks away - matches TurnCoordinator's own draw-phase delay.
         private const float ReactionAbsorbDelay = 0.4f;
 
         private IEnumerator DealPlayerOpeningHandRoutine()
@@ -191,14 +210,16 @@ namespace ThroneOfTides.App
             var dealtCards    = new List<CardSO>();
             var reactionCards = new List<CardSO>();
 
-            // Draws until the hand itself is full, not a fixed number of draws — see the
-            // matching comment in DealOpeningHand for why a plain fixed-count loop undercounts.
-            while (_gameState.PlayerHand.Count < _config.MaxHandSize && _gameState.PlayerDeck.Count > 0)
+            // Same fixed-draw-count rule as DealOpeningHand - a Reaction card still counts as
+            // one of the opening draws even though it ends up as a badge charge rather than a
+            // hand card.
+            int drawsRemaining = _config.MaxHandSize - _gameState.PlayerHand.Count;
+            for (int i = 0; i < drawsRemaining && _gameState.PlayerDeck.Count > 0; i++)
             {
                 CardSO card = _gameState.PlayerDeck.Draw();
                 if (card == null) break;
 
-                // Dealt into the visual hand in draw order regardless of type — a reaction card
+                // Dealt into the visual hand in draw order regardless of type - a reaction card
                 // reads exactly like any other opening-hand card until it later flies off to
                 // charge its badge, instead of the charge silently appearing before the deal
                 // animation even starts.

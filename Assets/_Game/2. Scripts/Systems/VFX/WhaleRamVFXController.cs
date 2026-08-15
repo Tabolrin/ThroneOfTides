@@ -1,23 +1,23 @@
 // Assets/_Game/2. Scripts/Systems/VFX/WhaleRamVFXController.cs
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using ThroneOfTides.Systems.VFX;
 
 namespace ThroneOfTides.Systems
 {
     /// <summary>
     /// Whale Ram's presentation: a whale cry plays immediately, then the whale sprite (Filled,
     /// Vertical, Fill Origin = Top) fills from 0 up to FillTarget while simultaneously sliding
-    /// from a configurable start point to a configurable end point — one diagonal
+    /// from a configurable start point to a configurable end point - one diagonal
     /// breach-and-lunge motion. Contact triggers a loud crash SFX and a strong camera shake; the
     /// whale then holds a beat before fading out and destroying itself.
     /// Start/End Point below override wherever CardPresentationPlayer originally spawned this
-    /// (per the CardSO's own PresentationEntry) — defaults match the original design (both ends
-    /// on the opponent's ship: SeaSurface to its left, then its ShipHit — Whale Ram always hits
+    /// (per the CardSO's own PresentationEntry) - defaults match the original design (both ends
+    /// on the opponent's ship: SeaSurface to its left, then its ShipHit - Whale Ram always hits
     /// the opponent, no target selection).
     /// </summary>
     public class WhaleRamVFXController : MonoBehaviour, ICardPlayEffect
@@ -26,13 +26,13 @@ namespace ThroneOfTides.Systems
         [Tooltip("Whale cry played the instant the effect spawns.")]
         [SerializeField] private CardSfxCue _emergeSfx;
 
-        [Header("Travel — Start Point")]
+        [Header("Travel - Start Point")]
         [SerializeField] private CardPresentationSide _startSide = CardPresentationSide.Opponent;
         [SerializeField] private VfxAnchorType _startAnchorType = VfxAnchorType.SeaSurfaceLeft;
         [Tooltip("Extra manual nudge applied after resolving the start anchor, in canvas pixels.")]
         [SerializeField] private Vector2 _startOffset;
 
-        [Header("Travel — End Point")]
+        [Header("Travel - End Point")]
         [SerializeField] private CardPresentationSide _endSide = CardPresentationSide.Opponent;
         [SerializeField] private VfxAnchorType _endAnchorType = VfxAnchorType.ShipHit;
         [Tooltip("Extra manual nudge applied after resolving the end anchor, in canvas pixels.")]
@@ -51,9 +51,7 @@ namespace ThroneOfTides.Systems
         [SerializeField] private Ease  _moveEase = Ease.InQuad;
 
         [Header("Contact")]
-        [SerializeField] private float _shakeDuration  = 0.3f;
-        [SerializeField] private float _shakeAmplitude = 2f;
-        [SerializeField] private float _shakeFrequency = 35f;
+        [SerializeField] private ScreenShakeLevel _shakeLevel = ScreenShakeLevel.Level4;
         [Tooltip("Loud crash played on contact with the ship.")]
         [SerializeField] private CardSfxCue _contactSfx;
         [Tooltip("How long the whale sits eclipsing the ship after contact before the fade-out.")]
@@ -73,6 +71,10 @@ namespace ThroneOfTides.Systems
         public void Initialize(CardEffectSpawnContext context)
         {
             CardSfxPlayer.Play(_emergeSfx, transform.position);
+
+            // Shakes the camera itself at the ram's own impact beat - the generic instant
+            // on-damage shake would otherwise double up with it.
+            context.SuppressNextDamageCameraShake?.Invoke();
 
             // Re-anchors to our own configurable Start Point, overriding wherever
             // CardPresentationPlayer originally placed this based on the CardSO's entry.
@@ -112,7 +114,7 @@ namespace ThroneOfTides.Systems
 
         private void OnContact(CardEffectSpawnContext context)
         {
-            MMCameraShakeEvent.Trigger(_shakeDuration, _shakeAmplitude, _shakeFrequency, 0f, 0f, 0f);
+            ScreenShake.Trigger(_shakeLevel);
             CardSfxPlayer.Play(_contactSfx, transform.position);
         }
 
@@ -120,7 +122,7 @@ namespace ThroneOfTides.Systems
         {
             Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(cam, worldPosition);
             // null camera is correct for Screen Space Overlay canvases (see CardPresentationPlayer's
-            // own WorldToCanvasLocalPoint) — passing the real camera here collapses the result to
+            // own WorldToCanvasLocalPoint) - passing the real camera here collapses the result to
             // roughly the canvas corner regardless of the input world position.
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, null, out var localPoint);
             return localPoint;

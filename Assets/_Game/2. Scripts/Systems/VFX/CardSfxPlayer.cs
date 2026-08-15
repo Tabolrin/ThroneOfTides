@@ -8,7 +8,7 @@ namespace ThroneOfTides.Systems
 {
     /// <summary>
     /// Plays one specific song from a shared MMSMPlaylist through MMSoundManager as a one-shot.
-    /// Treats the playlist purely as a pool of clips to select from — it never drives
+    /// Treats the playlist purely as a pool of clips to select from - it never drives
     /// MMSMPlaylistManager's persistent playback session, since that's built for continuous
     /// music/ambience rather than one-off card SFX.
     /// </summary>
@@ -44,7 +44,7 @@ namespace ThroneOfTides.Systems
                 if (song.Name == songName) return song;
             }
 
-            Debug.LogWarning($"CardSfxPlayer: no song named '{songName}' found in the assigned playlist — falling back to a random song.");
+            Debug.LogWarning($"CardSfxPlayer: no song named '{songName}' found in the assigned playlist - falling back to a random song.");
             return songs[Random.Range(0, songs.Count)];
         }
     }

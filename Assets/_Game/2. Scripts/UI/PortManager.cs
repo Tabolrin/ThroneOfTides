@@ -76,7 +76,7 @@ namespace ThroneOfTides.App
             bool added = _deckEditor.TryAddCard(card);
 
             if (!added)
-                Debug.Log($"[Port] Cannot add {card.Name} — storage full " +
+                Debug.Log($"[Port] Cannot add {card.Name} - storage full " +
                           $"({_deckEditor.GetStorageUsed()} / {_deckEditor.MaxStorage})");
 
             _inventoryView.Refresh();

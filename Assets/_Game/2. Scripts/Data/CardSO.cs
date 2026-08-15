@@ -12,7 +12,7 @@ namespace ThroneOfTides.Data
         [Tooltip("Display name shown on the card and used to look it up in the deck builder/inventory.")]
         [SerializeField] private string _name;
 
-        [Tooltip("Stable identity for code that needs to recognize this specific card (e.g. Kraken's negate rule, Torch's AI weighting, reaction charge routing) without depending on the editable display Name — renaming Name never breaks a CardId check, unlike a card.Name == \"...\" string comparison.")]
+        [Tooltip("Stable identity for code that needs to recognize this specific card (e.g. Kraken's negate rule, Torch's AI weighting, reaction charge routing) without depending on the editable display Name - renaming Name never breaks a CardId check, unlike a card.Name == \"...\" string comparison.")]
         [SerializeField] private CardId _id = CardId.None;
 
         [Tooltip("Determines how this card is resolved: Weapon deals flat damage, Combo needs a Partner, Action/Reaction run an Effect SO, DOT applies damage over time.")]
@@ -29,7 +29,7 @@ namespace ThroneOfTides.Data
         [Tooltip("Mana required to play this card.")]
         [SerializeField] private int _manaCost;
 
-        [Tooltip("Deck slots this card occupies — enforced by the deck builder's storage cap.")]
+        [Tooltip("Deck slots this card occupies - enforced by the deck builder's storage cap.")]
         [SerializeField] private int _storageCost;
 
         [Tooltip("HP the caster pays to play this card. Only non-zero on cards that sacrifice HP (e.g. Ram the Hull, Stolen Wind).")]
@@ -57,7 +57,7 @@ namespace ThroneOfTides.Data
         [SerializeField] private int _dotDuration;
 
         [Header("Action")]
-        [Tooltip("The ScriptableObject that implements this card's gameplay effect. Required for Action and Reaction cards — without it the card does nothing. Optional for Weapon cards: if assigned, CombatResolver runs it instead of the legacy name-switch (e.g. Tidal Wave).")]
+        [Tooltip("The ScriptableObject that implements this card's gameplay effect. Required for Action and Reaction cards - without it the card does nothing. Optional for Weapon cards: if assigned, CombatResolver runs it instead of the legacy name-switch (e.g. Tidal Wave).")]
         [SerializeField] private ActionEffectSO _actionEffect;
 
         [Tooltip("Whether this Action card can be played in the same turn as a damage card without using up the turn's action-card allowance twice.")]
@@ -66,11 +66,11 @@ namespace ThroneOfTides.Data
         [Tooltip("If true, playing this card shows a target-selection prompt (your ship / enemy ship) before it resolves. The chosen target is available to the Effect SO via ICardEffectContext.SelectedTarget.")]
         [SerializeField] private bool _requiresTargetSelection;
 
-        [Tooltip("Enemy AI: prefer playing this card before any attack card this turn (e.g. Siren Song, Monkey Grab — utility that's more valuable pre-attack). Also gates whether the enemy AI is allowed to actually execute this card's Action Effect at all — only cards confirmed side-safe for an Enemy caster should be flagged.")]
+        [Tooltip("Enemy AI: prefer playing this card before any attack card this turn (e.g. Siren Song, Monkey Grab - utility that's more valuable pre-attack). Also gates whether the enemy AI is allowed to actually execute this card's Action Effect at all - only cards confirmed side-safe for an Enemy caster should be flagged.")]
         [SerializeField] private bool _aiPlayBeforeAttack;
 
         [Header("Ship Status")]
-        [Tooltip("The persistent per-ship status this card's play produces (if any) — drives the world-space indicator sprite and the Active Effects Bar badge. Leave None for cards with no lingering status.")]
+        [Tooltip("The persistent per-ship status this card's play produces (if any) - drives the world-space indicator sprite and the Active Effects Bar badge. Leave None for cards with no lingering status.")]
         [SerializeField] private ShipStatusType _statusType = ShipStatusType.None;
 
         [Header("Visuals")]
@@ -78,7 +78,7 @@ namespace ThroneOfTides.Data
         [SerializeField] private Sprite _art;
 
         [Header("Play Presentation")]
-        [Tooltip("What spawns when this card is played — sprite-only effects or paired UI-sprite + world-particle effects, per caster side. See CardPresentationPlayer.")]
+        [Tooltip("What spawns when this card is played - sprite-only effects or paired UI-sprite + world-particle effects, per caster side. See CardPresentationPlayer.")]
         [SerializeField] private List<CardPresentationEntry> _presentationEntries = new List<CardPresentationEntry>();
 
         public CardId Id => _id;

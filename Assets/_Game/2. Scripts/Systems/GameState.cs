@@ -17,7 +17,7 @@ namespace ThroneOfTides.Systems
         public Deck PlayerDeck { get; private set; }
         public Deck EnemyDeck  { get; private set; }
 
-        // Per-side HP/Mana/Combo state — GameState forwards its Player*/Enemy* API to these
+        // Per-side HP/Mana/Combo state - GameState forwards its Player*/Enemy* API to these
         // instead of duplicating the underlying math (see ShipState.cs).
         public ShipState Player { get; private set; }
         public ShipState Enemy  { get; private set; }
@@ -38,12 +38,19 @@ namespace ThroneOfTides.Systems
         public int EnemyMaxMana  => Enemy.MaxMana;
 
         // Extra mana cost tacked onto the very next card the player plays (e.g. Dead Man's Turn's
-        // cost) — applied once, then cleared, regardless of what that next card turns out to be.
+        // cost) - applied once, then cleared, regardless of what that next card turns out to be.
         public int PlayerNextCardManaSurcharge { get; private set; }
         public void AddPlayerNextCardManaSurcharge(int amount) => PlayerNextCardManaSurcharge += amount;
         public void ClearPlayerNextCardManaSurcharge() => PlayerNextCardManaSurcharge = 0;
 
-        // ── Combo (per side — gunpowder priming/resolving works independently on each ship) ──
+        // Mirror of PlayerNextCardManaSurcharge for when the enemy is the one spending its own
+        // Dead Man's Turn charge - the same "-1 HP, next card +1 mana" cost must apply to
+        // whichever side actually used the reaction, not just the player.
+        public int EnemyNextCardManaSurcharge { get; private set; }
+        public void AddEnemyNextCardManaSurcharge(int amount) => EnemyNextCardManaSurcharge += amount;
+        public void ClearEnemyNextCardManaSurcharge() => EnemyNextCardManaSurcharge = 0;
+
+        // ── Combo (per side - gunpowder priming/resolving works independently on each ship) ──
         public int    PlayerComboStackCount => Player.ComboStackCount;
         public CardSO PlayerActiveComboCard => Player.ActiveComboCard;
         public int    EnemyComboStackCount  => Enemy.ComboStackCount;
@@ -79,20 +86,26 @@ namespace ThroneOfTides.Systems
 
         public int MaxHandSize { get; private set; }
 
+        // Absolute ceiling a hand can still be pushed past MaxHandSize by a card's own
+        // guaranteed bonus draw/gain (Treasure Chest, Monkey Grab) - see GameConfigSO.BonusMaxHandSize.
+        public int BonusMaxHandSize { get; private set; }
+
         public GameState(int startingHP, int startingMaxMana, int maxHandSize,
                          Deck playerDeck, Deck enemyDeck,
                          List<CardSO> originalDeckSnapshot,
-                         int? enemyStartingHP = null, int? enemyStartingMaxMana = null)
+                         int? enemyStartingHP = null, int? enemyStartingMaxMana = null,
+                         int? bonusMaxHandSize = null)
         {
-            // Both sides start with a full mana pool — previously only the player's mana was
+            // Both sides start with a full mana pool - previously only the player's mana was
             // implicitly filled (as a side effect of PlayerTurnState.Enter() firing on the very
             // first state-machine transition); the enemy had no equivalent until its first turn.
             // enemyStartingHP/enemyStartingMaxMana let a Captain be tougher (or weaker) than the
-            // player's own base stats — null falls back to the shared starting values.
+            // player's own base stats - null falls back to the shared starting values.
             Player = new ShipState(startingHP, startingMaxMana);
             Enemy  = new ShipState(enemyStartingHP ?? startingHP, enemyStartingMaxMana ?? startingMaxMana);
 
-            MaxHandSize = maxHandSize;
+            MaxHandSize      = maxHandSize;
+            BonusMaxHandSize = Mathf.Max(maxHandSize, bonusMaxHandSize ?? maxHandSize);
             PlayerDeck  = playerDeck;
             EnemyDeck   = enemyDeck;
             PlayerHand  = new Hand();
@@ -166,13 +179,20 @@ namespace ThroneOfTides.Systems
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
+        // Mirror of RefundPlayerMana for when the enemy is the one whose Counter Gale fires.
+        public void RefundEnemyMana(int amount)
+        {
+            Enemy.RefundMana(amount);
+            GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
+        }
+
         public void AddEnemyMaxMana(int amount)
         {
             Enemy.AddMaxMana(amount);
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
         }
 
-        // Enemy mana floor is 1 — cannot be fully drained by Stolen Wind/Essence Plunder
+        // Enemy mana floor is 1 - cannot be fully drained by Stolen Wind/Essence Plunder
         public void StealEnemyMana(int amount)
         {
             int actual = Enemy.TransferManaTo(Player, amount);
@@ -181,7 +201,7 @@ namespace ThroneOfTides.Systems
             GameEventBus.FirePlayerManaChanged(PlayerMana, PlayerMaxMana);
         }
 
-        // Mirror of StealEnemyMana for when the Enemy is the one casting the steal — Player
+        // Mirror of StealEnemyMana for when the Enemy is the one casting the steal - Player
         // mana floor is 1, same rule reversed.
         public void StealPlayerMana(int amount)
         {
@@ -239,7 +259,7 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireShipStatusCountChanged(ShipStatusType.SirenSong, caster, 0);
         }
 
-        // High Spirits is a permanent buff — its icon count only ever grows (capped at 3
+        // High Spirits is a permanent buff - its icon count only ever grows (capped at 3
         // copies per deck) and is never cleared for the rest of the match.
         public void RegisterHighSpiritsPlayed()
         {
@@ -282,7 +302,7 @@ namespace ThroneOfTides.Systems
 
         public bool CanPlayCard(CardSO card)
         {
-            // Draw is only mandatory while the deck can still supply one — once it's empty,
+            // Draw is only mandatory while the deck can still supply one - once it's empty,
             // waiting for a draw that can never happen would softlock the player's turn.
             if (!HasDrawnThisTurn && PlayerDeck.Count > 0) return false;
             if (card.CardType == CardType.Reaction)        return false;
@@ -398,7 +418,7 @@ namespace ThroneOfTides.Systems
         public void NotifyCardDrawn(CardSO card)         => GameEventBus.FireCardDrawn(card);
         public void NotifyPlayerCardRemoved(CardSO card) => GameEventBus.FirePlayerCardRemoved(card);
 
-        // ── Cheats (playtest only — see UI/CheatsPanel.cs) ────────────────────
+        // ── Cheats (playtest only - see UI/CheatsPanel.cs) ────────────────────
 
         public void CheatAddPlayerHP(int amount)
         {
@@ -424,7 +444,7 @@ namespace ThroneOfTides.Systems
             GameEventBus.FireEnemyManaChanged(EnemyMana, EnemyMaxMana);
         }
 
-        // Raises (or lowers) the ceiling itself — current value is only pulled down if it would
+        // Raises (or lowers) the ceiling itself - current value is only pulled down if it would
         // otherwise exceed the new max. Follow with the matching Add cheat to fill it back up.
         public void CheatSetPlayerMaxHP(int amount)
         {

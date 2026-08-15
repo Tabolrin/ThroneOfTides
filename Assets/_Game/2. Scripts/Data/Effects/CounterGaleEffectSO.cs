@@ -10,7 +10,7 @@ namespace ThroneOfTides.Data
         protected override void Execute(IReactionChargeEffects context)
         {
             context.AddCounterGaleCharge();
-            GameDebug.Log("Counter Gale — reaction charge added");
+            GameDebug.Log("Counter Gale - reaction charge added");
         }
     }
 }

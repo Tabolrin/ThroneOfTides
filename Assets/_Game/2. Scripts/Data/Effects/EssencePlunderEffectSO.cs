@@ -12,9 +12,9 @@ namespace ThroneOfTides.Data
         protected override void Execute(IManaEffects context)
         {
             // HP cost is paid by CombatResolver before Execute is called,
-            // using CardSO.HPCost — no HP deduction here
+            // using CardSO.HPCost - no HP deduction here
             context.StealEnemyMana(_manaToSteal);
-            GameDebug.Log($"Essence Plunder — stole {_manaToSteal} mana from enemy");
+            GameDebug.Log($"Essence Plunder - stole {_manaToSteal} mana from enemy");
         }
     }
 }

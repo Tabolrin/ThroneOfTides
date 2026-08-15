@@ -1,11 +1,11 @@
 // Assets/_Game/2. Scripts/Systems/VFX/TidalWaveVFXController.cs
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
 using ThroneOfTides.Data;
+using ThroneOfTides.Systems.VFX;
 
 namespace ThroneOfTides.Systems
 {
@@ -15,21 +15,21 @@ namespace ThroneOfTides.Systems
     /// arrival (a Screen Space Overlay canvas element always draws over world-space ship
     /// sprites, so no manual sort-order work is needed for that). Contact triggers a camera
     /// shake and SFX; the target's Gunpowder sprite is held at its pre-hit look for the whole
-    /// approach and only released — snapping to normal if it was cleared — right before the
+    /// approach and only released - snapping to normal if it was cleared - right before the
     /// fade-out starts, then the wave fades and destroys itself.
     /// Start/End Point below override wherever CardPresentationPlayer originally spawned this
-    /// (per the CardSO's own PresentationEntry) — defaults match the original design (both ends
+    /// (per the CardSO's own PresentationEntry) - defaults match the original design (both ends
     /// on the explicitly chosen target ship: SeaSurface to its left, then its ShipHit).
     /// </summary>
     public class TidalWaveVFXController : MonoBehaviour, ICardPlayEffect
     {
-        [Header("Travel — Start Point")]
+        [Header("Travel - Start Point")]
         [SerializeField] private CardPresentationSide _startSide = CardPresentationSide.ExplicitTarget;
         [SerializeField] private VfxAnchorType _startAnchorType = VfxAnchorType.SeaSurfaceLeft;
         [Tooltip("Extra manual nudge applied after resolving the start anchor, in canvas pixels.")]
         [SerializeField] private Vector2 _startOffset;
 
-        [Header("Travel — End Point")]
+        [Header("Travel - End Point")]
         [SerializeField] private CardPresentationSide _endSide = CardPresentationSide.ExplicitTarget;
         [SerializeField] private VfxAnchorType _endAnchorType = VfxAnchorType.ShipHit;
         [Tooltip("Extra manual nudge applied after resolving the end anchor, in canvas pixels.")]
@@ -38,6 +38,8 @@ namespace ThroneOfTides.Systems
         [Header("Wave")]
         [Tooltip("The Image (Filled type, Fill Origin = Bottom) that fills and slides toward the target.")]
         [SerializeField] private Image _waveImage;
+        [Tooltip("Uniform vertical nudge (canvas pixels) applied to the wave graphic for its whole travel - both Start and End Point - separate from the per-endpoint Start/End Offset above, for quick whole-effect height tuning without having to keep both offsets in sync.")]
+        [SerializeField] private float _verticalOffset = 0f;
         [Tooltip("How long the fill animation takes, independent of how long the move takes.")]
         [SerializeField] private float _fillDuration = 0.45f;
         [SerializeField] private Ease  _fillEase = Ease.InQuad;
@@ -46,9 +48,7 @@ namespace ThroneOfTides.Systems
         [SerializeField] private Ease  _moveEase = Ease.InQuad;
 
         [Header("Contact")]
-        [SerializeField] private float _shakeDuration  = 0.25f;
-        [SerializeField] private float _shakeAmplitude = 0.4f;
-        [SerializeField] private float _shakeFrequency = 30f;
+        [SerializeField] private ScreenShakeLevel _shakeLevel = ScreenShakeLevel.Level3;
         [SerializeField] private CardSfxCue _contactSfx;
         [Tooltip("How long the wave sits eclipsing the ship after contact before the Gunpowder reveal and fade-out.")]
         [SerializeField] private float _eclipseHoldDuration = 0.2f;
@@ -67,15 +67,20 @@ namespace ThroneOfTides.Systems
         public void Initialize(CardEffectSpawnContext context)
         {
             // Freeze the target's Gunpowder look now, before CombatResolver clears it a moment
-            // later — released at the "right before fade" beat further down. Tied to the card's
+            // later - released at the "right before fade" beat further down. Tied to the card's
             // real explicit target regardless of Start/End Point above (those are purely visual).
             context.BeginExplicitTargetGunpowderHold?.Invoke();
+
+            // Shakes the camera itself at the wave's own impact beat - the generic instant
+            // on-damage shake would otherwise double up with it.
+            context.SuppressNextDamageCameraShake?.Invoke();
 
             // Re-anchors to our own configurable Start Point, overriding wherever
             // CardPresentationPlayer originally placed this based on the CardSO's entry.
             Transform startAnchor = context.GetAnchor?.Invoke(_startSide, _startAnchorType);
             if (_rect != null && startAnchor != null && context.GameCamera != null)
-                _rect.anchoredPosition = WorldToCanvasLocalPoint(startAnchor.position, context.GameCamera, context.GameCanvas) + _startOffset;
+                _rect.anchoredPosition = WorldToCanvasLocalPoint(startAnchor.position, context.GameCamera, context.GameCanvas)
+                    + _startOffset + Vector2.up * _verticalOffset;
 
             _sequence = DOTween.Sequence();
 
@@ -92,7 +97,8 @@ namespace ThroneOfTides.Systems
             Transform endAnchor = context.GetAnchor?.Invoke(_endSide, _endAnchorType);
             if (_rect != null && endAnchor != null && context.GameCamera != null)
             {
-                Vector2 endLocalPos = WorldToCanvasLocalPoint(endAnchor.position, context.GameCamera, context.GameCanvas) + _endOffset;
+                Vector2 endLocalPos = WorldToCanvasLocalPoint(endAnchor.position, context.GameCamera, context.GameCanvas)
+                    + _endOffset + Vector2.up * _verticalOffset;
                 _sequence.Join(_rect.DOAnchorPos(endLocalPos, _moveDuration).SetEase(_moveEase));
             }
 
@@ -110,7 +116,7 @@ namespace ThroneOfTides.Systems
 
         private void OnContact(CardEffectSpawnContext context)
         {
-            MMCameraShakeEvent.Trigger(_shakeDuration, _shakeAmplitude, _shakeFrequency, 0f, 0f, 0f);
+            ScreenShake.Trigger(_shakeLevel);
             CardSfxPlayer.Play(_contactSfx, transform.position);
         }
 
@@ -118,7 +124,7 @@ namespace ThroneOfTides.Systems
         {
             Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(cam, worldPosition);
             // null camera is correct for Screen Space Overlay canvases (see CardPresentationPlayer's
-            // own WorldToCanvasLocalPoint) — passing the real camera here collapses the result to
+            // own WorldToCanvasLocalPoint) - passing the real camera here collapses the result to
             // roughly the canvas corner regardless of the input world position.
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, null, out var localPoint);
             return localPoint;

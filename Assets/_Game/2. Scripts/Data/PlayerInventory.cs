@@ -20,12 +20,22 @@ namespace ThroneOfTides.Data
         [Header("Card Collection")]
         [SerializeField] private List<CardSO> _collection = new List<CardSO>();
 
-        [Tooltip("The collection/deck a Reset (see OptionsPanel's 'Reset Player Data') restores. " +
-                 "_collection and _playerDeck's own Cards list are both mutated at runtime and " +
-                 "persisted over the top of themselves — without a separate untouched baseline, " +
-                 "there'd be nothing left to reset back to.")]
+        [Tooltip("The collection a Reset (see OptionsPanel's 'Reset Player Data') restores. " +
+                 "_collection is mutated at runtime and persisted over the top of itself - " +
+                 "without a separate untouched baseline, there'd be nothing left to reset back to.")]
         [SerializeField] private List<CardSO> _startingCollection = new List<CardSO>();
-        [SerializeField] private List<DeckDefinitionSO.CardEntry> _startingDeckCards = new List<DeckDefinitionSO.CardEntry>();
+
+        [Tooltip("A dedicated DeckDefinitionSO asset used ONLY as the Reset template - never " +
+                 "assigned as _playerDeck, an enemy deck, or a build-profile override, and never " +
+                 "written to by any code path. Deliberately a separate asset (not an embedded " +
+                 "list here) rather than a copy of _playerDeck's own composition: PortDeckEditor " +
+                 "mutates _playerDeck's Cards list directly and in-memory, and Unity does not " +
+                 "revert ScriptableObject asset edits made in Play Mode the way it does scene " +
+                 "objects - editing the deck while testing in the Editor can permanently corrupt " +
+                 "whatever asset _playerDeck points at. Keeping the template on a wholly separate " +
+                 "asset that nothing ever edits means Reset can always restore the real balanced " +
+                 "starting deck, even after that corruption.")]
+        [SerializeField] private DeckDefinitionSO _starterDeckTemplate;
 
         [Header("Active Deck")]
         [SerializeField] private DeckDefinitionSO _playerDeck;
@@ -47,7 +57,7 @@ namespace ThroneOfTides.Data
 
         // ── Properties ────────────────────────────────────────────────────────
 
-        // Fired whenever Coins actually changes — lets a live HUD (e.g. the Match scene's coin
+        // Fired whenever Coins actually changes - lets a live HUD (e.g. the Match scene's coin
         // counter) reflect Treasure Chest/Kraken/upgrade-purchase changes without polling.
         public event Action<int> OnCoinsChanged;
 
@@ -61,7 +71,7 @@ namespace ThroneOfTides.Data
 
         // ── Collection ────────────────────────────────────────────────────────
 
-        // Ownership is per card TYPE, not per copy — the Port deck editor lets a player add as
+        // Ownership is per card TYPE, not per copy - the Port deck editor lets a player add as
         // many copies of an owned card as they want (bounded by storage and MaxCopiesInDeck),
         // it's not limited by how many times they happen to own that card. Adding an
         // already-owned reward card again (e.g. a duplicate future reward) is a no-op rather
@@ -147,18 +157,18 @@ namespace ThroneOfTides.Data
 
         // ── Reset ─────────────────────────────────────────────────────────────
 
-        // Playtest-only "clean slate" — see OptionsPanel's Reset Player Data button. Restores
-        // the collection and deck to their designer-authored starting state (not empty — an
+        // Playtest-only "clean slate" - see OptionsPanel's Reset Player Data button. Restores
+        // the collection and deck to their designer-authored starting state (not empty - an
         // empty deck/collection would softlock deck-building) and wipes everything earned since.
         public void Reset()
         {
             _collection.Clear();
             _collection.AddRange(_startingCollection);
 
-            if (_playerDeck != null)
+            if (_playerDeck != null && _starterDeckTemplate != null)
             {
                 _playerDeck.Cards.Clear();
-                _playerDeck.Cards.AddRange(_startingDeckCards);
+                _playerDeck.Cards.AddRange(_starterDeckTemplate.Cards);
             }
 
             _powerUps.Clear();
@@ -188,7 +198,7 @@ namespace ThroneOfTides.Data
                 if (card != null && card.Id != CardId.None)
                     data.CollectionCardIds.Add(card.Id);
 
-            // The deck editor (PortDeckEditor) mutates _playerDeck.Cards directly at runtime —
+            // The deck editor (PortDeckEditor) mutates _playerDeck.Cards directly at runtime -
             // that in-memory ScriptableObject edit only survives an actual build if it's also
             // captured here. Without this, deck changes appeared to save (AssetDatabase.Save is
             // Editor-only) but silently reverted to the shipped default on every relaunch.

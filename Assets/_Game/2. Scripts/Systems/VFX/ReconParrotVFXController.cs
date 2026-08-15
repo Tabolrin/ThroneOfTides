@@ -12,11 +12,11 @@ namespace ThroneOfTides.Systems
     /// whole time, driven by its own Animator) launches from the activating player's ship and
     /// flies to the targeted ship's sky anchor, then the reveal panel shows the enemy's hand.
     /// Only once the player dismisses that panel does the parrot flip around, fly back to the
-    /// activating player's ship, then fade out and destroy itself — sequenced this way (rather
+    /// activating player's ship, then fade out and destroy itself - sequenced this way (rather
     /// than firing the reveal panel immediately, as ReconParrotEffectSO's own
     /// GameEventBus.FireEnemyHandRevealed would otherwise do on its own) so the panel doesn't pop
     /// up over the parrot before it has even finished flying in.
-    /// A pure world-space effect (no canvas conversion needed) — spawns already positioned by
+    /// A pure world-space effect (no canvas conversion needed) - spawns already positioned by
     /// CardPresentationPlayer at the caster's ShipDeck anchor via AnchorSide = Caster.
     /// </summary>
     public class ReconParrotVFXController : MonoBehaviour, ICardPlayEffect
@@ -47,7 +47,7 @@ namespace ThroneOfTides.Systems
             _spawnPosition = transform.position;
 
             // ReconParrotEffectSO fires this synchronously as part of the same card-resolution
-            // call that spawned this VFX — subscribing before the outbound flight even starts
+            // call that spawned this VFX - subscribing before the outbound flight even starts
             // guarantees it's already been raised by the time we'd otherwise miss it.
             GameEventBus.OnEnemyHandRevealed += CacheRevealedHand;
 
@@ -69,11 +69,12 @@ namespace ThroneOfTides.Systems
         private void ShowRevealPanel()
         {
             GameEventBus.OnEnemyHandRevealed -= CacheRevealedHand;
+            _context.PlaySfx?.Invoke(transform.position);
 
             if (_context.ShowEnemyHandReveal != null && _revealedCards != null)
                 _context.ShowEnemyHandReveal(_revealedCards, PlayReturn);
             else
-                PlayReturn(); // no panel wired / nothing revealed — just fly home
+                PlayReturn(); // no panel wired / nothing revealed - just fly home
         }
 
         private void PlayReturn()

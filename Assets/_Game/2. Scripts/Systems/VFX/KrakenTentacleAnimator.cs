@@ -51,13 +51,13 @@ namespace ThroneOfTides.Systems.VFX
 
             _sequence = DOTween.Sequence();
 
-            // Phase 1 — wind up
+            // Phase 1 - wind up
             _sequence.Append(
                 DOTween.To(() => _trackedZ, ApplyZ, windUpTarget, _windUpDuration)
                     .SetEase(_windUpEase)
             );
 
-            // Phase 2 — strike, fires callback on completion, then holds forever
+            // Phase 2 - strike, fires callback on completion, then holds forever
             _sequence.Append(
                 DOTween.To(() => _trackedZ, ApplyZ, strikeTarget, _strikeDuration)
                     .SetEase(_strikeEase)

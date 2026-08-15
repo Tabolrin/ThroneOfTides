@@ -47,7 +47,7 @@ namespace ThroneOfTides.Tools
             var cardRect  = new Rect(afterPreview, position.y, cardFieldWidth, position.height);
             EditorGUI.PropertyField(cardRect, cardProp, GUIContent.none);
 
-            // Count field — clamped to 1 min so designers can't accidentally set 0
+            // Count field - clamped to 1 min so designers can't accidentally set 0
             var countRect = new Rect(countX, position.y, CountWidth, position.height);
             countProp.intValue = Mathf.Max(1,
                 EditorGUI.IntField(countRect, countProp.intValue));

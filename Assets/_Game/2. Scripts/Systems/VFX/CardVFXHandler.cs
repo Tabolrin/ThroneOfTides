@@ -26,52 +26,52 @@ namespace ThroneOfTides.Systems
         [Tooltip("Always used for Locker's Return's tentacle, regardless of which side actually played the card.")]
         [SerializeField] private Transform _playerSeaSurfaceRightPoint;
 
-        [Header("VFX Prefabs — Weapon")]
+        [Header("VFX Prefabs - Weapon")]
         [SerializeField] private GameObject _hitImpactStandardPrefab;
         [SerializeField] private GameObject _hitImpactExplosionPrefab;
         [SerializeField] private GameObject _whirlpoolPrefab;
 
-        [Header("VFX Prefabs — Action")]
+        [Header("VFX Prefabs - Action")]
         [SerializeField] private GameObject _reconParrotPrefab;
         [SerializeField] private GameObject _highSpiritsPrefab;
         [SerializeField] private GameObject _lockerReturnPrefab;
         [SerializeField] private GameObject _monkeyGrabPrefab;
         [SerializeField] private GameObject _rumPrefab;
 
-        [Header("VFX Prefabs — Reaction")]
+        [Header("VFX Prefabs - Reaction")]
         [SerializeField] private GameObject _deadMansTurnPrefab;
         [SerializeField] private GameObject _counterGaleTornadoPrefab;
         [SerializeField] private GameObject _bloodForBloodPrefab;
 
-        [Header("FEEL — Hit")]
+        [Header("FEEL - Hit")]
         [SerializeField] private MMF_Player _feedbackLightHit;
         [SerializeField] private MMF_Player _feedbackMediumHit;
         [SerializeField] private MMF_Player _feedbackHeavyHit;
 
-        [Header("FEEL — Combat")]
+        [Header("FEEL - Combat")]
         [SerializeField] private MMF_Player _feedbackComboResolve;
         [SerializeField] private MMF_Player _feedbackDOTTick;
         [SerializeField] private MMF_Player _feedbackHeal;
         [SerializeField] private MMF_Player _feedbackLightningFlash;
 
-        [Header("FEEL — Card")]
+        [Header("FEEL - Card")]
         [SerializeField] private MMF_Player _feedbackCardDraw;
         [SerializeField] private MMF_Player _feedbackCardPlay;
         [SerializeField] private MMF_Player _feedbackEndTurnPulse;
         [SerializeField] private MMF_Player _feedbackComboStackIncrement;
         [SerializeField] private MMF_Player _feedbackPlayZoneGlow;
 
-        [Header("FEEL — Mana & Reactions")]
+        [Header("FEEL - Mana & Reactions")]
         [SerializeField] private MMF_Player _feedbackManaSpent;
         [SerializeField] private MMF_Player _feedbackManaGained;
         [SerializeField] private MMF_Player _feedbackReactionCharged;
         [SerializeField] private MMF_Player _feedbackReactionFired;
 
-        [Header("FEEL — Match")]
+        [Header("FEEL - Match")]
         [SerializeField] private MMF_Player _feedbackWin;
         [SerializeField] private MMF_Player _feedbackLoss;
 
-        [Header("FEEL — Damage Numbers")]
+        [Header("FEEL - Damage Numbers")]
         [SerializeField] private MMF_Player _feedbackDamageNumber;
 
         [Header("Floating Combat Text")]
@@ -85,7 +85,7 @@ namespace ThroneOfTides.Systems
         [SerializeField] private float _winSlowDuration  = 0.8f;
         [SerializeField] private float _lossSlowDuration = 0.5f;
 
-        // Default when nothing overrides it (e.g. via SetFloatingNumberDelay) — GameBootstrapper
+        // Default when nothing overrides it (e.g. via SetFloatingNumberDelay) - GameBootstrapper
         // owns the authoritative configured value so it's tunable in one place per scene.
         [SerializeField] private float _floatingNumberDelay = 0.15f;
 
@@ -95,17 +95,17 @@ namespace ThroneOfTides.Systems
         private int _previousEnemyMana  = -1;
 
         // Several damage/heal/mana events can fire within the same frame (e.g. a combo hitting
-        // multiple times, or a DOT tick landing alongside a card play) — queued and drained with
+        // multiple times, or a DOT tick landing alongside a card play) - queued and drained with
         // a delay between each so overlapping numbers don't stack unreadably on top of each other.
         private readonly Queue<(string text, Color color, Vector3 position)> _floatingNumberQueue = new();
         private Coroutine _floatingNumberQueueRoutine;
 
-        /// <summary>Overrides the inspector default — see GameBootstrapper's configurable delay.</summary>
+        /// <summary>Overrides the inspector default - see GameBootstrapper's configurable delay.</summary>
         public void SetFloatingNumberDelay(float delay) => _floatingNumberDelay = Mathf.Max(0f, delay);
 
         // Set by a self-driving ICardPlayEffect (e.g. Essence Plunder) that wants to show its own
         // "+N" popup timed to its own animation instead of the generic one OnPlayerManaChanged/
-        // OnEnemyManaChanged would otherwise fire the instant the mana actually changes — which
+        // OnEnemyManaChanged would otherwise fire the instant the mana actually changes - which
         // happens synchronously as part of the same card resolution, before that animation even
         // starts. Consumed (reset) the next time either handler runs, so it never leaks into an
         // unrelated later mana change.
@@ -113,7 +113,18 @@ namespace ThroneOfTides.Systems
 
         public void SuppressNextManaGainPopup() => _suppressNextManaGainPopup = true;
 
-        /// <summary>Public entry point for a self-driving effect's own deferred "+N" mana popup — routed through the same queue as every other floating number.</summary>
+        // Set by a self-driving ICardPlayEffect (e.g. Torch, Cannonball, Kraken, Lightning, Tidal
+        // Wave, Whale Ram) that triggers its own ScreenShake.Trigger() precisely timed to its own
+        // deferred visual impact - without this, the generic hit feedback below (which fires the
+        // instant OnDamageDealt fires, i.e. the moment the card resolves, well before any of
+        // those effects have actually traveled anywhere) would ALSO shake the camera, so the
+        // player feels two shakes for one hit. Consumed (reset) the next time OnDamageDealt runs,
+        // so it never leaks into an unrelated later hit.
+        private bool _suppressNextDamageCameraShake;
+
+        public void SuppressNextDamageCameraShake() => _suppressNextDamageCameraShake = true;
+
+        /// <summary>Public entry point for a self-driving effect's own deferred "+N" mana popup - routed through the same queue as every other floating number.</summary>
         public void SpawnFloatingManaGain(int amount, Vector3 position) =>
             SpawnFloatingNumber($"+{amount}", ManaColor, position);
 
@@ -165,9 +176,30 @@ namespace ThroneOfTides.Systems
             _feedbackDamageNumber?.PlayFeedbacks(hit.position, amount);
             SpawnFloatingNumber($"-{amount}", DamageColor, hit.position);
 
-            if      (amount >= 8) { SpawnVFX(_hitImpactExplosionPrefab, hit.position); _feedbackHeavyHit?.PlayFeedbacks(); }
-            else if (amount >= 4) { SpawnVFX(_hitImpactStandardPrefab,  hit.position); _feedbackMediumHit?.PlayFeedbacks(); }
-            else if (amount > 0)  { SpawnVFX(_hitImpactStandardPrefab,  hit.position); _feedbackLightHit?.PlayFeedbacks(); }
+            // Consumed unconditionally here (not inside PlayHitFeedback) so a 0-damage event
+            // (e.g. a negated Kraken standoff) can't leave this flag set and wrongly suppress an
+            // unrelated later hit's shake.
+            bool suppressShake = _suppressNextDamageCameraShake;
+            _suppressNextDamageCameraShake = false;
+
+            if      (amount >= 8) { SpawnVFX(_hitImpactExplosionPrefab, hit.position); PlayHitFeedback(_feedbackHeavyHit, suppressShake); }
+            else if (amount >= 4) { SpawnVFX(_hitImpactStandardPrefab,  hit.position); PlayHitFeedback(_feedbackMediumHit, suppressShake); }
+            else if (amount > 0)  { SpawnVFX(_hitImpactStandardPrefab,  hit.position); PlayHitFeedback(_feedbackLightHit, suppressShake); }
+        }
+
+        // Plays a hit feedback bundle, temporarily disabling its Camera Shake step if a
+        // self-driving effect has claimed ownership of this hit's shake timing - see
+        // SuppressNextDamageCameraShake.
+        private void PlayHitFeedback(MMF_Player feedback, bool suppressShake)
+        {
+            if (feedback == null) return;
+
+            MMF_CameraShake shake = suppressShake ? feedback.GetFeedbackOfType<MMF_CameraShake>() : null;
+            if (shake != null) shake.Active = false;
+
+            feedback.PlayFeedbacks();
+
+            if (shake != null) shake.Active = true;
         }
 
         private void OnHealApplied(DamageTarget target, int amount)
@@ -239,10 +271,17 @@ namespace ThroneOfTides.Systems
 
             switch (type)
             {
-                // Anchor appears on whichever ship actually activated it.
+                // Anchor appears on whichever ship actually activated it - parented under that
+                // ship (not just positioned at its hit point) so it's genuinely part of the
+                // ship's hierarchy and rides along when DeadMansTurnVFXController recoils it.
                 case ReactionType.DeadMansTurn:
                     if (_deadMansTurnPrefab != null)
-                        Instantiate(_deadMansTurnPrefab, GetHitPoint(side).position, Quaternion.identity);
+                    {
+                        Transform hitPoint = GetHitPoint(side);
+                        Transform shipRoot = hitPoint.GetComponentInParent<ShipVfxAnchors>()?.transform ?? hitPoint;
+                        var instance = Instantiate(_deadMansTurnPrefab, hitPoint.position, Quaternion.identity, shipRoot);
+                        instance.GetComponent<DeadMansTurnVFXController>()?.Setup(shipRoot);
+                    }
                     break;
 
                 // Always the player's sky anchor, regardless of which side fired it.
@@ -269,13 +308,13 @@ namespace ThroneOfTides.Systems
             switch (card.Id)
             {
                 // Pistol/Cannonball/Chain Shot and Whale Ram are migrated to
-                // CardPresentationPlayer (PresentationEntries + ICardPlayEffect) — no case
+                // CardPresentationPlayer (PresentationEntries + ICardPlayEffect) - no case
                 // needed here for their spawn logic.
 
                 case CardId.Whirlpool: SpawnVFX(_whirlpoolPrefab, target.position); break;
 
                 // Hail Storm/Lightning/Gunpowder Barrel/Torch/Kraken/Siren Song/Tidal Wave are
-                // migrated to CardPresentationPlayer (PresentationEntries + ICardPlayEffect) —
+                // migrated to CardPresentationPlayer (PresentationEntries + ICardPlayEffect) -
                 // no case needed here for their spawn logic.
                 case CardId.Lightning:
                     _feedbackLightningFlash?.PlayFeedbacks();
@@ -298,10 +337,10 @@ namespace ThroneOfTides.Systems
                 case CardId.MonkeyGrab:     SpawnVFX(_monkeyGrabPrefab,    target.position); break;
 
                 // Treasure Chest is migrated to CardPresentationPlayer (PresentationEntries +
-                // ICardPlayEffect) — no case needed here for its spawn logic.
+                // ICardPlayEffect) - no case needed here for its spawn logic.
 
                 case CardId.HighSpirits:
-                    // Appears "between the ships" — always the player's sky anchor, matching
+                    // Appears "between the ships" - always the player's sky anchor, matching
                     // Counter Gale's placement. Self-manages its own animation length and
                     // destroys itself, so it's not routed through SpawnVFX's fixed _vfxLifetime
                     // timer. Mana-gain feedback already fires generically via
@@ -310,11 +349,11 @@ namespace ThroneOfTides.Systems
                         Instantiate(_highSpiritsPrefab, _playerSkyPoint.position, Quaternion.identity);
                     break;
 
-                // Rum is SFX-only, migrated to CardPresentationPlayer's SFX-only entry support —
+                // Rum is SFX-only, migrated to CardPresentationPlayer's SFX-only entry support -
                 // no case needed here (and its heal feedback already fires generically via
                 // OnHealApplied).
 
-                // Reactions are charged on draw — OnReactionCharged/Fired handle their VFX
+                // Reactions are charged on draw - OnReactionCharged/Fired handle their VFX
                 case CardId.DeadMansTurn:
                 case CardId.CounterGale:
                     break;
@@ -360,7 +399,7 @@ namespace ThroneOfTides.Systems
 
         private IEnumerator ProcessFloatingNumberQueue()
         {
-            // StartCoroutine runs synchronously up to the first yield — without this, several
+            // StartCoroutine runs synchronously up to the first yield - without this, several
             // SpawnFloatingNumber calls in the same frame (e.g. a multi-hit combo) would each
             // see a freshly-empty queue and drain their own single item immediately instead of
             // ever accumulating together, defeating the whole point of the delay. Yielding once

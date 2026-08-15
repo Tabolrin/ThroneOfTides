@@ -20,7 +20,7 @@ namespace ThroneOfTides.Systems
 
         /// <summary>
         /// Decides whether the enemy uses a charged reaction to defend against an incoming
-        /// attack, and which one. Thin wrapper — the actual weighted decision lives on the
+        /// attack, and which one. Thin wrapper - the actual weighted decision lives on the
         /// Captain, same as every other card-choice weight.
         /// </summary>
         public ReactionType? ChooseReaction(bool hasDeadMansTurn, bool hasCounterGale) =>
@@ -28,22 +28,22 @@ namespace ThroneOfTides.Systems
 
         /// <summary>
         /// Picks the next card the enemy should play this turn, or null if nothing in hand is
-        /// currently playable (caller should end the turn). Called once per card played — the
+        /// currently playable (caller should end the turn). Called once per card played - the
         /// caller re-invokes this after each play since hand/mana/HP change each time.
         /// </summary>
         /// <param name="comboPrimed">
         /// True once the enemy has already primed its own combo (e.g. Gunpowder Barrel) this
-        /// match and has an unspent stack — a follow-up finisher (Torch) is always the correct
+        /// match and has an unspent stack - a follow-up finisher (Torch) is always the correct
         /// play once available, so it's forced through rather than left to weighted RNG, which
         /// could otherwise waste the turn (or the whole match) on something else while the
         /// primed stack just sits there.
         /// </param>
-        /// <param name="playerHasDeadMansTurn">Player has a Dead Man's Turn charge — the next
+        /// <param name="playerHasDeadMansTurn">Player has a Dead Man's Turn charge - the next
         /// non-unblockable attack would be fully negated for free.</param>
-        /// <param name="playerHasCounterGale">Player has a Counter Gale charge — the next
+        /// <param name="playerHasCounterGale">Player has a Counter Gale charge - the next
         /// non-unblockable attack gets half its damage reflected back.</param>
         /// <param name="selfUnblockable">This side's next attack is already guaranteed to land
-        /// (Siren Song already resolved this turn) — reaction-threat weighting is skipped since
+        /// (Siren Song already resolved this turn) - reaction-threat weighting is skipped since
         /// there's nothing left to play around.</param>
         public CardSO PickCard(IReadOnlyList<CardSO> hand, int enemyMana, int enemyHP,
             bool comboPrimed = false, bool playerHasDeadMansTurn = false,
@@ -55,12 +55,12 @@ namespace ThroneOfTides.Systems
 
             foreach (var card in hand)
             {
-                // Reaction cards are never played from hand by the enemy —
+                // Reaction cards are never played from hand by the enemy -
                 // enemy AI doesn't hold reaction cards in normal gameplay
                 if (card.CardType == CardType.Reaction) continue;
 
                 // Cards requiring a player-chosen target (e.g. Tidal Wave) have no AI-facing
-                // targeting UI — excluded until the AI gets its own targeting heuristic.
+                // targeting UI - excluded until the AI gets its own targeting heuristic.
                 if (card.RequiresTargetSelection) continue;
 
                 // Cannot play cards that cost more mana than currently available
@@ -77,7 +77,7 @@ namespace ThroneOfTides.Systems
 
             if (candidates.Count == 0) return null;
 
-            // A primed combo is always worth cashing in the instant it's available — no
+            // A primed combo is always worth cashing in the instant it's available - no
             // personality reads this differently, so it bypasses weighting entirely.
             if (comboPrimed)
             {
@@ -88,7 +88,7 @@ namespace ThroneOfTides.Systems
             ApplyReactionAwareness(candidates, playerHasDeadMansTurn, playerHasCounterGale, selfUnblockable);
 
             // Prefer cards that are more valuable played before an attack (Siren Song, Monkey
-            // Grab, etc.) — if any are still playable, restrict the pick to that group; only
+            // Grab, etc.) - if any are still playable, restrict the pick to that group; only
             // fall back to the full candidate pool (including attacks) once none remain. Still
             // uses weighted-random selection within whichever pool is active, so the captain's
             // weight table still governs which specific card gets picked.

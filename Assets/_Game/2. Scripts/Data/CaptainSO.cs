@@ -96,7 +96,7 @@ namespace ThroneOfTides.Data
         }
 
         // Weighted by the effect's declared Role (see EffectRole/ActionEffectSO) rather than by
-        // CardId — a new Action card just needs its effect SO to declare a Role, no edit here.
+        // CardId - a new Action card just needs its effect SO to declare a Role, no edit here.
         private float GetActionWeight(CardSO card)
         {
             EffectRole role = card.ActionEffect != null ? card.ActionEffect.Role : EffectRole.None;

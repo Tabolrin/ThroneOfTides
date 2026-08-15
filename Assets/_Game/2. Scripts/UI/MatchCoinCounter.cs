@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ThroneOfTides.UI
 {
-    // Live coin counter shown during a match — lets the player see coins gained/spent mid-fight
+    // Live coin counter shown during a match - lets the player see coins gained/spent mid-fight
     // (Treasure Chest's reward, The Kraken's materials cost) rather than only finding out at the
     // Port. Purely a readout; never mutates PlayerInventory itself.
     public class MatchCoinCounter : MonoBehaviour

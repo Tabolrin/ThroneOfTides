@@ -6,7 +6,7 @@ namespace ThroneOfTides.Systems
 {
     // Per-ship HP/Mana/Combo state. GameState holds one instance for Player and one for Enemy
     // (via GetSide(DamageTarget)) instead of duplicating this math across mirrored
-    // Player*/Enemy* methods. Pure state + clamping — event firing and card-specific damage
+    // Player*/Enemy* methods. Pure state + clamping - event firing and card-specific damage
     // formulas stay in GameState, which already owns that policy.
     public class ShipState
     {
@@ -62,11 +62,11 @@ namespace ThroneOfTides.Systems
 
         public void CheatAddMana(int amount) => Mana = Mathf.Clamp(Mana + amount, 0, MaxMana);
 
-        // Refunds current mana (e.g. Counter Gale) without touching MaxMana — unlike AddMaxMana,
+        // Refunds current mana (e.g. Counter Gale) without touching MaxMana - unlike AddMaxMana,
         // this doesn't permanently raise the mana ceiling, just gives some back this turn.
         public void RefundMana(int amount) => Mana = Mathf.Clamp(Mana + amount, 0, MaxMana);
 
-        // Mana floor of 1 on the sender — cannot be fully drained by Stolen Wind/Essence
+        // Mana floor of 1 on the sender - cannot be fully drained by Stolen Wind/Essence
         // Plunder. Returns the amount actually transferred (may be less than requested, or 0).
         public int TransferManaTo(ShipState receiver, int amount)
         {
@@ -79,7 +79,7 @@ namespace ThroneOfTides.Systems
 
         // ── Combo ─────────────────────────────────────────────────────────────
 
-        // Prevents Gunpowder/Torch from scaling without bound — see Torch's damage formula
+        // Prevents Gunpowder/Torch from scaling without bound - see Torch's damage formula
         // (8 + (stack-1)*2), which would otherwise snowball indefinitely.
         public const int MaxComboStack = 4;
 

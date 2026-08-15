@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace ThroneOfTides.UI
 {
-    // A small scrolling history of "important" match events — card plays (hoverable for their
+    // A small scrolling history of "important" match events - card plays (hoverable for their
     // description), HP loss/gain, and misc one-off notes (e.g. Locker's Return recovering
     // cards). Deliberately leaves out noisier events (mana changes, DOT ticks, combo-stack
     // increments) that GameEventBus already exposes but would clutter a log meant to stay
@@ -78,7 +78,7 @@ namespace ThroneOfTides.UI
             if (_rows.Count > _maxEntries)
                 Destroy(_rows.Dequeue().gameObject);
 
-            // Snap to the newest entry — layout needs to rebuild first or the scroll position
+            // Snap to the newest entry - layout needs to rebuild first or the scroll position
             // computed this frame would still reflect last frame's content height.
             Canvas.ForceUpdateCanvases();
             if (_scrollRect != null) _scrollRect.verticalNormalizedPosition = 0f;

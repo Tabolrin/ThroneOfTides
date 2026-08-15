@@ -9,8 +9,8 @@ namespace ThroneOfTides.UI
     // Shows only the currently-active per-ship status badges (Gunpowder/Whirlpool/Hail
     // Storm/High Spirits/Siren Song) plus reaction charge badges (Dead Man's Turn/Counter
     // Gale) for one ship. Badges are dynamically instantiated from a single shared prefab
-    // when an effect becomes active and destroyed when it clears — nothing sits pre-placed
-    // in the scene. One instance per ship — set Side to which ship this represents.
+    // when an effect becomes active and destroyed when it clears - nothing sits pre-placed
+    // in the scene. One instance per ship - set Side to which ship this represents.
     public class ActiveEffectsBar : MonoBehaviour
     {
         [Header("Side")]
@@ -30,10 +30,10 @@ namespace ThroneOfTides.UI
         [SerializeField] private EffectBadgeTooltip    _tooltip;
 
         [Header("Reaction Icons")]
-        [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette — assign their icons directly.")]
+        [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette - assign their icons directly.")]
         [SerializeField] private Sprite _deadMansTurnIcon;
         [SerializeField] private Sprite _counterGaleIcon;
-        [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette — assign their hover descriptions directly.")]
+        [Tooltip("Reactions aren't ShipStatusTypes, so they don't come from the palette - assign their hover descriptions directly.")]
         [TextArea]
         [SerializeField] private string _deadMansTurnDescription;
         [TextArea]
@@ -70,7 +70,7 @@ namespace ThroneOfTides.UI
         {
             if (ship != _side) return;
 
-            // Siren Song is a pending-effect badge — presence only, no count shown.
+            // Siren Song is a pending-effect badge - presence only, no count shown.
             int? displayCount = type == ShipStatusType.SirenSong ? (int?)null : count;
 
             SetBadge(_activeStatusBadges, type, count > 0, _effectsContainer,

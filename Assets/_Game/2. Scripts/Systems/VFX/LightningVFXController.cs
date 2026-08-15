@@ -1,9 +1,9 @@
 using System;
 using DG.Tweening;
-using MoreMountains.Feedbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using ThroneOfTides.Core;
+using ThroneOfTides.Data;
 
 namespace ThroneOfTides.Systems.VFX
 {
@@ -14,15 +14,15 @@ namespace ThroneOfTides.Systems.VFX
     ///   1. Cloud fades in above target.
     ///   2. Lightning fill sweeps top→bottom (very fast).
     ///   3. Strike particle fires at _strikeAnchor world position + screen whiteout flash.
-    ///   4. FEEL feedback fires.
+    ///   4. Strike SFX fires.
     ///   5. Everything fades out together via CanvasGroup.
     ///
     /// Scene setup requirements:
     ///   - _cloudImage      : Image with alpha driven by color.a.
     ///   - _lightningImage  : Image, FillMethod = Vertical, FillOrigin = Top.
     ///   - _strikeAnchor    : Empty child of LightningImage, placed at its bottom tip.
-    ///   - _canvasGroup     : CanvasGroup on this root — drives combined fade-out.
-    ///   - _whiteoutImage   : Full-screen scene Image — cannot be baked into prefab,
+    ///   - _canvasGroup     : CanvasGroup on this root - drives combined fade-out.
+    ///   - _whiteoutImage   : Full-screen scene Image - cannot be baked into prefab,
     ///                        must be passed via Inject(). Root Canvas child, last sibling,
     ///                        Raycast Target OFF, color (1,1,1,0) at rest.
     ///   - _strikeParticles : Scene-level world-space ParticleSystem, passed via Inject().
@@ -37,8 +37,8 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private RectTransform _strikeAnchor;  // bottom tip of lightning sprite
         [SerializeField] private CanvasGroup   _canvasGroup;
 
-        [Header("FEEL")]
-        [SerializeField] private MMF_Player _feedbackLightningStrike;
+        [Header("SFX")]
+        [SerializeField] private CardSfxCue _lightningStrikeSfx;
 
         [Header("Spawn Offset (canvas units, applied left of target)")]
         [SerializeField] private Vector2 _canvasSpawnOffset = new Vector2(-80f, 0f);
@@ -51,7 +51,7 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private float _holdBeforeStrike = 0.15f;
 
         [Header("Lightning Strike")]
-        // Very fast — sells the instantaneous nature of lightning.
+        // Very fast - sells the instantaneous nature of lightning.
         [SerializeField] private float _strikeFillDuration = 0.08f;
         [SerializeField] private Ease  _strikeFillEase     = Ease.InQuart;
 
@@ -74,7 +74,7 @@ namespace ThroneOfTides.Systems.VFX
         /// <summary>Fired when fully faded. Safe to destroy or return to pool.</summary>
         public event Action OnSequenceEnd;
 
-        /// <summary>ICardPlayEffect — fired when fully faded, so CardPresentationPlayer destroys the instance.</summary>
+        /// <summary>ICardPlayEffect - fired when fully faded, so CardPresentationPlayer destroys the instance.</summary>
         public event Action Completed;
 
         // ── Private ───────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ namespace ThroneOfTides.Systems.VFX
 
         /// <summary>
         /// Injected by CardPresentationPlayer after instantiation.
-        /// Both strikeParticles and whiteoutImage are persistent scene objects —
+        /// Both strikeParticles and whiteoutImage are persistent scene objects -
         /// prefabs cannot hold references to scene objects, so both must be injected.
         /// </summary>
         public void Inject(RectTransform canvasRect, Camera gameCamera,
@@ -113,13 +113,16 @@ namespace ThroneOfTides.Systems.VFX
         }
 
         /// <summary>
-        /// ICardPlayEffect entry point — hosted by CardPresentationPlayer. Lightning always
+        /// ICardPlayEffect entry point - hosted by CardPresentationPlayer. Lightning always
         /// strikes the opponent's ship, matching this card's authored PresentationEntry
         /// (AnchorSide: Opponent).
         /// </summary>
         public void Initialize(CardEffectSpawnContext context)
         {
             Inject(context.GameCanvas, context.GameCamera, context.LightningStrikeParticles, context.WhiteoutImage);
+            // Shakes the camera itself at the strike moment - the generic instant on-damage
+            // shake would otherwise double up with it.
+            context.SuppressNextDamageCameraShake?.Invoke();
             OnSequenceEnd += () => Completed?.Invoke();
             StartSequence(context.OpponentAnchor.position);
         }
@@ -169,7 +172,7 @@ namespace ThroneOfTides.Systems.VFX
         {
             Sequence seq = DOTween.Sequence();
 
-            // Phase 1 — Cloud fades in.
+            // Phase 1 - Cloud fades in.
             seq.Append(DOTween.To(
                     () => _cloudImage.color.a,
                     (float x) => SetCloudAlpha(x),
@@ -178,14 +181,14 @@ namespace ThroneOfTides.Systems.VFX
 
             seq.AppendInterval(_holdBeforeStrike);
 
-            // Phase 2 — Lightning fills top→bottom (FillOrigin = Top set in Inspector).
+            // Phase 2 - Lightning fills top→bottom (FillOrigin = Top set in Inspector).
             seq.Append(DOTween.To(
                     () => _lightningImage.fillAmount,
                     (float x) => _lightningImage.fillAmount = x,
                     1f, _strikeFillDuration)
                 .SetEase(_strikeFillEase));
 
-            // Phase 3 — Strike peak: position particles at anchor, then fire everything.
+            // Phase 3 - Strike peak: position particles at anchor, then fire everything.
             // Particles positioned here so the anchor's canvas position is fully resolved
             // after the prefab has been placed and laid out.
             seq.AppendCallback(() =>
@@ -194,14 +197,14 @@ namespace ThroneOfTides.Systems.VFX
                 OnStrikePeak();
             });
 
-            // Phase 4 — Hold whiteout briefly, then fade it out independently
+            // Phase 4 - Hold whiteout briefly, then fade it out independently
             // so it doesn't block the master sequence timeline.
             seq.AppendInterval(_whiteoutHoldDuration);
             seq.AppendCallback(BeginWhiteoutFade);
 
             seq.AppendInterval(_holdAfterStrike);
 
-            // Phase 5 — Fade out cloud + lightning together via CanvasGroup.
+            // Phase 5 - Fade out cloud + lightning together via CanvasGroup.
             seq.Append(DOTween.To(
                     () => _canvasGroup.alpha,
                     (float x) => _canvasGroup.alpha = x,
@@ -231,7 +234,7 @@ namespace ThroneOfTides.Systems.VFX
         {
             _strikeParticles.Play();
             SetWhiteoutAlpha(1f);
-            _feedbackLightningStrike?.PlayFeedbacks();
+            CardSfxPlayer.Play(_lightningStrikeSfx, transform.position);
             ScreenShake.Trigger(ScreenShakeLevel.Level4);
             OnStrikeMoment?.Invoke();
         }

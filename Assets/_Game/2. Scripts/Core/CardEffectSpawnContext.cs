@@ -20,7 +20,7 @@ namespace ThroneOfTides.Core
         public readonly ICard Card;
 
         /// <summary>
-        /// The absolute side that played the card (always Player or Enemy — never Any).
+        /// The absolute side that played the card (always Player or Enemy - never Any).
         /// Lets an effect script make absolute-side decisions (e.g. mirroring a sprite)
         /// in addition to the already-relative-resolved CasterAnchor/OpponentAnchor transforms.
         /// </summary>
@@ -55,7 +55,7 @@ namespace ThroneOfTides.Core
 
         /// <summary>
         /// Reveals the opponent ship's persistent world-space status indicator for the given
-        /// type immediately (e.g. the Gunpowder-barrel decoration) — for thrown-projectile
+        /// type immediately (e.g. the Gunpowder-barrel decoration) - for thrown-projectile
         /// effects that want the reveal timed to their own impact frame instead of firing the
         /// instant GameState registers the effect. No-op if no such indicator is placed.
         /// </summary>
@@ -69,7 +69,7 @@ namespace ThroneOfTides.Core
 
         /// <summary>
         /// Resolves an anchor point on whichever ship was this play's explicit target (e.g. Tidal
-        /// Wave's player-chosen ship) — for self-driving effects that need a second point beyond
+        /// Wave's player-chosen ship) - for self-driving effects that need a second point beyond
         /// their own spawn position, such as animating a projectile from spawn to a hit point.
         /// Null if this card has no explicit target.
         /// </summary>
@@ -77,7 +77,7 @@ namespace ThroneOfTides.Core
 
         /// <summary>
         /// Resolves an anchor point of any VfxAnchorType on the opponent's ship, independent of
-        /// the entry's own PositionType — for always-targets-opponent effects (e.g. Whale Ram)
+        /// the entry's own PositionType - for always-targets-opponent effects (e.g. Whale Ram)
         /// that spawn at one anchor (say, SeaSurface) but need to travel to a different one
         /// (ShipHit) without requiring target selection. Unlike GetExplicitTargetAnchor, this is
         /// always available since it doesn't depend on the player having chosen a target.
@@ -87,7 +87,7 @@ namespace ThroneOfTides.Core
         /// <summary>
         /// Starts holding the explicit target ship's Gunpowder sprite exactly as it currently
         /// looks, ignoring the game state's instant clear, until EndExplicitTargetGunpowderHold
-        /// is called — for effects (e.g. Tidal Wave) that want the powdered-look-to-clean swap
+        /// is called - for effects (e.g. Tidal Wave) that want the powdered-look-to-clean swap
         /// timed to their own sequence instead of snapping the moment the card resolves.
         /// No-op if this card has no explicit target or that ship has no Gunpowder visual.
         /// </summary>
@@ -97,7 +97,7 @@ namespace ThroneOfTides.Core
         public readonly Action EndExplicitTargetGunpowderHold;
 
         /// <summary>
-        /// Generic anchor resolver — given a side (Caster/Opponent/ExplicitTarget) and an anchor
+        /// Generic anchor resolver - given a side (Caster/Opponent/ExplicitTarget) and an anchor
         /// type, returns that ship's Transform for it (null for ExplicitTarget if this play had
         /// no chosen target). Lets a VFX controller expose its own Inspector-configurable
         /// start/end points instead of being hardcoded to whatever the CardPresentationEntry's
@@ -107,7 +107,7 @@ namespace ThroneOfTides.Core
 
         /// <summary>
         /// Resolves an anchor point on the PLAYER's ship specifically, regardless of which side
-        /// actually cast the card — for effects meant to appear "in the space between the two
+        /// actually cast the card - for effects meant to appear "in the space between the two
         /// ships" (e.g. Treasure Chest's coin burst), which should stay pinned to the player's
         /// side rather than flipping to the enemy's when the enemy plays the card.
         /// </summary>
@@ -116,7 +116,7 @@ namespace ThroneOfTides.Core
         /// <summary>
         /// Shows the enemy-hand-reveal modal (Recon Parrot) with the given cards, invoking the
         /// callback once the player dismisses it. Kept as a generic delegate (not a direct
-        /// EnemyHandRevealPanel reference) since Core cannot depend on the UI assembly — see
+        /// EnemyHandRevealPanel reference) since Core cannot depend on the UI assembly - see
         /// CardPresentationPlayer for the concrete wiring.
         /// </summary>
         public readonly Action<IReadOnlyList<ICard>, Action> ShowEnemyHandReveal;
@@ -124,13 +124,50 @@ namespace ThroneOfTides.Core
         /// <summary>
         /// Suppresses the next generic "+N mana" popup that OnPlayerManaChanged/OnEnemyManaChanged
         /// would otherwise fire the instant CombatResolver's synchronous mana change actually
-        /// happens — for effects (e.g. Essence Plunder) that want to show their own "+N" popup
+        /// happens - for effects (e.g. Essence Plunder) that want to show their own "+N" popup
         /// timed to their own animation instead of the instant the real state changes.
         /// </summary>
         public readonly Action SuppressManaGainPopup;
 
         /// <summary>Spawns a deferred "+N" mana popup at the given world position, through the same queue as every other floating number.</summary>
         public readonly Action<int, Vector3> SpawnManaGainedNumber;
+
+        /// <summary>
+        /// Suppresses the generic on-damage camera shake (bundled into the light/medium/heavy hit
+        /// feedback that fires the instant GameEventBus.OnDamageDealt fires - i.e. the moment the
+        /// card resolves, before any deferred VFX has actually traveled anywhere) - for
+        /// self-driving effects (e.g. Torch, Cannonball, Kraken, Lightning, Tidal Wave, Whale Ram)
+        /// that trigger their own ScreenShake.Trigger() precisely timed to their own deferred
+        /// visual impact instead. Must be called from Initialize(), before CombatResolver's
+        /// synchronous ApplyDamage call (same ordering rule as SuppressManaGainPopup) - calling it
+        /// any later is always too late, since the generic shake has already fired by then.
+        /// </summary>
+        public readonly Action SuppressNextDamageCameraShake;
+
+        /// <summary>
+        /// Resolves the world position of the given side's hand-visual area - for effects (e.g.
+        /// Monkey Grab) that fly a temporary card visual toward wherever the hand actually is
+        /// on screen instead of a fixed ship anchor.
+        /// </summary>
+        public readonly Func<DamageTarget, Vector3> GetHandAreaPosition;
+
+        /// <summary>
+        /// Invoked once a self-driving "carrying a stolen card" VFX finishes its own flight
+        /// animation - triggers the actual persistent hand-card visual (HandLayoutManager's
+        /// StealCardFrom*Hand) for the given card/receiving side, which up to this point has been
+        /// deliberately withheld even though the GameState ownership change already happened
+        /// instantly when the card resolved.
+        /// </summary>
+        public readonly Action<ICard, DamageTarget> FinalizeStolenCardVisual;
+
+        /// <summary>
+        /// Spawns a throwaway, non-interactive copy of the real card prefab (frame, cost, art,
+        /// text - not just a bare sprite) parented under the given Transform - for effects (e.g.
+        /// Monkey Grab) that need to show the actual stolen card flying across the screen before
+        /// it's really added to a hand. Kept as a generic delegate (not a direct HandLayoutManager
+        /// reference) since Core cannot depend on the UI assembly.
+        /// </summary>
+        public readonly Func<ICard, Transform, GameObject> SpawnStolenCardVisual;
 
         public CardEffectSpawnContext(
             Transform casterAnchor,
@@ -155,7 +192,11 @@ namespace ThroneOfTides.Core
             Func<VfxAnchorType, Transform> getPlayerAnchor = null,
             Action<IReadOnlyList<ICard>, Action> showEnemyHandReveal = null,
             Action suppressManaGainPopup = null,
-            Action<int, Vector3> spawnManaGainedNumber = null)
+            Action<int, Vector3> spawnManaGainedNumber = null,
+            Func<DamageTarget, Vector3> getHandAreaPosition = null,
+            Action<ICard, DamageTarget> finalizeStolenCardVisual = null,
+            Func<ICard, Transform, GameObject> spawnStolenCardVisual = null,
+            Action suppressNextDamageCameraShake = null)
         {
             CasterAnchor = casterAnchor;
             OpponentAnchor = opponentAnchor;
@@ -180,6 +221,10 @@ namespace ThroneOfTides.Core
             ShowEnemyHandReveal = showEnemyHandReveal;
             SuppressManaGainPopup = suppressManaGainPopup;
             SpawnManaGainedNumber = spawnManaGainedNumber;
+            GetHandAreaPosition = getHandAreaPosition;
+            FinalizeStolenCardVisual = finalizeStolenCardVisual;
+            SpawnStolenCardVisual = spawnStolenCardVisual;
+            SuppressNextDamageCameraShake = suppressNextDamageCameraShake;
         }
     }
 }

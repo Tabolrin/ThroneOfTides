@@ -121,6 +121,4 @@ MonoBehaviour:
     _songName: ChainShot
     _volumeMultiplier: 1
     _pitchMultiplier: 0.95
-  _shakeDuration: 0.2
-  _shakeAmplitude: 0.45
-  _shakeFrequency: 30
+  _shakeLevel: 2

@@ -10,16 +10,16 @@ namespace ThroneOfTides.Systems.VFX
     /// <summary>
     /// Essence Plunder: a lantern (UI-canvas sprite, same convention as Torch/Gunpowder Barrel)
     /// fades in on the activating player's ship. Once fully visible, a mana-flow particle system
-    /// plays from the opponent's ship toward the caster's — always correct regardless of which
+    /// plays from the opponent's ship toward the caster's - always correct regardless of which
     /// side actually cast the card, since it's positioned/oriented from
     /// CardEffectSpawnContext.OpponentAnchor toward CasterAnchor (both already resolved relative
     /// to the caster) rather than any hardcoded "enemy"/"player" assumption. Only once the
     /// particle finishes does the "+N mana" popup appear (the actual mana transfer itself already
-    /// happened synchronously when the card resolved — CombatResolver has no async capability —
+    /// happened synchronously when the card resolved - CombatResolver has no async capability -
     /// so this suppresses the generic instant popup and fires its own deferred one instead, timed
     /// to this animation). The lantern then fades out.
     ///
-    /// The particle prefab ships empty on purpose — configure its Shape/Velocity/Color/etc.
+    /// The particle prefab ships empty on purpose - configure its Shape/Velocity/Color/etc.
     /// freely. This controller only positions and rotates the GameObject each play so its local
     /// +Y (up) points from the opponent's ship toward the caster's; aim your emission shape's
     /// "forward" along local +Y to match.
@@ -28,7 +28,7 @@ namespace ThroneOfTides.Systems.VFX
     {
         [Header("References")]
         [SerializeField] private Image _lanternImage;
-        [Tooltip("Ships empty — fully configure its Shape/Velocity/Color/etc. yourself. Rotated at runtime so its local +Y (up) points from the opponent's ship toward the caster's.")]
+        [Tooltip("Ships empty - fully configure its Shape/Velocity/Color/etc. yourself. Rotated at runtime so its local +Y (up) points from the opponent's ship toward the caster's.")]
         [SerializeField] private ParticleSystem _manaFlowParticlesPrefab;
 
         [Header("Lantern Fade")]
@@ -38,7 +38,7 @@ namespace ThroneOfTides.Systems.VFX
         [SerializeField] private Ease  _fadeOutEase = Ease.InSine;
 
         [Header("Mana Feedback")]
-        [Tooltip("Shown as a floating \"+N\" once the particle finishes — keep in sync with the card's own configured steal amount (EssencePlunderEffectSO's _manaToSteal).")]
+        [Tooltip("Shown as a floating \"+N\" once the particle finishes - keep in sync with the card's own configured steal amount (EssencePlunderEffectSO's _manaToSteal).")]
         [SerializeField] private int _manaAmountForDisplay = 2;
 
         public event Action Completed;
@@ -65,7 +65,7 @@ namespace ThroneOfTides.Systems.VFX
             _gameCamera     = context.GameCamera;
 
             // Must happen now, before CombatResolver's synchronous StealEnemyMana call (which
-            // fires moments after this method returns, as part of the same card resolution) —
+            // fires moments after this method returns, as part of the same card resolution) -
             // by the time our own deferred popup would fire, it's already too late to still be
             // the "next" mana-gain event.
             _context.SuppressManaGainPopup?.Invoke();
@@ -93,7 +93,7 @@ namespace ThroneOfTides.Systems.VFX
                 Vector3 to   = _context.CasterAnchor.position;
                 Vector3 direction = (to - from).normalized;
 
-                // Local +Y (up) points along the opponent->caster direction — see class remarks.
+                // Local +Y (up) points along the opponent->caster direction - see class remarks.
                 float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
 
                 _particleInstance = Instantiate(_manaFlowParticlesPrefab, from, Quaternion.Euler(0f, 0f, angle));
