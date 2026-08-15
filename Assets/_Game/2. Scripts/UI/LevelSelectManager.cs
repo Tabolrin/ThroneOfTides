@@ -28,8 +28,8 @@ namespace ThroneOfTides.Systems
         [SerializeField] private TextMeshProUGUI _level1Label;
         [SerializeField] private TextMeshProUGUI _level2Label;
         [SerializeField] private TextMeshProUGUI _level3Label;
-        [SerializeField] private GameObject      _level2Lock;
-        [SerializeField] private GameObject      _level3Lock;
+        [Tooltip("Alpha a locked level button's Image is dimmed to (0-255, matching how art tools express it) - restored to full opacity the instant the level unlocks.")]
+        [SerializeField] private float _lockedButtonAlpha255 = 140f;
 
         [Header("Port")]
         [Tooltip("The Port is always optional and freely revisitable from the map - never gated behind a level and never accessible from the main menu, so this is the only entry point.")]
@@ -213,11 +213,25 @@ namespace ThroneOfTides.Systems
             _level2Label.text = _captain2.CaptainName;
             _level3Label.text = _captain3.CaptainName;
 
-            _level2Button.interactable = _progression.Level2Unlocked;
-            _level3Button.interactable = _progression.Level3Unlocked;
+            SetLevelButtonUnlocked(_level2Button, _progression.Level2Unlocked);
+            SetLevelButtonUnlocked(_level3Button, _progression.Level3Unlocked);
+        }
 
-            _level2Lock.SetActive(!_progression.Level2Unlocked);
-            _level3Lock.SetActive(!_progression.Level3Unlocked);
+        // Locked levels are authored directly on the button (Image alpha dimmed to
+        // _lockedButtonAlpha255, Interactable unticked) rather than via a separate Lock overlay
+        // GameObject - this is what restores both back to their unlocked look/behavior once
+        // ProgressionSO.Level2Unlocked/Level3Unlocked actually says so. That flag is already
+        // persisted by ProgressionSO.SetLevelBeaten's own Save() call, so re-running this on
+        // every RefreshNodes (Start, and after returning from a completed level) is enough to
+        // keep the button's appearance correctly in sync across sessions with no extra save logic.
+        private void SetLevelButtonUnlocked(Button button, bool unlocked)
+        {
+            button.interactable = unlocked;
+
+            if (button.image == null) return;
+            Color color = button.image.color;
+            color.a = unlocked ? 1f : _lockedButtonAlpha255 / 255f;
+            button.image.color = color;
         }
 
         private void OnLevelSelected(CaptainSO captain, int levelIndex)
