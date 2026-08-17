@@ -31,7 +31,7 @@ MonoBehaviour:
   _weightActionHeal: 2.2
   _weightActionDefense: 0.3
   _weightActionManaSteal: 2
-  _weightKraken: 6
+  _weightKraken: 3
   _weightDOT: 1
   _weightReactionCounter: 1.3
   _weightPlayAroundReactions: 0.5

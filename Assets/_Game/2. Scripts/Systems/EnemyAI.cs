@@ -38,16 +38,17 @@ namespace ThroneOfTides.Systems
         /// could otherwise waste the turn (or the whole match) on something else while the
         /// primed stack just sits there.
         /// </param>
-        /// <param name="playerHasDeadMansTurn">Player has a Dead Man's Turn charge - the next
-        /// non-unblockable attack would be fully negated for free.</param>
-        /// <param name="playerHasCounterGale">Player has a Counter Gale charge - the next
-        /// non-unblockable attack gets half its damage reflected back.</param>
+        /// <param name="playerDeadMansTurnCharges">How many Dead Man's Turn charges the player
+        /// is holding - each one is a free full negate of a future non-unblockable attack, so
+        /// more charges means more reason to play around it, not just a yes/no threat.</param>
+        /// <param name="playerCounterGaleCharges">How many Counter Gale charges the player is
+        /// holding - each one reflects half the damage of a future non-unblockable attack.</param>
         /// <param name="selfUnblockable">This side's next attack is already guaranteed to land
         /// (Siren Song already resolved this turn) - reaction-threat weighting is skipped since
         /// there's nothing left to play around.</param>
         public CardSO PickCard(IReadOnlyList<CardSO> hand, int enemyMana, int enemyHP,
-            bool comboPrimed = false, bool playerHasDeadMansTurn = false,
-            bool playerHasCounterGale = false, bool selfUnblockable = false)
+            bool comboPrimed = false, int playerDeadMansTurnCharges = 0,
+            int playerCounterGaleCharges = 0, bool selfUnblockable = false)
         {
             if (hand.Count == 0) return null;
 
@@ -85,7 +86,7 @@ namespace ThroneOfTides.Systems
                 if (finisher.card != null) return finisher.card;
             }
 
-            ApplyReactionAwareness(candidates, playerHasDeadMansTurn, playerHasCounterGale, selfUnblockable);
+            ApplyReactionAwareness(candidates, playerDeadMansTurnCharges, playerCounterGaleCharges, selfUnblockable);
 
             // Prefer cards that are more valuable played before an attack (Siren Song, Monkey
             // Grab, etc.) - if any are still playable, restrict the pick to that group; only
@@ -104,16 +105,33 @@ namespace ThroneOfTides.Systems
         // charged reaction; every other attack gets dampened so the AI doesn't just feed its
         // best hit into a guaranteed Dead Man's Turn negate.
         private void ApplyReactionAwareness(List<(CardSO card, float weight)> candidates,
-            bool playerHasDeadMansTurn, bool playerHasCounterGale, bool selfUnblockable)
+            int playerDeadMansTurnCharges, int playerCounterGaleCharges, bool selfUnblockable)
         {
             float caution = _captain.WeightPlayAroundReactions;
-            bool anyReactionThreat = playerHasDeadMansTurn || playerHasCounterGale;
+            bool anyReactionThreat = playerDeadMansTurnCharges > 0 || playerCounterGaleCharges > 0;
             if (caution <= 0f || selfUnblockable || !anyReactionThreat) return;
 
-            // A full negate is worth playing around much harder than a half-damage reflect.
-            float dampen = playerHasDeadMansTurn
-                ? Mathf.Max(0.15f, 1f - 0.5f  * caution)
-                : Mathf.Max(0.4f,  1f - 0.25f * caution);
+            // A second (or third) charge of the same reaction doesn't double the threat the way
+            // going from 0 to 1 does - the player was already going to block/reflect one attack
+            // either way, extra charges just mean they can keep doing it later too. Scaled by
+            // sqrt(charges) for diminishing returns: sqrt(1) = 1 (identical to the old flat
+            // boolean behavior at one charge), sqrt(2) ~= 1.41, sqrt(3) ~= 1.73, and so on.
+            float dmtScale = Mathf.Sqrt(playerDeadMansTurnCharges);
+            float cgScale  = Mathf.Sqrt(playerCounterGaleCharges);
+
+            // A full negate is worth playing around much harder than a half-damage reflect -
+            // whichever reaction is actually charged (Dead Man's Turn takes priority if the
+            // player holds both, matching the human reaction-prompt's own precedence) sets the
+            // dampen applied to ordinary attacks below.
+            float dampen = playerDeadMansTurnCharges > 0
+                ? Mathf.Max(0.15f, 1f - 0.5f  * caution * dmtScale)
+                : Mathf.Max(0.4f,  1f - 0.25f * caution * cgScale);
+
+            // The unblockable-card boost scales off whichever reaction is more heavily stacked -
+            // more charges (of either type) means landing a guaranteed hit is worth chasing
+            // harder, since a dampened normal attack would otherwise just feed one more charge
+            // opportunity that's still there next turn.
+            float unblockableBoost = 1f + caution * Mathf.Max(dmtScale, cgScale);
 
             for (int i = 0; i < candidates.Count; i++)
             {
@@ -124,7 +142,7 @@ namespace ThroneOfTides.Systems
                                 card.CardType == CardType.DOT;
 
                 if (isUnblockableCard)
-                    candidates[i] = (card, weight * (1f + caution));
+                    candidates[i] = (card, weight * unblockableBoost);
                 else if (isAttack)
                     candidates[i] = (card, weight * dampen);
             }

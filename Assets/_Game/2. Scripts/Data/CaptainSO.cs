@@ -123,12 +123,18 @@ namespace ThroneOfTides.Data
         };
 
         // Called when the enemy is about to take damage and has at least one reaction charged.
-        // Each available reaction has weight/2 chance to be used; if both would fire, the
-        // higher-weighted one wins. Returns null if the captain chooses not to react at all.
+        // Each available reaction has weight/2 chance to be used (capped below), and if both
+        // would fire, the higher-weighted one wins. Returns null if the captain chooses not to
+        // react at all.
         public ReactionType? ChooseReaction(bool hasDeadMansTurn, bool hasCounterGale)
         {
-            bool useDeadMansTurn = hasDeadMansTurn && Random.value < (_weightActionDefense / 2f);
-            bool useCounterGale  = hasCounterGale  && Random.value < (_weightReactionCounter / 2f);
+            // The weight fields are authored on a 0-2 "how much does this captain like this
+            // option" scale, not a probability - fed into weight/2 directly and uncapped, a
+            // captain with a 1.8 defense weight (e.g. Loreley) would fire that reaction 90% of
+            // the time it's available, reading as "always blocks" rather than a personality.
+            const float maxFireChance = 0.75f;
+            bool useDeadMansTurn = hasDeadMansTurn && Random.value < Mathf.Min(maxFireChance, _weightActionDefense / 2f);
+            bool useCounterGale  = hasCounterGale  && Random.value < Mathf.Min(maxFireChance, _weightReactionCounter / 2f);
 
             if (useDeadMansTurn && useCounterGale)
                 return _weightActionDefense >= _weightReactionCounter

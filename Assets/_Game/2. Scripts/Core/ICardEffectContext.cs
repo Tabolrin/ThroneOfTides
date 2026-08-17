@@ -42,6 +42,10 @@ namespace ThroneOfTides.Core
         IReadOnlyList<ICard> GetEnemyHand();
         IReadOnlyList<ICard> GetPlayerHand();
 
+        /// Whoever did NOT cast this card's hand - use this (not GetEnemyHand) for any effect
+        /// that should read correctly regardless of which side casts it, e.g. Recon Parrot.
+        IReadOnlyList<ICard> GetOpponentHand();
+
         /// Discards one random card from whoever did NOT cast this card's hand entirely (not
         /// stolen into the caster's hand - see StealFromEnemyHand for that). Used by Chain Shot.
         void DiscardRandomFromOpponentHand();

@@ -59,7 +59,14 @@ namespace ThroneOfTides.Systems
         // ── Status Effects ────────────────────────────────────────────────────
         public bool SirenSongActive    { get; private set; }
         public bool PendingUnblockable { get; private set; }
-        public int  HighSpiritsPlayCount { get; private set; }
+        public int  PlayerHighSpiritsPlayCount => Player.HighSpiritsPlayCount;
+        public int  EnemyHighSpiritsPlayCount  => Enemy.HighSpiritsPlayCount;
+
+        // Set once and never cleared - closes off further card plays/draws once a match has
+        // been decided, so a coroutine or input event still in flight when the match ends can't
+        // sneak in one more mutation before the results panel takes over. See CanPlayCard/CanDraw.
+        public bool MatchOver { get; private set; }
+        public void SetMatchOver() => MatchOver = true;
 
         // ── Turn Tracking ─────────────────────────────────────────────────────
         public bool DamageCardPlayedThisTurn { get; private set; }
@@ -260,11 +267,14 @@ namespace ThroneOfTides.Systems
         }
 
         // High Spirits is a permanent buff - its icon count only ever grows (capped at 3
-        // copies per deck) and is never cleared for the rest of the match.
-        public void RegisterHighSpiritsPlayed()
+        // copies per deck) and is never cleared for the rest of the match. Tracked per side
+        // (like the reaction charges) so the enemy playing its own High Spirits doesn't
+        // increment the player's status icon.
+        public void RegisterHighSpiritsPlayed(DamageTarget caster = DamageTarget.Player)
         {
-            HighSpiritsPlayCount++;
-            GameEventBus.FireShipStatusCountChanged(ShipStatusType.HighSpirits, DamageTarget.Player, HighSpiritsPlayCount);
+            var ship = GetSide(caster);
+            ship.AddHighSpiritsPlay();
+            GameEventBus.FireShipStatusCountChanged(ShipStatusType.HighSpirits, caster, ship.HighSpiritsPlayCount);
         }
 
         // ── DOT ───────────────────────────────────────────────────────────────
@@ -302,6 +312,8 @@ namespace ThroneOfTides.Systems
 
         public bool CanPlayCard(CardSO card)
         {
+            if (MatchOver) return false;
+
             // Draw is only mandatory while the deck can still supply one - once it's empty,
             // waiting for a draw that can never happen would softlock the player's turn.
             if (!HasDrawnThisTurn && PlayerDeck.Count > 0) return false;
@@ -312,6 +324,7 @@ namespace ThroneOfTides.Systems
         }
 
         public bool CanDraw() =>
+            !MatchOver        &&
             !HasDrawnThisTurn &&
             IsPlayerTurn      &&
             PlayerHand.Count < MaxHandSize &&
@@ -373,8 +386,16 @@ namespace ThroneOfTides.Systems
 
         public Winner GetWinner()
         {
-            if (PlayerHP <= 0 || (PlayerDeck.Count == 0 && PlayerHand.Count == 0)) return Winner.Enemy;
-            if (EnemyHP  <= 0 || (EnemyDeck.Count  == 0 && EnemyHand.Count  == 0)) return Winner.Player;
+            bool playerLost = PlayerHP <= 0 || (PlayerDeck.Count == 0 && PlayerHand.Count == 0);
+            bool enemyLost  = EnemyHP  <= 0 || (EnemyDeck.Count  == 0 && EnemyHand.Count  == 0);
+
+            // Simultaneous lethal (e.g. a Counter Gale reflect that kills the enemy on the very
+            // resolution that also finishes off the player) used to fall through to the first
+            // branch below and hand the enemy an automatic win regardless of which side actually
+            // dealt the finishing blow - resolved in the human player's favor instead.
+            if (playerLost && enemyLost) return Winner.Player;
+            if (playerLost) return Winner.Enemy;
+            if (enemyLost)  return Winner.Player;
             return Winner.None;
         }
 
@@ -383,16 +404,23 @@ namespace ThroneOfTides.Systems
         public void DiscardPlayerCard(CardSO card) => _playerDiscard.Add(card);
         public void DiscardEnemyCard(CardSO card)  => _enemyDiscard.Add(card);
 
-        public List<CardSO> RetrieveFromPlayerDiscard(int count)
+        public List<CardSO> RetrieveFromPlayerDiscard(int count) => RetrieveFromDiscard(_playerDiscard, count);
+
+        // Mirror of RetrieveFromPlayerDiscard for when the enemy is the one casting Locker's
+        // Return - without this, an enemy-cast retrieval had nowhere to pull from but the
+        // player's own discard pile (see CardEffectContext.RetrieveFromDiscard).
+        public List<CardSO> RetrieveFromEnemyDiscard(int count) => RetrieveFromDiscard(_enemyDiscard, count);
+
+        private static List<CardSO> RetrieveFromDiscard(List<CardSO> discard, int count)
         {
-            var eligible  = _playerDiscard.Where(c => c.Id != CardId.Kraken).ToList();
+            var eligible  = discard.Where(c => c.Id != CardId.Kraken).ToList();
             var retrieved = new List<CardSO>();
 
             for (int i = 0; i < count && eligible.Count > 0; i++)
             {
                 int index = UnityEngine.Random.Range(0, eligible.Count);
                 retrieved.Add(eligible[index]);
-                _playerDiscard.Remove(eligible[index]);
+                discard.Remove(eligible[index]);
                 eligible.RemoveAt(index);
             }
             return retrieved;

@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Data::ThroneOfTides.Data.LevelRewardSO
   _rewardCards:
   - {fileID: 11400000, guid: 0703b9acc314f9a46b4b653c98fc383e, type: 2}
-  _highHPCoinReward: 30
-  _midHPCoinReward: 20
-  _lowHPCoinReward: 10
+  _highHPCoinReward: 45
+  _midHPCoinReward: 30
+  _lowHPCoinReward: 15

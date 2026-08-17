@@ -59,7 +59,7 @@ namespace ThroneOfTides.Systems
             _gameState.ResetCombo(target);
 
         public void RegisterHighSpiritsPlayed() =>
-            _gameState.RegisterHighSpiritsPlayed();
+            _gameState.RegisterHighSpiritsPlayed(Caster);
 
         public void SpendPlayerMana(int amount) =>
             _gameState.SpendPlayerMana(amount);
@@ -197,15 +197,28 @@ namespace ThroneOfTides.Systems
             }
         }
 
+        // Retrieves from and returns into whoever cast this card's own discard/deck - works for
+        // either side so Locker's Return behaves correctly when the enemy plays it too (it used
+        // to always touch the player's discard/deck regardless of caster).
         public void RetrieveFromDiscard(int count)
         {
-            var retrieved = _gameState.RetrieveFromPlayerDiscard(count);
+            bool isPlayer = Caster == DamageTarget.Player;
+            var retrieved = isPlayer
+                ? _gameState.RetrieveFromPlayerDiscard(count)
+                : _gameState.RetrieveFromEnemyDiscard(count);
+            var deck = isPlayer ? _gameState.PlayerDeck : _gameState.EnemyDeck;
             foreach (var card in retrieved)
-                _gameState.PlayerDeck.ReturnCard(card);
+                deck.ReturnCard(card);
         }
 
         public IReadOnlyList<ICard> GetEnemyHand()  => _gameState.EnemyHand.Cards;
         public IReadOnlyList<ICard> GetPlayerHand() => _gameState.PlayerHand.Cards;
+
+        // Whoever did NOT cast this card's hand - works for either side so Recon Parrot
+        // behaves correctly when the enemy plays it too (it used to always reveal the enemy's
+        // own hand to itself regardless of caster).
+        public IReadOnlyList<ICard> GetOpponentHand() =>
+            Caster == DamageTarget.Player ? _gameState.EnemyHand.Cards : _gameState.PlayerHand.Cards;
 
         // Only the player has a tracked coin balance - a no-op when the enemy casts a card
         // that happens to touch coins (e.g. an enemy Treasure Chest).

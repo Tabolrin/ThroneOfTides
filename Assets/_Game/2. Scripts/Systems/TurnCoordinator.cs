@@ -69,7 +69,7 @@ namespace ThroneOfTides.Systems
 
         public void EndTurn()
         {
-            if (!_gameState.IsPlayerTurn)
+            if (!_gameState.IsPlayerTurn || _gameState.MatchOver)
             {
                 GameDebug.Log("EndTurn ignored - not the player's turn (already ended, or match over).");
                 return;
@@ -442,8 +442,8 @@ namespace ThroneOfTides.Systems
                         _gameState.EnemyMana - _gameState.EnemyNextCardManaSurcharge,
                         _gameState.EnemyHP,
                         comboPrimed: _gameState.EnemyComboStackCount > 0 && _gameState.EnemyActiveComboCard != null,
-                        playerHasDeadMansTurn: _gameState.PlayerDeadMansTurnCharges > 0,
-                        playerHasCounterGale: _gameState.PlayerCounterGaleCharges > 0,
+                        playerDeadMansTurnCharges: _gameState.PlayerDeadMansTurnCharges,
+                        playerCounterGaleCharges: _gameState.PlayerCounterGaleCharges,
                         selfUnblockable: _gameState.SirenSongActive);
                 }
 
@@ -539,8 +539,10 @@ namespace ThroneOfTides.Systems
             // Song's "next attack" would silently keep making EVERY subsequent enemy attack this
             // turn (and beyond, since nothing else clears it once an attack has been played)
             // unblockable, permanently locking the player out of Dead Man's Turn/Counter Gale
-            // even with charges available.
-            bool sirenConsumed = ConsumeSirenIfActive(DamageTarget.Enemy);
+            // even with charges available. Skipped entirely for Kraken, which is already
+            // unconditionally unblockable on its own - consuming Siren here would burn the charge
+            // for no benefit and leave a later, non-Kraken attack this turn blockable again.
+            bool sirenConsumed = !isKraken && ConsumeSirenIfActive(DamageTarget.Enemy);
             bool isUnblockable = sirenConsumed || isKraken;
             bool hasDMT        = _gameState.PlayerDeadMansTurnCharges > 0;
             bool hasCounterGale = _gameState.PlayerCounterGaleCharges > 0;
@@ -743,6 +745,13 @@ namespace ThroneOfTides.Systems
 
         private void FireMatchResult()
         {
+            // Idempotent - IsGameOver() stays true for the rest of the match once tripped (HP
+            // doesn't come back from 0, decks don't refill), so without this guard any of the
+            // several call sites that check it (card play, enemy attack, cheat panel) could
+            // re-fire a second Win/Loss event and double-grant match rewards.
+            if (_gameState.MatchOver) return;
+            _gameState.SetMatchOver();
+
             Winner winner = _gameState.GetWinner();
             GameDebug.Log($"Match over - winner: {winner} " +
                 $"(PlayerHP: {_gameState.PlayerHP}, PlayerDeck: {_gameState.PlayerDeck.Count}, PlayerHand: {_gameState.PlayerHand.Count}, " +

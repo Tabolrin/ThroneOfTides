@@ -15,13 +15,13 @@ MonoBehaviour:
   _name: Chain Shot
   _id: 3
   _cardType: 0
-  _description: Deal 4 damage. 50% chance to discard 1 random card from the enemy's
+  _description: Deal 3 damage. 50% chance to discard 1 random card from the enemy's
     hand.
   _maxCopiesInDeck: 99
   _manaCost: 2
   _storageCost: 3
   _hpCost: 0
-  _damage: 4
+  _damage: 3
   _comboDamage: 0
   _comboStackBonus: 0
   _comboPartner: {fileID: 0}

@@ -118,5 +118,10 @@ namespace ThroneOfTides.Systems
         }
 
         public bool HasAnyReaction() => DeadMansTurnCharges > 0 || CounterGaleCharges > 0;
+
+        // ── Status Effects (per side) ────────────────────────────────────────
+
+        public int HighSpiritsPlayCount { get; private set; }
+        public void AddHighSpiritsPlay() => HighSpiritsPlayCount++;
     }
 }

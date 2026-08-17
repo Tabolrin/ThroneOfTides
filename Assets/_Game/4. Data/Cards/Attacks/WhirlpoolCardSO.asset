@@ -15,7 +15,7 @@ MonoBehaviour:
   _name: Whirlpool
   _id: 8
   _cardType: 3
-  _description: Deal 3 damage per turn for 3 turns.
+  _description: Deal 4 damage per turn for 3 turns.
   _maxCopiesInDeck: 99
   _manaCost: 4
   _storageCost: 5
@@ -24,7 +24,7 @@ MonoBehaviour:
   _comboDamage: 0
   _comboStackBonus: 0
   _comboPartner: {fileID: 0}
-  _dotDamagePerTurn: 3
+  _dotDamagePerTurn: 4
   _dotDuration: 3
   _actionEffect: {fileID: 0}
   _isEligibleAsActionPair: 0

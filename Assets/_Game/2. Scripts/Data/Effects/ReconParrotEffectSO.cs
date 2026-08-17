@@ -11,12 +11,12 @@ namespace ThroneOfTides.Data
 
         protected override void Execute(IHandEffects context)
         {
-            var enemyHand   = context.GetEnemyHand();
-            int revealCount = Mathf.Min(_cardsToReveal, enemyHand.Count);
+            var opponentHand = context.GetOpponentHand();
+            int revealCount  = Mathf.Min(_cardsToReveal, opponentHand.Count);
 
             var revealed = new List<ICard>(revealCount);
             for (int i = 0; i < revealCount; i++)
-                revealed.Add(enemyHand[i]);
+                revealed.Add(opponentHand[i]);
 
             GameEventBus.FireEnemyHandRevealed(revealed);
         }
