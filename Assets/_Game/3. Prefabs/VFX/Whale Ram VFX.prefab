@@ -90,7 +90,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.Systems::ThroneOfTides.Systems.WhaleRamVFXController
   _emergeSfx:
     _playlist: {fileID: 11400000, guid: 7fe872d4518959043a0d648a120ad6f9, type: 2}
-    _songName: Whale
+    _songName: Whale Roar
     _volumeMultiplier: 1
     _pitchMultiplier: 1
   _startSide: 1

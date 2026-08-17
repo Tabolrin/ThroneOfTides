@@ -14,10 +14,15 @@ namespace ThroneOfTides.Tools
     {
         public int callbackOrder => 0;
 
+        // Matches the order already set up in Unity's own Build Settings (File > Build Settings) -
+        // kept as an explicit list (rather than reading EditorBuildSettings.scenes directly) so a
+        // scene can be temporarily disabled there for quick iteration without silently dropping
+        // out of these custom build menu items too.
         private static readonly string[] Scenes =
         {
             "Assets/_Game/7. Scenes/MainMenu.unity",
             "Assets/_Game/7. Scenes/LevelSelect.unity",
+            "Assets/_Game/7. Scenes/Port.unity",
             "Assets/_Game/7. Scenes/Match.unity"
         };
 

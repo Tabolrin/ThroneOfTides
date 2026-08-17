@@ -35,6 +35,11 @@ namespace ThroneOfTides.Systems
         [Tooltip("Extra manual nudge applied after resolving the end anchor, in canvas pixels.")]
         [SerializeField] private Vector2 _endOffset;
 
+        [Header("Start")]
+        [Tooltip("Played a short beat after the wave begins forming - runs independently of the fill/move animation below, so it doesn't delay either.")]
+        [SerializeField] private CardSfxCue _startSfx;
+        [SerializeField] private float _startSfxDelay = 0.1f;
+
         [Header("Wave")]
         [Tooltip("The Image (Filled type, Fill Origin = Bottom) that fills and slides toward the target.")]
         [SerializeField] private Image _waveImage;
@@ -83,6 +88,11 @@ namespace ThroneOfTides.Systems
                     + _startOffset + Vector2.up * _verticalOffset;
 
             _sequence = DOTween.Sequence();
+
+            // Scheduled at an absolute offset into the sequence's own timeline rather than
+            // Appended/Joined - fires independently alongside the fill/move animation below
+            // without delaying (or being delayed by) either.
+            _sequence.InsertCallback(_startSfxDelay, () => CardSfxPlayer.Play(_startSfx, transform.position));
 
             if (_waveImage != null)
             {

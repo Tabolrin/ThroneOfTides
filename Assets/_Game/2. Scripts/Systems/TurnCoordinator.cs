@@ -313,29 +313,43 @@ namespace ThroneOfTides.Systems
         // Not called on turn 1 - GameBootstrapper handles the opening hand deal.
         private IEnumerator AutoDrawRoutine()
         {
+            // Set here, before the settle delay below - not just before RefillPlayerHandRoutine's
+            // own loop - since the deck stays clickable through this delay too, and a click here
+            // would otherwise pass CanDraw()'s !HasDrawnThisTurn check the same way one during the
+            // refill's own card animations would. See RefillPlayerHandRoutine's remarks.
+            _gameState.SetHasDrawnThisTurn();
+
             yield return new WaitForSeconds(0.3f);
             yield return StartCoroutine(RefillPlayerHandRoutine());
             OnHPChanged?.Invoke();
         }
 
-        // Draws a fixed number of cards (MaxHandSize minus whatever's already in hand) rather
-        // than looping until the hand reaches MaxHandSize - a Reaction card still counts as one
-        // of this turn's draws even though it ends up as a badge charge instead of a hand card,
-        // so drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand, never with
-        // the draw continuing until 4 non-Reaction cards have been found.
+        // Draws until the player's total held resources (hand cards + already-charged reactions)
+        // reach MaxHandSize, re-checking after every single card rather than trusting a count
+        // computed once up front - see the remarks inside. A Reaction card still counts as one of
+        // this turn's draws even though it ends up as a badge charge instead of a hand card, so
+        // drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand, never with the
+        // draw continuing until 4 non-Reaction cards have been found.
         private IEnumerator RefillPlayerHandRoutine()
         {
             var pendingReactionCards = new List<CardSO>();
 
-            // MaxHandSize caps the player's total held resources - hand cards AND already-charged
-            // reactions together - not just the hand alone. Reaction charges are a persistent,
-            // match-long resource that never goes away on its own (only consumed by actually
-            // firing Dead Man's Turn/Counter Gale), so counting only PlayerHand.Count here would
-            // let the total climb past 4 turn after turn as more reaction cards get drawn and
-            // charged, without ever reducing how many MORE cards get drawn on top.
-            int currentTotal   = _gameState.PlayerHand.Count + _gameState.PlayerDeadMansTurnCharges + _gameState.PlayerCounterGaleCharges;
-            int drawsRemaining = _config.MaxHandSize - currentTotal;
-            for (int i = 0; i < drawsRemaining && _gameState.PlayerDeck.Count > 0; i++)
+            // Defensive duplicate - AutoDrawRoutine already sets this before calling here, closing
+            // the deck-click race for its own settle delay too. Kept here as well in case this
+            // routine is ever called from somewhere that doesn't already do that.
+            _gameState.SetHasDrawnThisTurn();
+
+            // Re-checked after every single card, not computed once up front - if the hand (plus
+            // already-charged reactions) is already at or above MaxHandSize when this runs (e.g. a
+            // Treasure Chest/Monkey Grab bonus pushed it past 4 last turn), this draws nothing at
+            // all and leaves the existing total exactly as it was; it only ever comes down once
+            // the player actually plays cards. pendingReactionCards.Count is added in because a
+            // reaction card drawn THIS loop sits in neither PlayerHand nor the charge counters yet
+            // (it only becomes a charge once AbsorbReactionCard runs, after the whole loop below
+            // finishes) - without counting it here too, several reactions drawn back to back would
+            // each look like they hadn't used up a slot, letting the loop keep going past MaxHandSize.
+            while (_gameState.PlayerHand.Count + _gameState.PlayerDeadMansTurnCharges + _gameState.PlayerCounterGaleCharges + pendingReactionCards.Count < _config.MaxHandSize
+                   && _gameState.PlayerDeck.Count > 0)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
                 if (drawn == null) break;
@@ -356,8 +370,6 @@ namespace ThroneOfTides.Systems
                 OnCardDrawn?.Invoke(drawn);
                 yield return StartCoroutine(_handLayout.AnimateManualDraw(drawn));
             }
-
-            _gameState.SetHasDrawnThisTurn();
 
             foreach (var card in pendingReactionCards)
                 StartCoroutine(AbsorbReactionCard(card));
@@ -380,16 +392,15 @@ namespace ThroneOfTides.Systems
             _gameState.ResetEnemyMana();
 
             // The enemy hand fully refills at the start of its turn too, mirroring the player -
-            // including the same fixed-draw-count rule: a Reaction card still counts as one of
-            // this turn's draws even though it charges a badge instead of occupying a hand slot,
-            // so drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand.
+            // drawing until its total held resources (hand + already-charged reactions) reach
+            // MaxHandSize, re-checked after every card rather than computed once up front - see
+            // RefillPlayerHandRoutine's remarks. Unlike the player's version, the enemy charges a
+            // drawn Reaction immediately (no deferred "sits in hand, then flies to badge" beat to
+            // account for), so the total is always accurate mid-loop with no extra bookkeeping.
             // EnemyAI.PickCard never plays Reaction-type cards, so leaving one in hand would
-            // strand it there permanently unplayable. Also mirrors the player's own fix: charges
-            // count toward the total so it can't climb past MaxHandSize turn after turn - see
-            // RefillPlayerHandRoutine's remarks.
-            int enemyCurrentTotal   = _gameState.EnemyHand.Count + _gameState.EnemyDeadMansTurnCharges + _gameState.EnemyCounterGaleCharges;
-            int enemyDrawsRemaining = _config.MaxHandSize - enemyCurrentTotal;
-            for (int i = 0; i < enemyDrawsRemaining && _gameState.EnemyDeck.Count > 0; i++)
+            // strand it there permanently unplayable.
+            while (_gameState.EnemyHand.Count + _gameState.EnemyDeadMansTurnCharges + _gameState.EnemyCounterGaleCharges < _config.MaxHandSize
+                   && _gameState.EnemyDeck.Count > 0)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
                 if (enemyDrawn == null) break;
