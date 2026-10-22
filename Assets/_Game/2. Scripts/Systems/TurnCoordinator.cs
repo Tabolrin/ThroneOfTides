@@ -441,7 +441,11 @@ namespace ThroneOfTides.Systems
                         _gameState.EnemyHand.CardsSO,
                         _gameState.EnemyMana - _gameState.EnemyNextCardManaSurcharge,
                         _gameState.EnemyHP,
-                        comboPrimed: _gameState.EnemyComboStackCount > 0 && _gameState.EnemyActiveComboCard != null,
+                        // The enemy's own Gunpowder sits on the PLAYER's ship (Barrel primes the
+                        // opponent - see CombatResolver.ResolveCombo), so that's the stack its Torch
+                        // would ignite. Reading the Enemy side here would instead react to Gunpowder
+                        // the player stacked on the enemy, which its Torch can't touch.
+                        comboPrimed: _gameState.PlayerComboStackCount > 0 && _gameState.PlayerActiveComboCard != null,
                         playerDeadMansTurnCharges: _gameState.PlayerDeadMansTurnCharges,
                         playerCounterGaleCharges: _gameState.PlayerCounterGaleCharges,
                         selfUnblockable: _gameState.SirenSongActive);

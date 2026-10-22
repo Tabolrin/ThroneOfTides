@@ -5391,8 +5391,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: ThroneOfTides.UI::ThroneOfTides.Systems.LevelSelectManager
   _progression: {fileID: 11400000, guid: a187623b98467744dae6a7cc037a219c, type: 2}
   _captain1: {fileID: 11400000, guid: b80708be8a473904e9ccb1be50f45cab, type: 2}
-  _captain2: {fileID: 11400000, guid: 1850d80bea5353d4a932cb947657e06e, type: 2}
-  _captain3: {fileID: 11400000, guid: cff2484e7af70d54a96a534f368b7798, type: 2}
+  _captain2: {fileID: 11400000, guid: cff2484e7af70d54a96a534f368b7798, type: 2}
+  _captain3: {fileID: 11400000, guid: 1850d80bea5353d4a932cb947657e06e, type: 2}
   _level1Button: {fileID: 14265795}
   _level2Button: {fileID: 2145501099}
   _level3Button: {fileID: 1666035188}

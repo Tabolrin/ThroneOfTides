@@ -15,6 +15,6 @@ MonoBehaviour:
   _rewardCards:
   - {fileID: 11400000, guid: 526f9f49f80f32a44b68ff440369494f, type: 2}
   - {fileID: 11400000, guid: e99ae19356c0e414daec202d36f21506, type: 2}
-  _highHPCoinReward: 50
-  _midHPCoinReward: 35
-  _lowHPCoinReward: 15
+  _highHPCoinReward: 60
+  _midHPCoinReward: 40
+  _lowHPCoinReward: 20
