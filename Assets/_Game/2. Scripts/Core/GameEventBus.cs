@@ -23,6 +23,10 @@ namespace ThroneOfTides.Core
         // the prompt is answered, not at commit time - so VFX spawners get the real target.
         public static event Action<ICard, DamageTarget?> OnCardPlayAccepted;
         public static event Action<ICard> OnPlayerCardRemoved;
+
+        // Extra mana the player's next card costs (Dead Man's Turn's surcharge) - 0 once a card
+        // has been played and the surcharge is used up. Lets the hand show the real cost.
+        public static event Action<int> OnPlayerManaSurchargeChanged;
         public static event Action<ICard, DamageTarget?> OnEnemyCardPlayed;
         public static event Action       OnEnemyCardAnimationComplete;
 
@@ -95,6 +99,7 @@ namespace ThroneOfTides.Core
         public static void FireCardCommitted(ICard card)                     => OnCardCommitted?.Invoke(card);
         public static void FireCardPlayAccepted(ICard card, DamageTarget? target = null) => OnCardPlayAccepted?.Invoke(card, target);
         public static void FirePlayerCardRemoved(ICard card)                 => OnPlayerCardRemoved?.Invoke(card);
+        public static void FirePlayerManaSurchargeChanged(int surcharge)     => OnPlayerManaSurchargeChanged?.Invoke(surcharge);
         public static void FireEnemyCardPlayed(ICard card, DamageTarget? target = null)  => OnEnemyCardPlayed?.Invoke(card, target);
         public static void FireEnemyCardPresentationReady(ICard card, DamageTarget? target = null) => OnEnemyCardPresentationReady?.Invoke(card, target);
         public static void FireEnemyCardAnimationComplete()                  => OnEnemyCardAnimationComplete?.Invoke();
@@ -126,6 +131,7 @@ namespace ThroneOfTides.Core
         {
             OnTurnPhaseChanged           = null;
             OnCardDrawn                  = null;
+            OnPlayerManaSurchargeChanged = null;
             OnCardPlayed                 = null;
             OnCardCommitted              = null;
             OnCardPlayAccepted           = null;

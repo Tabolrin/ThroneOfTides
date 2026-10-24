@@ -40,8 +40,17 @@ namespace ThroneOfTides.Systems
         // Extra mana cost tacked onto the very next card the player plays (e.g. Dead Man's Turn's
         // cost) - applied once, then cleared, regardless of what that next card turns out to be.
         public int PlayerNextCardManaSurcharge { get; private set; }
-        public void AddPlayerNextCardManaSurcharge(int amount) => PlayerNextCardManaSurcharge += amount;
-        public void ClearPlayerNextCardManaSurcharge() => PlayerNextCardManaSurcharge = 0;
+        public void AddPlayerNextCardManaSurcharge(int amount)
+        {
+            PlayerNextCardManaSurcharge += amount;
+            GameEventBus.FirePlayerManaSurchargeChanged(PlayerNextCardManaSurcharge);
+        }
+
+        public void ClearPlayerNextCardManaSurcharge()
+        {
+            PlayerNextCardManaSurcharge = 0;
+            GameEventBus.FirePlayerManaSurchargeChanged(0);
+        }
 
         // Mirror of PlayerNextCardManaSurcharge for when the enemy is the one spending its own
         // Dead Man's Turn charge - the same "-1 HP, next card +1 mana" cost must apply to

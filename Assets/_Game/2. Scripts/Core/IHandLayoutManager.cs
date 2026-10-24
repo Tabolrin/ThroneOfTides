@@ -17,6 +17,10 @@ namespace ThroneOfTides.Core
         /// otherwise gains (not stolen from an existing visible hand card).
         void AddCardToEnemyHand(ICard card);
 
+        /// Removes a card from the enemy's face-down hand display - used when an effect knocks a
+        /// card out of the enemy's hand (e.g. Chain Shot's discard).
+        void RemoveCardFromEnemyHand(ICard card);
+
         IEnumerator AnimateManualDraw(ICard card);
 
         /// Card already sits visually in the player's hand (dealt via AnimateManualDraw or the

@@ -185,15 +185,22 @@ namespace ThroneOfTides.Systems
             int    index = UnityEngine.Random.Range(0, hand.Count);
             CardSO card  = hand[index];
 
+            // The hand display has to drop the card too - previously only the data was updated,
+            // so the discarded card stayed on screen (and stayed playable) while the hand count
+            // said it was gone, which made the next turn-start refill draw the hand past 4.
             if (opponentIsEnemy)
             {
                 _gameState.EnemyHand.RemoveCard(card);
                 _gameState.DiscardEnemyCard(card);
+                _handLayout?.RemoveCardFromEnemyHand(card);
+                LogNote("Chain Shot knocked a card out of the enemy's hand.");
             }
             else
             {
                 _gameState.PlayerHand.RemoveCard(card);
                 _gameState.DiscardPlayerCard(card);
+                _handLayout?.RemoveCardFromPlayerHand(card);
+                LogNote($"Chain Shot knocked {card.Name} out of your hand.");
             }
         }
 

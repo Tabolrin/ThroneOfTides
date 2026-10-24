@@ -176,6 +176,7 @@ namespace ThroneOfTides.Systems
             if (!_gameState.CanPlayCard(cardSO))
             {
                 GameDebug.Log($"Cannot play {cardSO.Name} - check draw, mana, or play limit");
+                ExplainRejectedPlay(cardSO);
                 return;
             }
 
@@ -207,6 +208,25 @@ namespace ThroneOfTides.Systems
             }
 
             FinishHandleCardPlayed(cardSO, null);
+        }
+
+        // A refused card just snaps back to the hand, so say why in the match log. The usual
+        // reason is mana, and the confusing case is Dead Man's Turn's surcharge: it adds to the
+        // next card's cost (stacking if used more than once) without changing the number printed
+        // on the card, so a 2 mana Torch can't be played with 2 mana after using it.
+        private void ExplainRejectedPlay(CardSO card)
+        {
+            if (_gameState.MatchOver || card.CardType == CardType.Reaction) return;
+
+            int surcharge = _gameState.PlayerNextCardManaSurcharge;
+            int cost      = card.ManaCost + surcharge;
+            if (_gameState.PlayerMana >= cost) return;
+
+            string costText = surcharge > 0
+                ? $"{cost} ({card.ManaCost} + {surcharge} from Dead Man's Turn)"
+                : $"{cost}";
+            GameEventBus.FireMatchNote(
+                $"Not enough mana for {card.Name}: it costs {costText} and you have {_gameState.PlayerMana}.");
         }
 
         private IEnumerator PlayCardWithTargetSelection(CardSO cardSO)
@@ -496,12 +516,20 @@ namespace ThroneOfTides.Systems
                 yield return StartCoroutine(ResolveEnemyAttack(playedCard));
             else
             {
-                if (playedCard.CardType == CardType.Action && playedCard.AiPlayBeforeAttack)
-                    _combatResolver.ResolveCard(playedCard, DamageTarget.Enemy, _handLayout);
-
-                // No reaction prompt can ever gate a non-attack card, so its presentation is
-                // always safe to show right away.
+                // Presentation first, then resolve - the same order as the player's own plays
+                // (FireCardPlayAccepted before ResolvePlayerCard). Some VFX listen for their
+                // effect's result as it happens (Monkey Grab caches OnCardStolen to carry the
+                // stolen card across), so they have to exist before the effect runs. Resolving
+                // first made an enemy Monkey Grab take the card in data while leaving it on screen
+                // in the player's hand, and the next refill then overdrew the hand past 4.
+                // No reaction prompt can ever gate a non-attack card, so this is always safe now.
                 GameEventBus.FireEnemyCardPresentationReady(playedCard);
+
+                // Every enemy Action resolves. This used to be limited to cards flagged
+                // AiPlayBeforeAttack (an AI ordering hint, not a "has an effect" flag), so the
+                // enemy's Rum, High Spirits, Locker's Return, Treasure Chest and Recon Parrot cost
+                // mana and did nothing.
+                _combatResolver.ResolveCard(playedCard, DamageTarget.Enemy, _handLayout);
             }
 
             OnHPChanged?.Invoke();
@@ -654,6 +682,10 @@ namespace ThroneOfTides.Systems
                 if (krakenCard != null)
                 {
                     _gameState.PlayerHand.RemoveCard(krakenCard);
+                    // Nothing subscribes to NotifyPlayerCardRemoved's event, so the sacrificed
+                    // Kraken has to be taken out of the hand display directly - otherwise it stays
+                    // on screen while the hand count drops, and the next refill overdraws.
+                    _handLayout.RemoveCardFromPlayerHand(krakenCard);
                     _gameState.NotifyPlayerCardRemoved(krakenCard);
                     _gameState.DiscardPlayerCard(krakenCard);
                     _gameState.ApplyDamage(DamageTarget.Player, 3);

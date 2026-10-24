@@ -15669,3 +15669,189 @@ git commit -m "Fix progress resetting between scenes and saves lost in web build
 - New ThroneOfTides WebGL template, based on Minimal, with autoSyncPersistentDataPath on so browser saves survive a page reload.
 - The web canvas now fills the page so itch.io fullscreen scales it, and it takes keyboard focus on load and on click."
 ```
+
+**You:** the players went back to keep drawing cards on turn start even if it ends up surpassing the 4 cards in hand rule (shouldnt happen - only card effects shoul let the player have more than 5 cards in hand. the turn start draw is only to fill the hand back to 4 if it is lower than 4 - exactly 4 cards in hand? no draw. 3 cards in hand before turn start? 1 card draw etc.)
+
+**Claude:** Checking the current turn start draw code, since this was fixed before and may have been changed since.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n "AutoDrawRoutine\|RefillPlayerHandRoutine\|while (_gameState.PlayerHand.Count\|drawsRema`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && cat Data/Effects/ChainShotEffectSO.cs | sed -n 1,40p; echo ====; grep -rn "OnPlayerCardRemoved\|`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && cat Core/IHandLayoutManager.cs | sed -n 1,30p; sed -n 250,300p UI/HandLayoutManager.cs; grep -n`
+
+**Claude:** Both visual removals exist in `HandLayoutManager`, but neither effect calls them. Checking whether anything else implements the hand layout interface before I add the enemy-side removal to it.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -rn ": .*IHandLayoutManager\|IHandLayoutManager\b" --include=*.cs . | grep -n "class " ; se`
+
+**Claude:** Only `HandLayoutManager` implements it, so adding the enemy-side removal to the interface is safe. Making the three edits now.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Core\IHandLayoutManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\HandLayoutManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\CardEffectContext.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+
+**Claude:** Checking for any other place that removes a card from your hand data without updating the screen.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -rn "PlayerHand\.\(RemoveCard\|AddCard\)" --include=*.cs .`
+
+**Claude:** The other removals are covered except possibly line 171, the enemy's Monkey Grab stealing from you. Its on-screen move depends on the Monkey Grab animation finishing, so I'm checking that path.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n 86,106p App/GameBootstrapper.cs; grep -n "FinalizeStolenCardVisual\|OnCardStolen" -r --in`
+
+**Claude:** You're right: turn start should only top your hand back up to 4. The refill code already did that, but its count of your hand could fall below what you saw on screen. I've fixed the two effects that caused this. Unity MCP is disconnected, so none of it has been compiled or tested yet.
+
+**Why it happened:** the turn start draw relies on the game's own count of your hand, not on the cards drawn on screen. Two effects removed a card from that count but left it visible:
+
+- **The enemy's Chain Shot:** it has a 50% chance to discard a random card from your hand. Rumboat carries 3 Chain Shots and Loreley 2, so this came up a lot. The card disappeared from the game's count but stayed on screen, and it was even still playable as a ghost card.
+- **The Kraken standoff:** sacrificing your Kraken to block the enemy's removed it from the count. The game then announced the removal, but nothing in the hand display was listening, so the card stayed on screen.
+
+Either way, the game thought you held 3 cards while 4 were on screen. The next turn start drew 1 to reach "4", and you saw 5.
+
+**The fix:**
+- **[CardEffectContext.cs](Assets/_Game/2.%20Scripts/Systems/CardEffectContext.cs):** Chain Shot's discard now also removes the card from the hand on screen, for both your hand and the enemy's. The match log says which card was knocked out, for example "Chain Shot knocked Rum out of your hand."
+- **[TurnCoordinator.cs](Assets/_Game/2.%20Scripts/Systems/TurnCoordinator.cs):** a Kraken sacrificed in the standoff is now removed from your hand on screen.
+- **[IHandLayoutManager.cs](Assets/_Game/2.%20Scripts/Core/IHandLayoutManager.cs) and [HandLayoutManager.cs](Assets/_Game/2.%20Scripts/UI/HandLayoutManager.cs):** these now let effects remove a card from the enemy's hand display, which Chain Shot needs.
+
+I checked every other place a card enters or leaves your hand. Each one already updates both the count and the screen. The enemy's Monkey Grab is the one partial exception: the stolen card only leaves your screen once its animation finishes, but that doesn't change the count.
+
+To test, check the Unity console is clean, then fight Rumboat until his Chain Shot discard hits. You should see the card leave your hand and a match log line naming it. Your next turn should draw back up to exactly 4.
+
+**You:** also, at some point i had 2 energy but stll couldnt play the torch card that costs 1 mana. check why
+
+**Claude:** Checking Torch's actual cost and what the card shows on screen, since those two could disagree.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && grep -E "_name|_manaCost|_description" "4. Data/Cards/Attacks/TorchCardSO.asset" "4. Data/Cards/Attacks/Gun`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n 314,330p Systems/GameState.cs; grep -n "ClearPlayerNextCardManaSurcharge\|ResetTurnCardPl`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+
+**Claude:** Two things combined here. Torch costs **2** mana, not 1 (Gunpowder Barrel is the 1-mana card). And the extra cost came from **Dead Man's Turn**. Using it makes your next card cost +1 mana, so after a Dead Man's Turn that 2-mana Torch needed 3, and with 2 mana it bounced back.
+
+The surcharge adds up: two Dead Man's Turns before your next card add +2. It's also never shown on the card, which still reads its normal cost. The only hint is the match log line when you use Dead Man's Turn, which is easy to miss. I checked the other rules that can refuse a card, and none of them applied here.
+
+The cost rule itself is working as designed, so I didn't change it. What I changed is the feedback when a card is refused. Before, the card just snapped back to your hand without explanation. Now the match log says why, for example: *"Not enough mana for Torch: it costs 3 (2 + 1 from Dead Man's Turn) and you have 2."* That change is in [TurnCoordinator.cs](Assets/_Game/2.%20Scripts/Systems/TurnCoordinator.cs). Unity MCP is still disconnected, so it hasn't been compiled yet.
+
+A clearer fix would be to show the extra cost on the cards themselves. While a surcharge is pending, every card's mana number in your hand would show the raised cost in red, for example Torch showing 3. Then you'd see it before trying to play. Want me to add that?
+
+**You:** ahhh got it. is there an easy way to dynamically change the cost written on all the cards to be the updated +1 value while the higher cost is active and change it back down after the effect is resolved by card use?
+
+**Claude:** Yes, and it's a small change. GameState will announce whenever the surcharge changes. The hand display will then update the mana number on every card in your hand, plus any card that enters your hand while the surcharge is active. Reading the card display and hand code to find the right hooks.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n 95,150p UI/CardView.cs; grep -n "_playerCards.Add\|_playerCards.Insert\|void OnEnable\|vo`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n "private void Awake\|private void Start\|void OnDestroy\|private void RefreshPlayerLayou`
+
+**Claude:** Adding the event first.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Core\GameEventBus.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Core\GameEventBus.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Core\GameEventBus.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\GameState.cs`
+
+**Claude:** Now GameState fires the event whenever the surcharge changes.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\GameState.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CardView.cs`
+
+**Claude:** A reused card could keep the red color, so the normal setup also needs to reset it.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CardView.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\HandLayoutManager.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\HandLayoutManager.cs`
+
+**Claude:** Now the hand manager: it listens for the surcharge and reapplies it on every layout refresh.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\HandLayoutManager.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n "^using" UI/HandLayoutManager.cs; grep -n "GameEventBus" UI/HandLayoutManager.cs | head`
+
+**Claude:** Yes. While a Dead Man's Turn surcharge is pending, every card in your hand shows its real cost in red, and the number drops back as soon as you play a card. Unity MCP is still disconnected, so this hasn't been compiled or tested yet.
+
+How it behaves:
+- **Using Dead Man's Turn:** every card in your hand goes up by +1 in red, so Torch shows **3**. Using it twice before your next card shows +2.
+- **Playing a card:** the surcharge is used up and every remaining card drops back to its normal cost and color straight away.
+- **New cards while it's active:** cards drawn, stolen or dealt into your hand also show the raised cost.
+- **Inspecting a card:** shows the raised cost too.
+- **Other places:** the enemy's revealed cards, reward cards and Port cards always show the normal cost.
+
+What changed:
+- **[GameEventBus.cs](Assets/_Game/2.%20Scripts/Core/GameEventBus.cs):** a new event for when the surcharge changes.
+- **[GameState.cs](Assets/_Game/2.%20Scripts/Systems/GameState.cs):** fires that event whenever the surcharge is added or cleared.
+- **[CardView.cs](Assets/_Game/2.%20Scripts/UI/CardView.cs):** each card can now show its cost with the surcharge added. Recycled card objects also reset back to the normal color.
+- **[HandLayoutManager.cs](Assets/_Game/2.%20Scripts/UI/HandLayoutManager.cs):** updates every card in your hand when the surcharge changes, and again whenever the hand is laid out. That covers every way a card can enter your hand.
+
+To test it, check the Unity console is clean. Then in a battle, use Dead Man's Turn on an enemy attack. Your hand's costs should turn red and go up by 1. Play a card and they should return to normal.
+
+**You:** look at the last game's log. in a few different turn i still surpassed the 4 cards in hand post draw without having more than 4 before turn start.
+
+the cost thing works great
+
+**Claude:** Finding the latest log. A Windows build writes `Player.log`, and the Editor writes `Editor.log`.
+  - `Bash: ls -la "/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides/" 2>/dev/null; ls -la /c/Users/User/AppData/LocalLow/DefaultCompany/ 2>/dev/null; ls -la "`
+  - `Bash: cat "/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides/Player.log" | grep -vE "^\s*$" | head -60`
+
+**Claude:** That build log has no gameplay lines in it. The release build doesn't write the turn logs, so the game you mean must have been played in the Editor. Pulling the last match from `Editor.log`.
+  - `Bash: L="/c/Users/User/AppData/Local/Unity/Editor/Editor.log"; grep -n "Player Turn - HP\|Enemy Turn Ended\|Player Turn Ended\|Card played:\|Monkey Grab\|Treasure Che`
+
+**Claude:** The extracted log shows the turns but not the hand sizes. The stack traces under each "Player hand" line show which code added the card, so I'm reading that part of the match in full.
+  - `Bash: L="/c/Users/User/AppData/Local/Unity/Editor/Editor.log"; sed -n '51780,$p' "$L" | grep -vE "^\s*$|^\(Filename|UnityEngine.Debug:Log|UnityEngine.SetupCoroutine|U`
+
+**Claude:** Too noisy. I'll condense it to one line per event, keeping only the code that triggered each hand change.
+  - `Bash: python -I - "/c/Users/User/AppData/Local/Unity/Editor/Editor.log" <<'EOF' import sys,re t=open(sys.argv[1],encoding='utf-8',errors='replace').read() start=t.rfi`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n '/private IEnumerator PlayEnemyCard/,/^ }/p' Systems/TurnCoordinator.cs; grep -rn "Resolv`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && sed -n 40,110p "2. Scripts/Systems/VFX/ReconParrotVFXController.cs"; grep -A2 "_casterFilter" "4. Data/Card`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Write: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Data\Effects\ReconParrotEffectSO.cs`
+
+**Claude:** Checking that enemy Treasure Chest draws into the enemy's hand now that it actually resolves.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n 120,135p Systems/CombatResolver.cs`
+
+**Claude:** Your extra card came from the enemy's Monkey Grab: it stole a card from your hand but left it on screen. I've fixed that, along with a bigger bug in the same code where five enemy cards did nothing. Unity MCP is still disconnected, so none of this has been compiled or tested yet.
+
+**Your overdraw.** In your last game you ended a turn with 2 cards and the enemy then stole one, so the game's count said 1. The stolen card's animation is what moves it to the enemy's hand. When the enemy plays a card, the effect ran before that animation spawned, so the animation never saw the steal and the card stayed on screen. Your next refill drew 3 to get the count to 4, and you saw 5. The stolen card was also still playable as a ghost card. (The log line says "stole 1 card from enemy hand", but that text is misleading here: it was the enemy's Monkey Grab, stealing from you.)
+
+Fix: the enemy's non-attack cards now spawn their animation before their effect runs, the same order your own cards use ([TurnCoordinator.cs](Assets/_Game/2.%20Scripts/Systems/TurnCoordinator.cs)).
+
+**The bigger bug.** Enemy actions only took effect if they were marked to be played before attacks. That mark is just a hint for the AI's card order. Five enemy cards spent mana and did nothing:
+- Rum
+- High Spirits
+- Locker's Return
+- Treasure Chest
+- Recon Parrot
+
+They all work now. I'd already made these effects work correctly for either side earlier, so the enemy's versions heal the enemy, grow its mana, refill its deck and draw into its hand.
+
+**A side effect, also fixed.** Now that the enemy's Recon Parrot works, it would have opened the "revealed hand" panel showing your own cards. It now only reveals when you cast it. The enemy's parrot still flies but shows no panel ([ReconParrotEffectSO.cs](Assets/_Game/2.%20Scripts/Data/Effects/ReconParrotEffectSO.cs)).
+
+**Captains will be tougher.** Until now they've been fighting without those cards:
+- **Nurgle:** heals with 2 Rums and grows his mana with 3 High Spirits, which is his intended identity.
+- **Loreley:** heals, grows her mana and recovers cards with Locker's Return.
+- **Rumboat:** gets Rum and Treasure Chest.
+
+Every balance number I worked out earlier assumed those cards did nothing, so play a run of each captain to recheck the difficulty.
+
+To test, check the Unity console is clean, then fight Rumboat until he plays Monkey Grab. The stolen card should fly across to his hand, and your next turn should draw back up to exactly 4.
+
+**You:** write a short clear git commit message title and description
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git status --short | grep -v ".recall" && git log --oneline -3`
+
+**Claude:** This one covers the hand overdraw fixes, the enemy actions fix and the surcharge cost display. I also included the WebGL template's `.meta` files. Unity created them after the last commit, and they belong with the template you already committed. `UnityConnectSettings.asset` and the `.recall/` logs are left out again.
+
+**Title**
+```
+Fix hand overdraw, make enemy actions resolve and show surcharged costs
+```
+
+**Description**
+```
+- Enemy non-attack cards now spawn their VFX before resolving, matching
+  player plays. An enemy Monkey Grab took the card in data but left it on
+  screen, so the next refill overdrew the hand past 4.
+- Chain Shot's discard and the Kraken standoff sacrifice now remove the
+  card from the hand display too.
+- Every enemy Action now resolves. Rum, High Spirits, Locker's Return,
+  Treasure Chest and Recon Parrot used to cost mana and do nothing.
+- Recon Parrot only opens the reveal panel when the player casts it.
+- Cards in hand show their real cost in red while a Dead Man's Turn
+  surcharge is pending, and a refused play explains why in the match log.
+- Added the WebGL template's .meta files.
+```
+
+```bash
+git add "Assets/_Game/2. Scripts" Assets/WebGLTemplates.meta Assets/WebGLTemplates
+```
+
+```bash
+git commit -m "Fix hand overdraw, make enemy actions resolve and show surcharged costs" -m "- Enemy non-attack cards now spawn their VFX before resolving, matching player plays. An enemy Monkey Grab took the card in data but left it on screen, so the next refill overdrew the hand past 4.
+- Chain Shot's discard and the Kraken standoff sacrifice now remove the card from the hand display too.
+- Every enemy Action now resolves. Rum, High Spirits, Locker's Return, Treasure Chest and Recon Parrot used to cost mana and do nothing.
+- Recon Parrot only opens the reveal panel when the player casts it.
+- Cards in hand show their real cost in red while a Dead Man's Turn surcharge is pending, and a refused play explains why in the match log.
+- Added the WebGL template's .meta files."
+```

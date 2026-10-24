@@ -136,11 +136,40 @@ namespace ThroneOfTides.UI
             }
         }
 
+        // Shows the card's real cost while a surcharge (Dead Man's Turn) is pending - the base cost
+        // plus the extra, in red - and the normal cost again once it's 0. Called by
+        // HandLayoutManager for every card in the player's hand whenever the surcharge or the
+        // hand changes.
+        private static readonly Color ManaSurchargeColor = new Color(0.9f, 0.25f, 0.2f);
+        private Color _manaCostDefaultColor;
+        private bool  _manaCostColorCaptured;
+
+        public void SetManaSurcharge(int surcharge)
+        {
+            if (_manaCostLabel == null || CardData == null) return;
+
+            if (!_manaCostColorCaptured)
+            {
+                _manaCostDefaultColor  = _manaCostLabel.color;
+                _manaCostColorCaptured = true;
+            }
+
+            bool raised = surcharge > 0;
+            _manaCostLabel.text  = (CardData.ManaCost + (raised ? surcharge : 0)).ToString();
+            _manaCostLabel.color = raised ? ManaSurchargeColor : _manaCostDefaultColor;
+        }
+
         private void SetupCostBanner(CardSO card)
         {
             // ── Mana ──────────────────────────────────────────────────────────
             if (_manaCostBadge != null) _manaCostBadge.SetActive(true);
-            if (_manaCostLabel != null) _manaCostLabel.text = card.ManaCost.ToString();
+            if (_manaCostLabel != null)
+            {
+                _manaCostLabel.text = card.ManaCost.ToString();
+                // Pooled views get reused (enemy reveals, previews) - drop any surcharge red a
+                // previous player-hand card left behind.
+                if (_manaCostColorCaptured) _manaCostLabel.color = _manaCostDefaultColor;
+            }
 
             // ── HP cost ───────────────────────────────────────────────────────
             bool hasHPCost = card.HPCost > 0;

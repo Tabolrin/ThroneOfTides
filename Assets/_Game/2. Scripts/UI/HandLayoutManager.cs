@@ -195,6 +195,9 @@ namespace ThroneOfTides.UI
         void IHandLayoutManager.AddCardToEnemyHand(ICard card) =>
             AddCardToEnemyHand(card as CardSO);
 
+        void IHandLayoutManager.RemoveCardFromEnemyHand(ICard card) =>
+            RemoveCardFromEnemyHand(card as CardSO);
+
         // ICard parameter to satisfy interface - cast to CardSO internally
         IEnumerator IHandLayoutManager.AnimateManualDraw(ICard card) =>
             AnimateManualDraw(card as CardSO);
@@ -289,10 +292,37 @@ namespace ThroneOfTides.UI
             _playerCards.Clear();
         }
 
+        // ── Mana surcharge display ──────────────────────────────────────────
+
+        // The extra mana the player's next card costs (Dead Man's Turn). Every card in the hand
+        // shows its real cost while this is above 0 - applied on every layout refresh as well as
+        // on change, so cards drawn, stolen or dealt in while it's active pick it up too.
+        private int _manaSurcharge;
+
+        // Subscribed in Start rather than OnEnable - GameBootstrapper clears every bus listener in
+        // its OnDestroy, which can run after the next scene's OnEnable on a scene reload (Retry).
+        private void Start() => GameEventBus.OnPlayerManaSurchargeChanged += OnManaSurchargeChanged;
+
+        private void OnDestroy() => GameEventBus.OnPlayerManaSurchargeChanged -= OnManaSurchargeChanged;
+
+        private void OnManaSurchargeChanged(int surcharge)
+        {
+            _manaSurcharge = surcharge;
+            ApplyManaSurchargeToHand();
+        }
+
+        private void ApplyManaSurchargeToHand()
+        {
+            foreach (var view in _playerCards)
+                if (view != null) view.SetManaSurcharge(_manaSurcharge);
+        }
+
         private void RefreshPlayerLayout(bool animated)
         {
             _playerCards.RemoveAll(v => v == null);
             if (_playerCards.Count == 0) return;
+
+            ApplyManaSurchargeToHand();
 
             var inHand = _playerCards.FindAll(
                 v => v.transform.parent == _playerHandContainer);
