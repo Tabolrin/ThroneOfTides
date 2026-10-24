@@ -85,12 +85,9 @@ namespace ThroneOfTides.Tools
         // ── Build A: Development (Windows) ─────────────────────────────────────
         // Deliberately does NOT call ApplySceneOverrides - unlike every other build type here,
         // this one builds Match.unity exactly as it's currently authored in the Editor (whatever
-        // deck overrides, if any, are already sitting in GameBootstrapper's Inspector fields, and
-        // whatever active/inactive state the CheatsPanel/CardCheatPanel/ForceEnemyCardCheatPanel
-        // GameObjects are already in). Cheats still work regardless of their GameObject's own
-        // active state, since each panel's own Awake() only hides itself when
-        // !Debug.isDebugBuild - BuildOptions.Development below keeps that true, so they show up
-        // as long as nothing has explicitly deactivated them in the scene.
+        // deck overrides, if any, are already sitting in GameBootstrapper's Inspector fields).
+        // Cheat panels are hidden in every build type until the cheat code is typed - see
+        // CheatUnlock - so no build here needs to switch them on or off.
 
         [MenuItem("ThroneOfTides/Build/Development Build (Windows)  %#1")]
         public static void BuildDevelopment()
@@ -117,7 +114,7 @@ namespace ThroneOfTides.Tools
                 EditorUtility.DisplayDialog("Dev Build Complete",
                     $"Development build ready:\n{path}\n\n" +
                     "Built exactly as currently configured in the Editor - no deck/config overrides applied.\n" +
-                    "Profiler, debugger, and cheats enabled.",
+                    "Profiler and debugger enabled. Type the cheat code in game to show the cheat panels.",
                     "OK");
         }
 
@@ -147,7 +144,7 @@ namespace ThroneOfTides.Tools
                 options          = BuildOptions.None
             };
 
-            var backup = ApplySceneOverrides(BuildProfileType.Release, disableCheats: true);
+            var backup = ApplySceneOverrides(BuildProfileType.Release);
             BuildReport report;
             try
             {
@@ -204,7 +201,7 @@ namespace ThroneOfTides.Tools
             int originalHand = config.MaxHandSize;
 
             ApplyConfigOverride(config, PlaytestStartingHP, PlaytestMaxHandSize);
-            var backup = ApplySceneOverrides(BuildProfileType.Playtest, disableCheats: false);
+            var backup = ApplySceneOverrides(BuildProfileType.Playtest);
 
             BuildReport report;
             try
@@ -263,7 +260,7 @@ namespace ThroneOfTides.Tools
                 options          = BuildOptions.None
             };
 
-            var backup = ApplySceneOverrides(BuildProfileType.WebGL, disableCheats: true);
+            var backup = ApplySceneOverrides(BuildProfileType.WebGL);
             BuildReport report;
             try
             {
@@ -328,17 +325,18 @@ namespace ThroneOfTides.Tools
 
         // ── Per-Build-Type Scene Overrides ──────────────────────────────────────
         // Unity's BuildPipeline reads scenes from disk, not the in-memory Editor state, so any
-        // build-specific customization (which deck each side uses, whether Cheats is reachable)
-        // has to be written into Match.unity before the build and reverted after - otherwise the
-        // override would leak into the next Editor session or the next, differently-typed build.
+        // build-specific customization (which deck each side uses) has to be written into
+        // Match.unity before the build and reverted after - otherwise the override would leak
+        // into the next Editor session or the next, differently-typed build. Cheat panels are no
+        // longer switched off here - they stay hidden in every build until the cheat code is
+        // typed (see CheatUnlock), and deactivating the CheatsPanel GameObject would stop it from
+        // ever hearing that code.
 
         private class SceneOverrideBackup
         {
             public GameBootstrapper Bootstrapper;
             public DeckDefinitionSO OriginalPlayerDeckOverride;
             public DeckDefinitionSO OriginalEnemyDeckOverride;
-            public Component        CheatsPanelComponent;
-            public bool             OriginalCheatsActive;
 
             public void Restore()
             {
@@ -349,15 +347,12 @@ namespace ThroneOfTides.Tools
                 so.FindProperty("_enemyDeckOverride").objectReferenceValue  = OriginalEnemyDeckOverride;
                 so.ApplyModifiedPropertiesWithoutUndo();
 
-                if (CheatsPanelComponent != null)
-                    CheatsPanelComponent.gameObject.SetActive(OriginalCheatsActive);
-
                 EditorSceneManager.MarkAllScenesDirty();
                 EditorSceneManager.SaveOpenScenes();
             }
         }
 
-        private static SceneOverrideBackup ApplySceneOverrides(BuildProfileType profileType, bool disableCheats)
+        private static SceneOverrideBackup ApplySceneOverrides(BuildProfileType profileType)
         {
             EditorSceneManager.OpenScene(MatchScenePath, OpenSceneMode.Single);
 
@@ -371,17 +366,13 @@ namespace ThroneOfTides.Tools
             var so         = new SerializedObject(bootstrapper);
             var playerProp = so.FindProperty("_playerDeckOverride");
             var enemyProp  = so.FindProperty("_enemyDeckOverride");
-            var cheatsProp = so.FindProperty("_cheatsPanel");
 
             var backup = new SceneOverrideBackup
             {
                 Bootstrapper                = bootstrapper,
                 OriginalPlayerDeckOverride  = playerProp.objectReferenceValue as DeckDefinitionSO,
                 OriginalEnemyDeckOverride   = enemyProp.objectReferenceValue as DeckDefinitionSO,
-                CheatsPanelComponent        = cheatsProp.objectReferenceValue as Component,
             };
-            backup.OriginalCheatsActive = backup.CheatsPanelComponent != null
-                && backup.CheatsPanelComponent.gameObject.activeSelf;
 
             var profiles = AssetDatabase.LoadAssetAtPath<BuildDeckProfileSO>(BuildProfilesAssetPath);
             var profile  = profiles != null ? profiles.GetProfile(profileType) : null;
@@ -389,9 +380,6 @@ namespace ThroneOfTides.Tools
             if (profile?.PlayerDeck != null) playerProp.objectReferenceValue = profile.PlayerDeck;
             if (profile?.EnemyDeck  != null) enemyProp.objectReferenceValue  = profile.EnemyDeck;
             so.ApplyModifiedPropertiesWithoutUndo();
-
-            if (disableCheats && backup.CheatsPanelComponent != null)
-                backup.CheatsPanelComponent.gameObject.SetActive(false);
 
             EditorSceneManager.MarkAllScenesDirty();
             EditorSceneManager.SaveOpenScenes();

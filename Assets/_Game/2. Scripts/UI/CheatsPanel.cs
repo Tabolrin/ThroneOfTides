@@ -9,7 +9,7 @@ namespace ThroneOfTides.UI
 {
     /// <summary>
     /// Playtest-only debug panel - toggled by a button, grants HP/mana to either side on demand.
-    /// Auto-hides outside debug builds. To add a new cheat later: add a button in the scene,
+    /// Hidden until the cheat code is typed (see CheatUnlock). To add a new cheat later: add a button in the scene,
     /// wire its OnClick to a new GameState.Cheat* method (or a new method here if it needs the
     /// shared amount field), and call RefreshAfterCheat() - no other changes needed.
     /// </summary>
@@ -51,12 +51,6 @@ namespace ThroneOfTides.UI
 
         private void Awake()
         {
-            if (!Debug.isDebugBuild)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
-
             if (_panelRoot != null) _panelRoot.SetActive(false);
             if (_toggleButton != null) _toggleButton.onClick.AddListener(TogglePanel);
 
@@ -95,6 +89,23 @@ namespace ThroneOfTides.UI
             _gameState.CheatAddEnemyMana(amount);
 
             _onChanged?.Invoke();
+        }
+
+        // Hidden until the cheat code is typed (see CheatUnlock) - in every build, not just
+        // development ones. Only the toggle button is hidden, this component's own GameObject
+        // stays active so it keeps listening for the unlock.
+        private void OnEnable()
+        {
+            CheatUnlock.Changed += ApplyUnlockState;
+            ApplyUnlockState(CheatUnlock.IsUnlocked);
+        }
+
+        private void OnDisable() => CheatUnlock.Changed -= ApplyUnlockState;
+
+        private void ApplyUnlockState(bool unlocked)
+        {
+            if (_toggleButton != null) _toggleButton.gameObject.SetActive(unlocked);
+            if (!unlocked && _panelRoot != null) _panelRoot.SetActive(false);
         }
 
         private void TogglePanel()

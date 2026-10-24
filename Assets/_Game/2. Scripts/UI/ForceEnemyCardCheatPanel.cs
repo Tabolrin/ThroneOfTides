@@ -17,7 +17,7 @@ namespace ThroneOfTides.UI
     /// Mirrors CardCheatPanel's layout/behavior - same row prefab, same search-filter approach.
     /// Reaction cards (Dead Man's Turn/Counter Gale) are excluded: they're charged when drawn,
     /// not played as an action, so "playing" one here has no defined meaning.
-    /// Auto-hides outside debug builds, same convention as CardCheatPanel/CheatsPanel.
+    /// Hidden until the cheat code is typed, same convention as CardCheatPanel/CheatsPanel.
     /// </summary>
     public class ForceEnemyCardCheatPanel : MonoBehaviour
     {
@@ -52,12 +52,6 @@ namespace ThroneOfTides.UI
 
         private void Awake()
         {
-            if (!Debug.isDebugBuild)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
-
             if (_panelRoot != null) _panelRoot.SetActive(false);
             if (_toggleButton != null) _toggleButton.onClick.AddListener(TogglePanel);
             if (_searchField != null) _searchField.onValueChanged.AddListener(ApplySearchFilter);
@@ -74,6 +68,21 @@ namespace ThroneOfTides.UI
                 },
                 actionOnDestroy: entry => Destroy(entry.gameObject),
                 collectionCheck: false);
+        }
+
+        // Hidden until the cheat code is typed - see CheatsPanel.OnEnable.
+        private void OnEnable()
+        {
+            CheatUnlock.Changed += ApplyUnlockState;
+            ApplyUnlockState(CheatUnlock.IsUnlocked);
+        }
+
+        private void OnDisable() => CheatUnlock.Changed -= ApplyUnlockState;
+
+        private void ApplyUnlockState(bool unlocked)
+        {
+            if (_toggleButton != null) _toggleButton.gameObject.SetActive(unlocked);
+            if (!unlocked && _panelRoot != null) _panelRoot.SetActive(false);
         }
 
         private void TogglePanel()

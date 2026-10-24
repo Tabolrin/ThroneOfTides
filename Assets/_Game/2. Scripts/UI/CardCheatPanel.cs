@@ -13,7 +13,7 @@ namespace ThroneOfTides.UI
     /// <summary>
     /// Playtest-only debug panel - toggled by a button, lists every card in the CardDatabaseSO
     /// registry in a scrollable list; clicking a name adds that card to the player's hand.
-    /// Auto-hides outside debug builds, same convention as CheatsPanel.
+    /// Hidden until the cheat code is typed, same convention as CheatsPanel.
     /// </summary>
     public class CardCheatPanel : MonoBehaviour
     {
@@ -53,12 +53,6 @@ namespace ThroneOfTides.UI
 
         private void Awake()
         {
-            if (!Debug.isDebugBuild)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
-
             if (_panelRoot != null) _panelRoot.SetActive(false);
             if (_toggleButton != null) _toggleButton.onClick.AddListener(TogglePanel);
             if (_searchField != null) _searchField.onValueChanged.AddListener(ApplySearchFilter);
@@ -75,6 +69,21 @@ namespace ThroneOfTides.UI
                 },
                 actionOnDestroy: entry => Destroy(entry.gameObject),
                 collectionCheck: false);
+        }
+
+        // Hidden until the cheat code is typed - see CheatsPanel.OnEnable.
+        private void OnEnable()
+        {
+            CheatUnlock.Changed += ApplyUnlockState;
+            ApplyUnlockState(CheatUnlock.IsUnlocked);
+        }
+
+        private void OnDisable() => CheatUnlock.Changed -= ApplyUnlockState;
+
+        private void ApplyUnlockState(bool unlocked)
+        {
+            if (_toggleButton != null) _toggleButton.gameObject.SetActive(unlocked);
+            if (!unlocked && _panelRoot != null) _panelRoot.SetActive(false);
         }
 
         private void TogglePanel()
