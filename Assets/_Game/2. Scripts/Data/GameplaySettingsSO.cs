@@ -18,6 +18,15 @@ namespace ThroneOfTides.Data
         [Tooltip("Seconds the enemy's played-card reveal stays up before auto-dismissing. Ignored if RequireClickToDismissEnemyCard is true.")]
         [SerializeField] private float _enemyCardAutoDismissDuration = 1.5f;
 
+        // Same fix as ProgressionSO.OnEnable - the sea map and Port scenes don't reference this
+        // asset, so a built game unloads it there and reloads the build defaults on the next
+        // battle, silently undoing the player's saved setting. Re-reading the save on every load
+        // keeps it correct.
+        private void OnEnable()
+        {
+            if (Application.isPlaying) LoadFromDisk();
+        }
+
         public bool  RequireClickToDismissEnemyCard => _requireClickToDismissEnemyCard;
         public float EnemyCardAutoDismissDuration   => _enemyCardAutoDismissDuration;
 

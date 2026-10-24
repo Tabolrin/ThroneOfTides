@@ -14,6 +14,18 @@ namespace ThroneOfTides.Data
         public bool Level2Unlocked => _level1Beaten;
         public bool Level3Unlocked => _level2Beaten;
 
+        // In a built game Unity unloads this asset whenever a scene loads that doesn't reference it
+        // (the Port scene doesn't), then loads a fresh copy from the build the next time a scene
+        // needs it - with the authored defaults (nothing beaten), not the player's progress. That
+        // made a captain beaten before visiting the Port show as locked again on the map.
+        // Re-reading the save every time the asset is loaded keeps it correct whichever scenes
+        // the player passes through. Skipped outside Play Mode so editing the asset in the Editor
+        // never pulls save data into it.
+        private void OnEnable()
+        {
+            if (Application.isPlaying) LoadFromDisk();
+        }
+
         public bool Level1Beaten => _level1Beaten;
         public bool Level2Beaten => _level2Beaten;
         public bool Level3Beaten => _level3Beaten;

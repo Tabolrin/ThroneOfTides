@@ -15373,3 +15373,265 @@ What changed:
 Your own save probably still holds the old 95-storage deck. If so, the sea map will now refuse battles until you remove 15 storage worth of cards at the Port or reset your player data. That's also a quick way to test both checks.
 
 To test, switch back to Unity and check the console has no errors. Then open the Port and look for the red label and greyed-out Save. Finally, try a battle from the sea map and you should get the warning message.
+
+**You:** write a short clear git commit message title and description
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git status --short && git log --oneline -2`
+
+**Claude:** Here's the commit message. It covers only the storage-capacity work. The `.recall/` files are your local session logs, so the commands below leave them out. Base storage capacity isn't in the changes: it went from 80 to 100 and back to 80, so there's nothing to commit there.
+
+**Title**
+```
+Block saving decks and starting battles over storage capacity
+```
+
+**Description**
+```
+- The Port's Save button is disabled while the deck uses more storage
+  than the hold allows, and the storage label turns red and explains why.
+- The sea map refuses to sail into a battle with an over-capacity deck,
+  shows a short warning and lights the Port badge.
+- Exactly full is allowed, one point over is not.
+- The storage check now lives in PlayerInventory, so the Port and the
+  sea map always agree.
+- LevelSelect scene now references GameConfigSO and the Storage upgrade.
+```
+
+```bash
+git add "Assets/_Game/2. Scripts" "Assets/_Game/7. Scenes/LevelSelect.unity"
+```
+
+```bash
+git commit -m "Block saving decks and starting battles over storage capacity" -m "- The Port's Save button is disabled while the deck uses more storage than the hold allows, and the storage label turns red and explains why.
+- The sea map refuses to sail into a battle with an over-capacity deck, shows a short warning and lights the Port badge.
+- Exactly full is allowed, one point over is not.
+- The storage check now lives in PlayerInventory, so the Port and the sea map always agree.
+- LevelSelect scene now references GameConfigSO and the Storage upgrade."
+```
+
+**You:** <pasted_content id="3b7f">
+<p><strong>The seas are ruled by
+three legendary captains, and none of them will give up their waters
+without a fight.</strong></p>
+<p>Throne
+of Tides is a single-player, turn-based pirate card battler. You
+command a battered ship and a deck of cards. Every turn you spend
+mana to fire cannons, call down storms, steal from the enemy's hand
+and set up explosive combos, while the enemy captain tries to sink
+you first. Between battles you dock at the Port to upgrade your ship
+and rebuild your deck, then sail out to face the next captain.</p>
+<h2>Features</h2>
+<ul><li><strong>Every card costs
+	twice:</strong> Mana to play it in battle and storage space to carry it
+	in your hold. Building the deck is half the battle.</li><li><strong>Defense
+	that fights on its own:</strong> Reaction cards charge the moment you
+	draw them. When the enemy attacks, you choose on the spot to dodge
+	the hit, throw half of it back or save your charge.</li><li><strong>Combos
+	worth waiting for:</strong> Stack Gunpowder on the enemy hull, then light
+	the Torch for one huge explosion.</li><li><strong>No
+	second chances:</strong> Your deck never reshuffles, so every card you
+	play counts.</li><li><strong>Three
+	captains, three lessons:</strong> Each enemy has its own deck and
+	personality, and each one demands a different plan.</li><li><strong>Release
+	the Kraken:</strong> 20 unblockable damage, paid for in blood and gold.</li><li><strong>A
+	ship that grows with you:</strong> Earn coins and new cards, then upgrade
+	your hull, mana and cargo hold at the Port.</li></ul>
+<h2>The
+Captains</h2>
+<ul><li><strong>Captain Rumboat:</strong>
+	All fury and no defense. Survive the broadside.</li><li><strong>Captain
+	Loreley:</strong> Sirens, storms and stolen cards. Win the long war.</li><li><strong>Captain
+	Nurgle:</strong> Steals your mana and calls up the Kraken. Hit hard
+	before it hits back.</li></ul>
+<h2>How
+to Play</h2>
+<ul><li><strong>Play a card:</strong>
+	Drag it from your hand onto the battlefield.</li><li><strong>End
+	your turn:</strong> Press the End Turn button or Space.</li><li><strong>Read
+	a card or effect:</strong> Hover over it.</li><li><strong>Respond
+	to an attack:</strong> When the enemy attacks and you hold a reaction
+	charge, pick an option in the prompt.</li></ul>
+<p>Your
+mana refills every turn, and your hand tops back up to four cards.
+Sink the enemy ship by bringing its HP to 0. A ship also sinks when
+its deck and hand are both empty.</p>
+<h2>Good
+to Know</h2>
+<ul><li>Your progress saves
+	automatically in your browser. Clearing your browser data resets it.</li><li>Best
+	played on a desktop browser in fullscreen.</li><li>This
+	is an in-development build, so balance and content will keep
+	changing. Feedback is very welcome in the comments.</li></ul>
+<h2>Credits</h2>
+<ul><li><strong>Pe'er Malul:</strong>
+	Game designer and programmer</li><li><strong>Thai Lazover Besher:</strong>
+	Producer and Artist</li><li><strong>Eldar Itzkovitch:</strong>&nbsp;Tech artist &amp; sound designer</li></ul>
+<p>Made
+with Unity. Built with DOTween by Demigiant, Feel by More Mountains
+and Modern Water 2D. Fonts: New Rocker and Star Crush.&nbsp;</p>
+</pasted_content id="3b7f">
+
+redo this html stylizing of the text to look better in the description part of the itch page
+
+**Claude:** ```html
+<p style="text-align: center;"><strong>The seas are ruled by three legendary captains, and none of them will give up their waters without a fight.</strong></p>
+
+<p style="text-align: center;"><em>A single-player, turn-based pirate card battler</em></p>
+
+<hr>
+
+<p>You command a battered ship and a deck of cards. Every turn you spend mana to fire cannons, call down storms, steal from the enemy's hand and set up explosive combos, while the enemy captain tries to sink you first.</p>
+
+<p>Between battles you dock at the <strong>Port</strong> to upgrade your ship and rebuild your deck, then sail out to face the next captain.</p>
+
+<hr>
+
+<h2>Features</h2>
+
+<ul>
+  <li><strong>Every card costs twice.</strong> Mana to play it in battle and storage space to carry it in your hold. Building the deck is half the battle.</li>
+  <li><strong>Defense that fights on its own.</strong> Reaction cards charge the moment you draw them. When the enemy attacks, you choose on the spot to dodge the hit, throw half of it back or save your charge.</li>
+  <li><strong>Combos worth waiting for.</strong> Stack Gunpowder on the enemy hull, then light the Torch for one huge explosion.</li>
+  <li><strong>No second chances.</strong> Your deck never reshuffles, so every card you play counts.</li>
+  <li><strong>Three captains, three lessons.</strong> Each enemy has its own deck and personality, and each one demands a different plan.</li>
+  <li><strong>Release the Kraken.</strong> 20 unblockable damage, paid for in blood and gold.</li>
+  <li><strong>A ship that grows with you.</strong> Earn coins and new cards, then upgrade your hull, mana and cargo hold at the Port.</li>
+</ul>
+
+<hr>
+
+<h2>The Captains</h2>
+
+<h3>Captain Rumboat</h3>
+<p><em>All fury and no defense.</em> Survive the broadside.</p>
+
+<h3>Captain Loreley</h3>
+<p><em>Sirens, storms and stolen cards.</em> Win the long war.</p>
+
+<h3>Captain Nurgle</h3>
+<p><em>Steals your mana and calls up the Kraken.</em> Hit hard before it hits back.</p>
+
+<hr>
+
+<h2>How to Play</h2>
+
+<ul>
+  <li><strong>Play a card:</strong> Drag it from your hand onto the battlefield.</li>
+  <li><strong>End your turn:</strong> Press the End Turn button or <strong>Space</strong>.</li>
+  <li><strong>Read a card or effect:</strong> Hover over it.</li>
+  <li><strong>Respond to an attack:</strong> When the enemy attacks and you hold a reaction charge, pick an option in the prompt.</li>
+</ul>
+
+<p>Your mana refills every turn, and your hand tops back up to four cards. Sink the enemy ship by bringing its HP to 0. A ship also sinks when its deck and hand are both empty.</p>
+
+<hr>
+
+<h2>Good to Know</h2>
+
+<ul>
+  <li>Your progress saves automatically in your browser. Clearing your browser data resets it.</li>
+  <li>Best played on a desktop browser in fullscreen.</li>
+  <li>This is an in-development build, so balance and content will keep changing. Feedback is very welcome in the comments!</li>
+</ul>
+
+<hr>
+
+<h2>Credits</h2>
+
+<ul>
+  <li><strong>Pe'er Malul</strong> · Game designer and programmer</li>
+  <li><strong>Thai Lazover Besher</strong> · Producer and artist</li>
+  <li><strong>Eldar Itzkovitch</strong> · Tech artist and sound designer</li>
+</ul>
+
+<p><em>Made with Unity. Built with DOTween by Demigiant, Feel by More Mountains and Modern Water 2D. Fonts: New Rocker and Star Crush.</em></p>
+
+<hr>
+
+<p style="text-align: center;"><strong>Raise the sails. The throne is waiting.</strong></p>
+```
+
+Here's the restyled description. All of your text is still there.
+
+- **Opening:** the hook is centered and bold, and the genre now sits under it in italics, so the first paragraph starts right in on the story.
+- **Captains:** each captain gets their own small heading, with the italic line as their personality and the plain line as the advice. This reads much better than three bullets in a row.
+- **Features:** the labels end in a period instead of a colon, which reads more naturally since each one is a full sentence.
+- **Credits:** each name and role is separated by a centered dot, and the "made with" line is in italics so it reads as fine print.
+- **Line breaks:** the stray mid-sentence line breaks left over from Word are gone, and divider lines now separate the sections.
+- **Closing line:** I added "Raise the sails. The throne is waiting." from your High Concept doc. Delete it if you'd rather end on the credits.
+
+I made two small wording edits for consistency: "Producer and Artist" became "Producer and artist", and "&" became "and" in Eldar's role.
+
+To paste it, use the HTML or source view in itch.io's description editor rather than the normal text view. If itch.io strips the centering, those lines just become left-aligned and nothing else breaks.
+
+**You:** for some reason even after defeating level 1 level 2 was still locked, please ceck why
+
+**Claude:** Tracing the unlock path: what records the win, what the map reads, and whether they use the same progression asset.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && sed -n 1,70p "2. Scripts/UI/ResultsPanel.cs"; echo ====; grep -rn "LoadFromDisk\|SetLevelBeaten\|\.Reset()"`
+
+**Claude:** All three scenes point at the same progression asset, so that's not it. Checking how the level index reaches the results screen.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -rn "GameSession\.\(Clear\|SetLevel\|SelectedLevelIndex\)" --include=*.cs .; sed -n 14,40p`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && sed -n 19590,19612p "7. Scenes/Match.unity" | grep -E "m_EditorClassIdentifier|_progression|_playerInventor`
+  - `Bash: LIB="/c/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/lib"; grep -n "syncfs" "$LIB/FileSystem.js" | head -20; g`
+  - `Bash: LIB="/c/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/lib"; sed -n 1,45p "$LIB/FileSystem.js"; grep -rn "JS_Fil`
+  - `Bash: T="/c/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/WebGLTemplates"; ls "$T"; grep -n "autoSync\|createUnityIns`
+  - `Bash: T="/c/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/WebGLTemplates"; find "$T" -maxdepth 3 | head -30; grep -rl`
+  - `Bash: T="/c/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/WebGLTemplates/Base/Minimal"; cat "$T/index.html"; ls "$T/T`
+  - `Bash: SRC="/c/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/WebGLTemplates/Base/Minimal"; DST="/c/Unity Projects/Thro`
+  - `Write: C:\Unity Projects\ThroneOfTides\Assets\WebGLTemplates\ThroneOfTides\index.html`
+
+**Claude:** Now pointing the WebGL build at this template.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && sed -i 's/^ webGLTemplate: APPLICATION:Minimal\r\?$/ webGLTemplate: PROJECT:ThroneOfTides/' ProjectSettings/ProjectSetti`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && file ProjectSettings/ProjectSettings.asset; grep -c $'\r' ProjectSettings/ProjectSettings.asset`
+
+**Claude:** The web build was losing all saved progress whenever the page reloaded, so Level 2 showed as locked again. I've fixed this in the project's web settings. It takes effect from the next WebGL build, and I haven't been able to test it yet.
+
+**Why it happened:** Unity 6 web builds keep save files in memory and only write them to the browser's permanent storage if the web page turns on an `autoSyncPersistentDataPath` option. The page in your build has that option commented out, and the Minimal template you switched to doesn't include it at all. So your win was saved, but only in memory. Reloading the page, revisiting it on itch.io or refreshing after an update threw it away. The same was true for coins, cards, your deck and upgrades.
+
+I also checked everything inside the game:
+- The results screen marks the level as beaten.
+- The level number is passed through correctly.
+- The progression save happens immediately.
+- The main menu, map and battle all use the same progression data.
+
+All of that is correct. Within one session, Level 2 does unlock.
+
+**The fix:** I added a project web page template at `Assets/WebGLTemplates/ThroneOfTides/` and set it as the WebGL template in Player Settings. It's Unity's Minimal page with three changes:
+- **Saving:** browser storage sync is turned on, so progress survives reloads.
+- **Fullscreen:** the game fills the frame instead of staying a fixed 1280 x 720 box, so itch.io's fullscreen button now actually enlarges it.
+- **Keyboard:** the game takes keyboard focus on load and on click, so Space for End Turn and the cheat code work straight away.
+
+**What to do:**
+1. Switch back to Unity. In Player Settings > Resolution and Presentation, check that **ThroneOfTides** is the selected WebGL template. I edited the settings file directly, so confirm Unity didn't overwrite it.
+2. Make a new WebGL build, zip it and upload it to itch.io.
+3. Test it there: beat Rumboat, reload the page, and check that Loreley is unlocked and your coins are still there.
+
+Progress lost in earlier sessions can't be recovered, so players start fresh after this update. If Level 2 also stayed locked without a page reload, or in the Windows build, tell me. That would be a different cause.
+
+**You:** the problem happened on the windows build. i wiped the save file, fought one fight and lost, then fought again and won. the next level was still greyed out in the map
+
+**Claude:** Since it happened on Windows, the browser save issue isn't the cause. Your sequence (lose, retry, win) points at the retry path, so I'm tracing what happens when the battle scene reloads.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n "void Awake\|void Start\|void OnDestroy\|void OnEnable\|void OnDisable\|SubscribeToEvent`
+
+**Claude:** Found the likely cause, and it's specific to built games. Checking which scenes keep the progression data loaded.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && P=$(grep guid "4. Data/ProgressionSO.asset.meta" | awk '{print $2}'); I=$(grep guid "4. Data/PlayerInventor`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Data\GameplaySettingsSO.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Data\PorgressionSO.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Data\GameplaySettingsSO.cs`
+
+**Claude:** I've fixed this, but haven't tested it yet. The cause is most likely the Port. The Port scene is the only one that doesn't reference the progression data, and that matters in a built game. The lose-then-retry part of your run didn't affect it.
+
+**What happens:**
+1. Your win was recorded and saved to disk correctly.
+2. When you left the battle for the Port, Unity freed the progression data from memory, because nothing in the Port scene uses it. Built games free assets like this when a scene loads. The Editor keeps everything loaded, which is why it never showed up there.
+3. When you sailed back to the map, Unity loaded a fresh copy from the build's original data, where no level is beaten. The save file was only re-read when the main menu opened, so the map showed Level 2 as locked.
+
+**The fix:** [PorgressionSO.cs](Assets/_Game/2.%20Scripts/Data/PorgressionSO.cs) now re-reads the save file every time Unity loads it. The map shows the right levels whichever scenes the player passes through. This doesn't affect the Editor outside Play Mode.
+
+**A second issue with the same cause:** your gameplay setting for how the enemy's played card is dismissed was quietly resetting too. The map and Port don't reference those settings either. [GameplaySettingsSO.cs](Assets/_Game/2.%20Scripts/Data/GameplaySettingsSO.cs) has the same fix. Coins, deck and cards were never at risk, because every scene references the player inventory.
+
+**To confirm the cause and test the fix:**
+1. Can you tell me if you went to the Port after the win, before checking the map? That's the route that triggers it.
+2. Check the Unity console is clean, make a Windows build and reset your player data.
+3. Beat Rumboat, go to the Port, then the map. Loreley should be unlocked.
+
+There's one more possible bug in the same area, which I haven't confirmed. When a scene reloads (for example the Retry button), the old battle clears all game events when it closes. Some UI hooks into those events as soon as it appears, including the match log, effect badges and card effects. If the old battle's cleanup runs after the new battle's UI has hooked in, that UI would stop updating after a Retry. Next time you retry a battle, watch whether the match log and effect badges still update. If they don't, tell me and I'll fix it.
