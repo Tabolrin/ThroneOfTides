@@ -146,6 +146,31 @@ namespace ThroneOfTides.Data
             }
         }
 
+        // ── Deck Storage ──────────────────────────────────────────────────────
+
+        // Single source of truth for "does the active deck fit in the hold" - shared by the Port
+        // (Save button) and the sea map (starting a battle) so both always agree. Exactly at
+        // capacity is allowed, one point over is not.
+        public int GetDeckStorageUsed()
+        {
+            int used = 0;
+            if (_playerDeck == null) return used;
+            foreach (var entry in _playerDeck.Cards)
+                if (entry.Card != null) used += entry.Card.StorageCost * entry.Count;
+            return used;
+        }
+
+        public int GetStorageCapacity(GameConfigSO config, UpgradeSO storageUpgrade)
+        {
+            int bonus = storageUpgrade != null
+                ? storageUpgrade.GetValueAtLevel(GetUpgradeLevel(UpgradeType.MaxStorage))
+                : 0;
+            return config.BaseStorageCapacity + bonus;
+        }
+
+        public bool IsDeckOverCapacity(GameConfigSO config, UpgradeSO storageUpgrade) =>
+            GetDeckStorageUsed() > GetStorageCapacity(config, storageUpgrade);
+
         // ── Power-Ups ─────────────────────────────────────────────────────────
 
         public void AddPowerUp(PowerUpSO powerUp)

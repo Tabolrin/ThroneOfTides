@@ -36,6 +36,12 @@ namespace ThroneOfTides.UI
         private DeckDefinitionSO _deck;
         public  int              MaxStorage { get; private set; }
 
+        // Exactly at capacity is fine, one point over is not. Only possible for a deck loaded from
+        // an older save (or a lowered base capacity) - TryAddCard never lets the player go over.
+        public bool IsOverCapacity => GetStorageUsed() > MaxStorage;
+
+        private Color _storageLabelDefaultColor;
+
         private ObjectPool<PortCardRow> _rowPool;
 
         // ── Init ───────────────────────────────────────────────────────────────
@@ -61,7 +67,12 @@ namespace ThroneOfTides.UI
             _deck      = deck;
             MaxStorage = maxStorage;
 
-            _saveButton.onClick.AddListener(() => OnSaveRequested?.Invoke());
+            if (_storageLabel != null) _storageLabelDefaultColor = _storageLabel.color;
+
+            _saveButton.onClick.AddListener(() =>
+            {
+                if (!IsOverCapacity) OnSaveRequested?.Invoke();
+            });
 
             Refresh();
         }
@@ -174,10 +185,19 @@ namespace ThroneOfTides.UI
 
         private void UpdateStorageDisplay()
         {
-            int used = GetStorageUsed();
+            int  used = GetStorageUsed();
+            bool over = used > MaxStorage;
 
             if (_storageLabel != null)
-                _storageLabel.text = $"Storage: {used} / {MaxStorage}";
+            {
+                _storageLabel.text  = over
+                    ? $"Storage: {used} / {MaxStorage} (over capacity, remove cards to save)"
+                    : $"Storage: {used} / {MaxStorage}";
+                _storageLabel.color = over ? StorageFull : _storageLabelDefaultColor;
+            }
+
+            // Saving an over-capacity deck is blocked - the button greys out until it fits.
+            if (_saveButton != null) _saveButton.interactable = !over;
 
             if (_storageBar != null)
             {

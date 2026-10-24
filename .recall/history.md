@@ -15314,3 +15314,96 @@ git commit -m "Gate cheat panels behind a typed code and polish the web build" -
 ```
 
 Decompression Fallback is still off in your WebGL settings. If the itch.io page shows a loading error, turn it on in Player Settings and rebuild.
+
+**You:** it seems the starting deck is still over the 80 limit. lets keep the deck as is and increase the starting storage capacity to 100
+
+**Claude:** Checking what the starter deck actually costs right now and where the base capacity comes from.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/4. Data" && python -I - <<'EOF' import glob,re,os st={} for p in glob.glob("Cards/*/*.asset"): t=open(p,encodin`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/4. Data" && sed -i 's/^ BaseStorageCapacity: 80$/ BaseStorageCapacity: 100/' GameConfigSO.asset && grep -n "Bas`
+
+**Claude:** I've raised the starting storage capacity from 80 to 100 (`BaseStorageCapacity` in [GameConfigSO.asset](Assets/_Game/4.%20Data/GameConfigSO.asset)). The starter deck is unchanged, so new players now start with 20 storage free, and with all three Storage upgrades the maximum goes from 170 to 190.
+
+The starter deck files themselves were never over 80. Both the starter template and the player deck still come to exactly 80. The over-80 number you saw almost certainly comes from your save file, which loads the deck you saved over the starter deck. If that save still holds the old 30 card deck, it uses 95 storage. To check, run **Options → Reset Player Data**, then look at the Port. Either way, that deck now fits under 100.
+
+The design documents still say base storage is 80 and the deck "fills storage exactly". That affects the GDD, both HLDs, the balance model and spreadsheet, the iteration log and the player journey doc. Want me to update them to 100?
+
+**You:** change it back to 80, and make sure the player cant start a fight or save a deck if his capacity usage is more than he his (100% capacity is fine, 101% is not)
+
+**Claude:** Reverting to 80 first, then reading the Port and sea map code to see where to put the two checks.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && sed -i 's/^ BaseStorageCapacity: 100$/ BaseStorageCapacity: 80/' "4. Data/GameConfigSO.asset" && grep -n "B`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortManager.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Data\PlayerInventory.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortManager.cs`
+
+**Claude:** Now the Port deck editor: blocking Save and flagging the over-capacity state.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+
+**Claude:** Now the sea map: refusing to sail into battle with an over-capacity deck.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+
+**Claude:** Wiring the config and Storage upgrade into the sea map scene so the check is active, then checking the DOTween fade I used is available in that assembly.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && CFG=$(grep guid "4. Data/GameConfigSO.asset.meta" | awk '{print $2}'); UPG=$(grep guid "4. Data/Upgrades/Up`
+
+**Claude:** I've set base storage back to 80 and added both checks, but I haven't tested any of it. Unity MCP is still disconnected, so the code hasn't compiled and I had to edit the sea map scene file by hand.
+
+**Port**
+- If the deck uses more storage than the hold allows, the Save button greys out.
+- The storage label turns red and reads "Storage: 95 / 80 (over capacity, remove cards to save)".
+- As soon as the deck fits (100% included), Save works again.
+- Adding cards was already capped at capacity. That's why an over-limit deck can only come from an older save.
+
+**Sea map**
+- Clicking a captain while the deck is over capacity keeps the ship where it is.
+- A message appears at the top of the screen for a few seconds: "Your deck uses 95 of 80 storage. Remove cards at the Port before sailing into battle."
+- The Port badge lights up, and the Port itself stays open.
+
+What changed:
+- **Shared check:** the "storage used vs capacity" calculation now lives in [PlayerInventory.cs](Assets/_Game/2.%20Scripts/Data/PlayerInventory.cs). Both screens use it, so they always agree.
+- **[PortDeckEditor.cs](Assets/_Game/2.%20Scripts/UI/PortDeckEditor.cs) and [PortManager.cs](Assets/_Game/2.%20Scripts/UI/PortManager.cs):** the blocked Save button and over-capacity label.
+- **[LevelSelectManager.cs](Assets/_Game/2.%20Scripts/UI/LevelSelectManager.cs):** the refusal to sail and the warning message.
+- **`LevelSelect.unity`:** the sea map now has the game config and Storage upgrade assigned. If those links are ever missing, the check is skipped rather than locking you out of battles.
+
+Your own save probably still holds the old 95-storage deck. If so, the sea map will now refuse battles until you remove 15 storage worth of cards at the Port or reset your player data. That's also a quick way to test both checks.
+
+To test, switch back to Unity and check the console has no errors. Then open the Port and look for the red label and greyed-out Save. Finally, try a battle from the sea map and you should get the warning message.
+
+**You:** write a short clear git commit message title and description
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git status --short && git log --oneline -2`
+
+**Claude:** Here's the commit message. It covers only the storage-capacity work. The `.recall/` files are your local session logs, so the commands below leave them out. Base storage capacity isn't in the changes: it went from 80 to 100 and back to 80, so there's nothing to commit there.
+
+**Title**
+```
+Block saving decks and starting battles over storage capacity
+```
+
+**Description**
+```
+- The Port's Save button is disabled while the deck uses more storage
+  than the hold allows, and the storage label turns red and explains why.
+- The sea map refuses to sail into a battle with an over-capacity deck,
+  shows a short warning and lights the Port badge.
+- Exactly full is allowed, one point over is not.
+- The storage check now lives in PlayerInventory, so the Port and the
+  sea map always agree.
+- LevelSelect scene now references GameConfigSO and the Storage upgrade.
+```
+
+```bash
+git add "Assets/_Game/2. Scripts" "Assets/_Game/7. Scenes/LevelSelect.unity"
+```
+
+```bash
+git commit -m "Block saving decks and starting battles over storage capacity" -m "- The Port's Save button is disabled while the deck uses more storage than the hold allows, and the storage label turns red and explains why.
+- The sea map refuses to sail into a battle with an over-capacity deck, shows a short warning and lights the Port badge.
+- Exactly full is allowed, one point over is not.
+- The storage check now lives in PlayerInventory, so the Port and the sea map always agree.
+- LevelSelect scene now references GameConfigSO and the Storage upgrade."
+```

@@ -5404,6 +5404,10 @@ MonoBehaviour:
   _portButton: {fileID: 723261639}
   _portNotificationBadge: {fileID: 1946883528}
   _playerInventory: {fileID: 11400000, guid: f0b136fd79297de4ca7bf4a3943080f5, type: 2}
+  _config: {fileID: 11400000, guid: 9e980ee082354a844bf0a1ee974b4207, type: 2}
+  _storageUpgrade: {fileID: 11400000, guid: fe6826728167e714a8a6a355ee55d062, type: 2}
+  _deckWarningLabel: {fileID: 0}
+  _deckWarningDuration: 3.5
   _mainMenuButton: {fileID: 707685969}
   _shipIcon: {fileID: 635190897}
   _shipSpeed: 350

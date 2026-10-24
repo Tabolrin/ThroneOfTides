@@ -38,6 +38,14 @@ namespace ThroneOfTides.Systems
         [SerializeField] private GameObject _portNotificationBadge;
         [SerializeField] private PlayerInventory _playerInventory;
 
+        [Header("Deck Capacity Check")]
+        [Tooltip("Used with the Storage upgrade below to work out the hold's capacity - a battle can't be started while the deck uses more storage than that. Leave empty to skip the check.")]
+        [SerializeField] private GameConfigSO _config;
+        [SerializeField] private UpgradeSO    _storageUpgrade;
+        [Tooltip("Optional - shown when a battle is refused because the deck is over capacity. Created at runtime near the top of the screen if left empty.")]
+        [SerializeField] private TextMeshProUGUI _deckWarningLabel;
+        [SerializeField] private float _deckWarningDuration = 3.5f;
+
         [Header("Navigation")]
         [SerializeField] private Button _mainMenuButton;
 
@@ -236,6 +244,8 @@ namespace ThroneOfTides.Systems
 
         private void OnLevelSelected(CaptainSO captain, int levelIndex)
         {
+            if (!DeckFitsInHold()) return;
+
             GameSession.SetLevel(captain, levelIndex);
 
             MapNode destination = levelIndex switch
@@ -333,6 +343,76 @@ namespace ThroneOfTides.Systems
             _level3Button.interactable = value && _progression.Level3Unlocked;
             if (_portButton != null) _portButton.interactable = value;
             _mainMenuButton.interactable = value;
+        }
+
+        // ── Deck Capacity ──────────────────────────────────────────────────────
+
+        // A battle can't start while the deck uses more storage than the hold allows (exactly
+        // full is fine). That can only happen with a deck loaded from an older save, since the
+        // Port never lets a card be added past capacity. Refuses the trip instead of sailing,
+        // explains why and points the player at the Port. A scene missing the config reference
+        // skips the check rather than locking the player out of every battle.
+        private bool DeckFitsInHold()
+        {
+            if (_playerInventory == null || _config == null) return true;
+
+            int used     = _playerInventory.GetDeckStorageUsed();
+            int capacity = _playerInventory.GetStorageCapacity(_config, _storageUpgrade);
+            if (used <= capacity) return true;
+
+            ShowDeckWarning($"Your deck uses {used} of {capacity} storage.\n" +
+                            "Remove cards at the Port before sailing into battle.");
+            if (_portNotificationBadge != null) _portNotificationBadge.SetActive(true);
+            return false;
+        }
+
+        private void ShowDeckWarning(string message)
+        {
+            if (_deckWarningLabel == null) _deckWarningLabel = CreateDeckWarningLabel();
+            if (_deckWarningLabel == null)
+            {
+                Debug.LogWarning($"[LevelSelect] {message}");
+                return;
+            }
+
+            var group = _deckWarningLabel.GetComponent<CanvasGroup>();
+            if (group == null) group = _deckWarningLabel.gameObject.AddComponent<CanvasGroup>();
+
+            _deckWarningLabel.text = message;
+            _deckWarningLabel.gameObject.SetActive(true);
+            _deckWarningLabel.transform.SetAsLastSibling();
+
+            group.DOKill();
+            group.alpha = 1f;
+            group.DOFade(0f, 0.6f).SetDelay(_deckWarningDuration);
+        }
+
+        // Builds a simple centered label at the top of the map's canvas, reusing the level
+        // labels' font so it matches the map's look without any extra scene setup.
+        private TextMeshProUGUI CreateDeckWarningLabel()
+        {
+            Canvas canvas = _mainMenuButton != null ? _mainMenuButton.GetComponentInParent<Canvas>() : null;
+            if (canvas == null) return null;
+
+            var go = new GameObject("DeckWarningLabel", typeof(RectTransform));
+            go.transform.SetParent(canvas.rootCanvas.transform, false);
+
+            var rect = (RectTransform)go.transform;
+            rect.anchorMin        = new Vector2(0.5f, 1f);
+            rect.anchorMax        = new Vector2(0.5f, 1f);
+            rect.pivot            = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -60f);
+            rect.sizeDelta        = new Vector2(1200f, 140f);
+
+            var label = go.AddComponent<TextMeshProUGUI>();
+            if (_level1Label != null) label.font = _level1Label.font;
+            label.fontSize      = 38f;
+            label.alignment     = TextAlignmentOptions.Center;
+            label.color         = new Color(1f, 0.82f, 0.55f);
+            label.raycastTarget = false;
+
+            go.AddComponent<CanvasGroup>().blocksRaycasts = false;
+            return label;
         }
 
         // A nudge, not a gate - lights up when there's coin sitting unspent or a card the

@@ -97,6 +97,15 @@ namespace ThroneOfTides.App
 
         private void SaveDeck()
         {
+            // Backstop for the editor's own disabled Save button - a deck over storage capacity
+            // (e.g. loaded from an older save) can't be saved until cards are removed.
+            if (_deckEditor.IsOverCapacity)
+            {
+                Debug.Log($"[Port] Deck not saved - over storage capacity " +
+                          $"({_deckEditor.GetStorageUsed()} / {_deckEditor.MaxStorage})");
+                return;
+            }
+
             // Persists to disk (see PlayerInventory.Save) so the deck survives an actual build,
             // not just the current Editor session.
             _playerInventory.Save();
@@ -105,14 +114,8 @@ namespace ThroneOfTides.App
 
         // ── Helpers ────────────────────────────────────────────────────────────
 
-        private int ComputeEffectiveStorage()
-        {
-            int bonus = _storageUpgrade != null
-                ? _storageUpgrade.GetValueAtLevel(
-                    _playerInventory.GetUpgradeLevel(UpgradeType.MaxStorage))
-                : 0;
-            return _config.BaseStorageCapacity + bonus;
-        }
+        private int ComputeEffectiveStorage() =>
+            _playerInventory.GetStorageCapacity(_config, _storageUpgrade);
 
         private void RefreshCoins()
         {

@@ -15191,3 +15191,185 @@ To check it:
 1. Switch back to Unity and make sure the console shows no errors.
 2. Make a WebGL build.
 3. Confirm both Quit buttons are gone.
+
+**You:** how should i build the game for windows without the cheats panels?
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n 124,172p Tools/Build/ThroneOfTidesBuildPipeline.cs; grep -n "disableCheats\|CheatPanel\|C`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && sed -n 50,62p UI/CheatsPanel.cs; sed -n 360,400p Tools/Build/ThroneOfTidesBuildPipeline.cs | gre`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && sed -n 124,131p "2. Scripts/App/GameBootstrapper.cs"; grep -n "_playerDeck:" "4. Data/PlayerInventoryTEMP.a`
+
+**You:** [Request interrupted by user]
+
+**You:** i want the cheats panels to be hidden by default but accessible using a "cheat code" of sorts that eables them (both on web and windows ports) - how is it best to enable this?
+
+**Claude:** You want the cheats hidden by default in every build, then unlocked with a typed code. Reading the three cheat panels to see how they hide today.
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CheatsPanel.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/UI" && sed -n 1,90p CardCheatPanel.cs; echo =====; sed -n 1,90p ForceEnemyCardCheatPanel.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && python -I - "7. Scenes/Match.unity" "2. Scripts/UI" <<'EOF' import re,sys,os t=open(sys.argv[1],encoding='u`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -ln "using UnityEngine.InputSystem" -r . ; grep -n "OnEnable\|OnDisable\|OnDestroy" UI/Chea`
+  - `Bash: grep guid "/c/Unity Projects/ThroneOfTides/Library/PackageCache/com.unity.inputsystem@21a28c3a6c83/InputSystem/Unity.InputSystem.asmdef.meta"; grep -n "InputSys`
+
+**Claude:** The UI assembly doesn't reference the Input System yet, so I'll add that. Writing the unlock listener now.
+  - `Write: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CheatUnlock.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\ThroneOfTides.UI.asmdef`
+
+**Claude:** Now updating the three panels: removing the old "development builds only" check and showing their toggle buttons only while cheats are unlocked.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/UI" && python -I - <<'EOF' import re OLD = """ private void Awake() { if (!Debug.isDebugBuild) { gam`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/UI" && grep -n "isDebugBuild\|CheatUnlock\|Auto-hides\|Hidden until" CheatsPanel.cs CardCheatPanel.c`
+
+**Claude:** The patch didn't apply (the files use Windows line endings), so I'll edit each panel directly.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CheatsPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CheatsPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CheatsPanel.cs`
+
+**Claude:** Now the two card cheat panels, which share the same structure.
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CardCheatPanel.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\ForceEnemyCardCheatPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CardCheatPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CardCheatPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\CardCheatPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\ForceEnemyCardCheatPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\ForceEnemyCardCheatPanel.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\ForceEnemyCardCheatPanel.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/Tools/Build" && grep -n "disableCheats\|Cheats\|cheats\|CheatsPanel" ThroneOfTidesBuildPipeline.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/Tools/Build" && sed -i 's/ApplySceneOverrides(BuildProfileType.Release, disableCheats: true)/ApplySc`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Tools\Build\ThroneOfTidesBuildPipeline.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n -i "cheat\|disableCheats" Tools/Build/ThroneOfTidesBuildPipeline.cs; grep -rn "isDebugBu`
+
+**Claude:** Code is done. Several documents still say the cheats only exist in development builds, so I'm updating those to match.
+  - `Bash: cd "/c/Users/User/Downloads/Throne of Tides Documents" && for f in *.docx Extras/*.docx; do unzip -p "$f" word/document.xml | python -I -c " import sys,re,html`
+  - `Bash: python -I - <<'EOF' import zipfile, shutil, os REPL = { "Throne of Tides - HLD.docx": [ ("Available in development builds only. They change HP and mana", "Hidde`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; OUT="C:/Users/User/Downloads/Thron`
+
+**Claude:** I've set the cheat panels to stay hidden in every build, Windows and web, until the player types a code: **`mutiny`**. Typing it again hides them. Unity MCP is still disconnected, so none of this has been compiled or tested yet.
+
+**How it works**
+- **Typing the code:** type `mutiny` on the keyboard at any point (main menu, sea map or battle). There's no text box. Capital letters are fine.
+- **What appears:** the toggle buttons for all three cheat panels show up in battle. In battle, the match log also shows "Cheats enabled." or "Cheats disabled."
+- **How long it lasts:** the unlock stays on for the current session only. It isn't saved, so closing the game locks the cheats again. That way a player who stumbles on the code doesn't keep it.
+- **In the Editor:** cheats start unlocked when you press Play, so your testing works as before.
+- **In the browser:** the player has to click the game once first so it receives keyboard input.
+
+**What changed**
+- **New [CheatUnlock.cs](Assets/_Game/2.%20Scripts/UI/CheatUnlock.cs):** listens for the typed code in every scene. It starts itself the same way `SceneFader` does, so no scene edits were needed. To change the code, edit the `Code` line at the top.
+- **The three cheat panels:** they no longer switch themselves off outside development builds. They now hide only their toggle button while locked, so they stay active and can hear the code.
+- **Build menu:** the Release and WebGL builds used to switch the main cheat panel off completely, which would have made the code useless there. I removed that.
+- **UI assembly definition:** it now references the Input System, which the listener needs.
+- **Documents:** I updated the HLD, Tech Stack and itch.io kit, which said the cheats only exist in development builds. The copies in Downloads are updated too.
+
+**For your Windows build:** use **ThroneOfTides > Build > Release Build (Windows)** (Ctrl+Shift+2). It builds without the profiler or debugger, and the cheats now stay hidden until someone types the code.
+
+**Before you ship:** switch back to Unity, check the console has no errors, then make a Release build. In that build, start a battle and confirm the cheat buttons are missing. Type `mutiny` and they should appear, and type it again to hide them.
+
+**You:** write a short clear git commit message title and description
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git status --short && git log --oneline -3`
+
+**Claude:** Some of these files changed outside my edits (Match.unity, the package manifest, project settings), so I'm checking them before describing them in the message.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git diff --stat -- "Assets/_Game/7. Scenes/Match.unity" Packages ProjectSettings 2>/dev/null; git diff -- Packages/manif`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git diff -- ProjectSettings/ProjectSettings.asset | grep -E "^[-+].*(Decompression|Compression|webGL)"; git diff -- "Ass`
+
+**Claude:** Here's the commit message. Besides the cheat code and Quit button work, I found a few changes you made in the editor and included them:
+
+- the WebGL build is set to the Minimal template at 1280 x 720
+- the unused AI Assistant package is removed
+- `Match.unity` was re-saved, which only reordered the water effect's built-in textures
+
+**Title**
+```
+Gate cheat panels behind a typed code and polish the web build
+```
+
+**Description**
+```
+- Cheat panels are hidden in every build until the code "mutiny" is
+  typed, and typing it again hides them. Unlocked by default in the
+  Editor, never saved between sessions (new CheatUnlock).
+- Release and WebGL builds no longer switch the cheat panel off, since
+  the code now handles hiding it.
+- Quit buttons are hidden in web builds, where Application.Quit does
+  nothing (new WebBuildQuitButtonHider).
+- WebGL now uses the Minimal template at 1280 x 720.
+- Removed the unused AI Assistant package.
+- Updated the HLD and Tech Stack docs and added the itch.io page kit.
+```
+
+The commands below leave out the two `.recall/` folders, since those are your local session logs.
+
+```bash
+git add "Assets/_Game/2. Scripts" "Assets/_Game/7. Scenes/Match.unity" Documentation Packages ProjectSettings
+```
+
+```bash
+git commit -m "Gate cheat panels behind a typed code and polish the web build" -m "- Cheat panels are hidden in every build until the code \"mutiny\" is typed, and typing it again hides them. Unlocked by default in the Editor, never saved between sessions (new CheatUnlock).
+- Release and WebGL builds no longer switch the cheat panel off, since the code now handles hiding it.
+- Quit buttons are hidden in web builds, where Application.Quit does nothing (new WebBuildQuitButtonHider).
+- WebGL now uses the Minimal template at 1280 x 720.
+- Removed the unused AI Assistant package.
+- Updated the HLD and Tech Stack docs and added the itch.io page kit."
+```
+
+Decompression Fallback is still off in your WebGL settings. If the itch.io page shows a loading error, turn it on in Player Settings and rebuild.
+
+**You:** it seems the starting deck is still over the 80 limit. lets keep the deck as is and increase the starting storage capacity to 100
+
+**Claude:** Checking what the starter deck actually costs right now and where the base capacity comes from.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/4. Data" && python -I - <<'EOF' import glob,re,os st={} for p in glob.glob("Cards/*/*.asset"): t=open(p,encodin`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/4. Data" && sed -i 's/^ BaseStorageCapacity: 80$/ BaseStorageCapacity: 100/' GameConfigSO.asset && grep -n "Bas`
+
+**Claude:** I've raised the starting storage capacity from 80 to 100 (`BaseStorageCapacity` in [GameConfigSO.asset](Assets/_Game/4.%20Data/GameConfigSO.asset)). The starter deck is unchanged, so new players now start with 20 storage free, and with all three Storage upgrades the maximum goes from 170 to 190.
+
+The starter deck files themselves were never over 80. Both the starter template and the player deck still come to exactly 80. The over-80 number you saw almost certainly comes from your save file, which loads the deck you saved over the starter deck. If that save still holds the old 30 card deck, it uses 95 storage. To check, run **Options → Reset Player Data**, then look at the Port. Either way, that deck now fits under 100.
+
+The design documents still say base storage is 80 and the deck "fills storage exactly". That affects the GDD, both HLDs, the balance model and spreadsheet, the iteration log and the player journey doc. Want me to update them to 100?
+
+**You:** change it back to 80, and make sure the player cant start a fight or save a deck if his capacity usage is more than he his (100% capacity is fine, 101% is not)
+
+**Claude:** Reverting to 80 first, then reading the Port and sea map code to see where to put the two checks.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && sed -i 's/^ BaseStorageCapacity: 100$/ BaseStorageCapacity: 80/' "4. Data/GameConfigSO.asset" && grep -n "B`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortManager.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Data\PlayerInventory.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortManager.cs`
+
+**Claude:** Now the Port deck editor: blocking Save and flagging the over-capacity state.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\PortDeckEditor.cs`
+
+**Claude:** Now the sea map: refusing to sail into battle with an over-capacity deck.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\UI\LevelSelectManager.cs`
+
+**Claude:** Wiring the config and Storage upgrade into the sea map scene so the check is active, then checking the DOTween fade I used is available in that assembly.
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game" && CFG=$(grep guid "4. Data/GameConfigSO.asset.meta" | awk '{print $2}'); UPG=$(grep guid "4. Data/Upgrades/Up`
+
+**Claude:** I've set base storage back to 80 and added both checks, but I haven't tested any of it. Unity MCP is still disconnected, so the code hasn't compiled and I had to edit the sea map scene file by hand.
+
+**Port**
+- If the deck uses more storage than the hold allows, the Save button greys out.
+- The storage label turns red and reads "Storage: 95 / 80 (over capacity, remove cards to save)".
+- As soon as the deck fits (100% included), Save works again.
+- Adding cards was already capped at capacity. That's why an over-limit deck can only come from an older save.
+
+**Sea map**
+- Clicking a captain while the deck is over capacity keeps the ship where it is.
+- A message appears at the top of the screen for a few seconds: "Your deck uses 95 of 80 storage. Remove cards at the Port before sailing into battle."
+- The Port badge lights up, and the Port itself stays open.
+
+What changed:
+- **Shared check:** the "storage used vs capacity" calculation now lives in [PlayerInventory.cs](Assets/_Game/2.%20Scripts/Data/PlayerInventory.cs). Both screens use it, so they always agree.
+- **[PortDeckEditor.cs](Assets/_Game/2.%20Scripts/UI/PortDeckEditor.cs) and [PortManager.cs](Assets/_Game/2.%20Scripts/UI/PortManager.cs):** the blocked Save button and over-capacity label.
+- **[LevelSelectManager.cs](Assets/_Game/2.%20Scripts/UI/LevelSelectManager.cs):** the refusal to sail and the warning message.
+- **`LevelSelect.unity`:** the sea map now has the game config and Storage upgrade assigned. If those links are ever missing, the check is skipped rather than locking you out of battles.
+
+Your own save probably still holds the old 95-storage deck. If so, the sea map will now refuse battles until you remove 15 storage worth of cards at the Port or reset your player data. That's also a quick way to test both checks.
+
+To test, switch back to Unity and check the console has no errors. Then open the Port and look for the red label and greyed-out Save. Finally, try a battle from the sea map and you should get the warning message.
