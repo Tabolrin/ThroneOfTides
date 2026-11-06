@@ -15817,3 +15817,106 @@ They all work now. I'd already made these effects work correctly for either side
 Every balance number I worked out earlier assumed those cards did nothing, so play a run of each captain to recheck the difficulty.
 
 To test, check the Unity console is clean, then fight Rumboat until he plays Monkey Grab. The stolen card should fly across to his hand, and your next turn should draw back up to exactly 4.
+
+**You:** write a short clear git commit message title and description
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git status --short | grep -v ".recall" && git log --oneline -3`
+
+**Claude:** This one covers the hand overdraw fixes, the enemy actions fix and the surcharge cost display. I also included the WebGL template's `.meta` files. Unity created them after the last commit, and they belong with the template you already committed. `UnityConnectSettings.asset` and the `.recall/` logs are left out again.
+
+**Title**
+```
+Fix hand overdraw, make enemy actions resolve and show surcharged costs
+```
+
+**Description**
+```
+- Enemy non-attack cards now spawn their VFX before resolving, matching
+  player plays. An enemy Monkey Grab took the card in data but left it on
+  screen, so the next refill overdrew the hand past 4.
+- Chain Shot's discard and the Kraken standoff sacrifice now remove the
+  card from the hand display too.
+- Every enemy Action now resolves. Rum, High Spirits, Locker's Return,
+  Treasure Chest and Recon Parrot used to cost mana and do nothing.
+- Recon Parrot only opens the reveal panel when the player casts it.
+- Cards in hand show their real cost in red while a Dead Man's Turn
+  surcharge is pending, and a refused play explains why in the match log.
+- Added the WebGL template's .meta files.
+```
+
+```bash
+git add "Assets/_Game/2. Scripts" Assets/WebGLTemplates.meta Assets/WebGLTemplates
+```
+
+```bash
+git commit -m "Fix hand overdraw, make enemy actions resolve and show surcharged costs" -m "- Enemy non-attack cards now spawn their VFX before resolving, matching player plays. An enemy Monkey Grab took the card in data but left it on screen, so the next refill overdrew the hand past 4.
+- Chain Shot's discard and the Kraken standoff sacrifice now remove the card from the hand display too.
+- Every enemy Action now resolves. Rum, High Spirits, Locker's Return, Treasure Chest and Recon Parrot used to cost mana and do nothing.
+- Recon Parrot only opens the reveal panel when the player casts it.
+- Cards in hand show their real cost in red while a Dead Man's Turn surcharge is pending, and a refused play explains why in the match log.
+- Added the WebGL template's .meta files."
+```
+
+**You:** look at the latest built game log, after playing the torch and trigerring the combo the torch vfx image was stuck on screen without disappearing upon hitting the enemy ship as was intended. also, there was another instance of me trying to play a cannon ball while having 1 mana and it not allowing me to activate for some reason.
+
+also make sure the start turn draw actualy fills back up to 4 cards and not just drawin 2 cards (unless we chose to do that together and i firgot)
+
+**Claude:** Reading the latest build log for errors around the Torch effect and the refused Cannonball.
+  - `Bash: D="/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides"; ls -la "$D"; grep -n -iE "exception|error|null|warning|torch|cannot|mana|Player Turn|Card pla`
+  - `Bash: D="/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides"; sed -n 140,180p "$D/Player.log"; echo =====; cat "/c/Unity Projects/ThroneOfTides/Assets/_Gam`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\VFX\ExplosionEffectPool.cs`
+  - `Write: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\VFX\ExplosionEffectPool.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/Systems/VFX" && grep -n "private void OnImpact" -A22 CannonballVFXController.cs`
+
+**Claude:** Cannonball hides itself before the explosion, so it only lost its blast and sound. Torch removes itself last, which is why its image got stuck. Making Torch's cleanup run no matter what.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\VFX\TorchVFXController.cs`
+
+**Claude:** Now the Cannonball. The build log only records "Card played" lines, and refused plays log one too, so I'm searching both build logs for it.
+  - `Bash: D="/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides"; for f in Player-prev.log Player.log; do echo "== $f"; grep -n "Player Turn\|Card played\|Turn`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n -i "mana" UI/GameHUD.cs | head -20; grep -n -i "IsPlayerTurn\|interactable\|enabled\s*="`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+
+**Claude:** Changing both refills (yours and the enemy's) to count only cards in hand, plus any reaction drawn during the same refill.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+
+**Claude:** I've fixed the stuck Torch image and the short refill, and added diagnostics for the Cannonball problem. Unity MCP is still disconnected, so none of this has been compiled or tested yet.
+
+**1. Torch image stuck on screen.** The build log has the exact error. Torch and Cannonball both get their explosion from a shared pool. That pool survives scene changes, but the explosions it created belonged to the battle scene, so Unity destroyed them when the scene changed. In your second battle the pool handed out one of those destroyed explosions and an error was thrown at Torch's impact. That happened before Torch could remove itself, so its image stayed up. Cannonball hit the same error but hides itself first, so it only lost its blast, sound and shake.
+- [ExplosionEffectPool.cs](Assets/_Game/2.%20Scripts/Systems/VFX/ExplosionEffectPool.cs): explosions now live under the pool's own surviving object, and any that were destroyed are skipped.
+- [TorchVFXController.cs](Assets/_Game/2.%20Scripts/Systems/VFX/TorchVFXController.cs): Torch now always removes itself, even if the explosion fails.
+
+**2. Turn start drew only 2.** That came from a rule I added in an earlier session: reaction charges on your badges counted toward the 4. Holding 2 charges meant the refill stopped at 2 cards in hand. You asked for reactions drawn during the refill to count, not charges you already hold, so this was my overreach. The refill now does exactly what you described:
+- 4 cards in hand draws nothing, 3 draws 1, and so on.
+- A reaction drawn during the refill still uses up one of the draws.
+- The enemy follows the same rule.
+
+The GDD still says charged reactions count toward the 4, so I'll update it if you want.
+
+**3. Cannonball refused with 1 mana.** I can't confirm the cause. The build log does show the Cannonball being played, but release builds don't log why a play is refused. Only two rules could refuse a 1-mana card when you have 1 mana:
+- **Most likely:** a pending Dead Man's Turn surcharge, which makes Cannonball cost 2. Its cost would have shown in red.
+- **Otherwise:** playing the card before that turn's draw had finished.
+
+Every refused play now states its reason in the match log, for example "Not enough mana for Cannonball: it costs 2 (1 + 1 from Dead Man's Turn) and you have 1". It's also written to the build's log, so if it happens again we'll know exactly which rule refused it.
+
+To test, check the Unity console is clean, then make a new build and play two battles in a row with a Torch combo in the second. Also play a turn where you hold reaction charges and check the refill still fills your hand to 4.
+
+**You:** got it about the reasn for the drawing behaviour - yes i want it to not count the charges i already had active before the draw as cards in hand - count only actual cards in the hand (before turning reaction cards into charges 0 those should still count)
+
+**Claude:** That's how it works now. The change I made last time already follows that rule, so nothing else needs to change.
+
+- **Charges you already held:** they don't count. A badge charge isn't a card in your hand.
+- **Reaction cards drawn during the refill:** they count as cards until they turn into charges. If you hold 3 cards and draw a reaction, that's your one draw for the turn, and you end with 3 cards plus a new charge.
+
+Some examples:
+
+| Before the draw | Draw | After |
+|---|---|---|
+| 4 cards, 2 charges | nothing | 4 cards, 2 charges |
+| 2 cards, 2 charges | 2 cards | 4 cards, 2 charges |
+| 3 cards, any charges | 1 card | 4 cards (or 3 cards + 1 new charge if it was a reaction) |
+
+The enemy uses the same rule, and so does the opening hand.
+
+The GDD and both HLDs still describe the old rule, where charges count toward the 4. Want me to update them?

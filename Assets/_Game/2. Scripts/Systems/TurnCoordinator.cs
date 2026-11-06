@@ -214,19 +214,35 @@ namespace ThroneOfTides.Systems
         // reason is mana, and the confusing case is Dead Man's Turn's surcharge: it adds to the
         // next card's cost (stacking if used more than once) without changing the number printed
         // on the card, so a 2 mana Torch can't be played with 2 mana after using it.
+        // Covers every reason CanPlayCard can refuse a card, so a refusal is never silent. Also
+        // written with Debug.Log (not GameDebug, which release builds strip) so the reason shows up
+        // in the built game's Player.log too.
         private void ExplainRejectedPlay(CardSO card)
         {
             if (_gameState.MatchOver || card.CardType == CardType.Reaction) return;
 
+            string reason;
             int surcharge = _gameState.PlayerNextCardManaSurcharge;
             int cost      = card.ManaCost + surcharge;
-            if (_gameState.PlayerMana >= cost) return;
 
-            string costText = surcharge > 0
-                ? $"{cost} ({card.ManaCost} + {surcharge} from Dead Man's Turn)"
-                : $"{cost}";
-            GameEventBus.FireMatchNote(
-                $"Not enough mana for {card.Name}: it costs {costText} and you have {_gameState.PlayerMana}.");
+            if (!_gameState.HasDrawnThisTurn && _gameState.PlayerDeck.Count > 0)
+            {
+                reason = $"Can't play {card.Name} yet: wait for this turn's draw to finish.";
+            }
+            else if (_gameState.PlayerMana < cost)
+            {
+                string costText = surcharge > 0
+                    ? $"{cost} ({card.ManaCost} + {surcharge} from Dead Man's Turn)"
+                    : $"{cost}";
+                reason = $"Not enough mana for {card.Name}: it costs {costText} and you have {_gameState.PlayerMana}.";
+            }
+            else
+            {
+                reason = $"Can't play {card.Name} right now.";
+            }
+
+            Debug.Log($"[Play refused] {reason}");
+            GameEventBus.FireMatchNote(reason);
         }
 
         private IEnumerator PlayCardWithTargetSelection(CardSO cardSO)
@@ -344,12 +360,12 @@ namespace ThroneOfTides.Systems
             OnHPChanged?.Invoke();
         }
 
-        // Draws until the player's total held resources (hand cards + already-charged reactions)
-        // reach MaxHandSize, re-checking after every single card rather than trusting a count
-        // computed once up front - see the remarks inside. A Reaction card still counts as one of
-        // this turn's draws even though it ends up as a badge charge instead of a hand card, so
-        // drawing 4 cards where 1 is a Reaction always ends with 3 cards in hand, never with the
-        // draw continuing until 4 non-Reaction cards have been found.
+        // Tops the hand back up to MaxHandSize: 4 cards in hand draws nothing, 3 draws 1, and so
+        // on. Reaction charges already sitting on the badges do NOT count toward the 4 - they
+        // aren't cards in hand. A Reaction card drawn during this refill still uses up one of the
+        // draws even though it ends up as a badge charge instead of a hand card, so drawing 4
+        // cards where 1 is a Reaction ends with 3 cards in hand, never with the draw continuing
+        // until 4 non-Reaction cards have been found. Re-checked after every card - see inside.
         private IEnumerator RefillPlayerHandRoutine()
         {
             var pendingReactionCards = new List<CardSO>();
@@ -359,16 +375,13 @@ namespace ThroneOfTides.Systems
             // routine is ever called from somewhere that doesn't already do that.
             _gameState.SetHasDrawnThisTurn();
 
-            // Re-checked after every single card, not computed once up front - if the hand (plus
-            // already-charged reactions) is already at or above MaxHandSize when this runs (e.g. a
-            // Treasure Chest/Monkey Grab bonus pushed it past 4 last turn), this draws nothing at
-            // all and leaves the existing total exactly as it was; it only ever comes down once
-            // the player actually plays cards. pendingReactionCards.Count is added in because a
-            // reaction card drawn THIS loop sits in neither PlayerHand nor the charge counters yet
-            // (it only becomes a charge once AbsorbReactionCard runs, after the whole loop below
-            // finishes) - without counting it here too, several reactions drawn back to back would
-            // each look like they hadn't used up a slot, letting the loop keep going past MaxHandSize.
-            while (_gameState.PlayerHand.Count + _gameState.PlayerDeadMansTurnCharges + _gameState.PlayerCounterGaleCharges + pendingReactionCards.Count < _config.MaxHandSize
+            // Re-checked after every single card, not computed once up front - if the hand is
+            // already at or above MaxHandSize when this runs (e.g. a Treasure Chest/Monkey Grab
+            // bonus pushed it past 4 last turn), this draws nothing at all and leaves the hand
+            // exactly as it was. pendingReactionCards.Count is added in so each reaction drawn
+            // here uses up one of this refill's draws (it never enters PlayerHand, so without it
+            // the loop would keep drawing until 4 non-reaction cards turned up).
+            while (_gameState.PlayerHand.Count + pendingReactionCards.Count < _config.MaxHandSize
                    && _gameState.PlayerDeck.Count > 0)
             {
                 CardSO drawn = _gameState.PlayerDeck.Draw();
@@ -411,15 +424,13 @@ namespace ThroneOfTides.Systems
 
             _gameState.ResetEnemyMana();
 
-            // The enemy hand fully refills at the start of its turn too, mirroring the player -
-            // drawing until its total held resources (hand + already-charged reactions) reach
-            // MaxHandSize, re-checked after every card rather than computed once up front - see
-            // RefillPlayerHandRoutine's remarks. Unlike the player's version, the enemy charges a
-            // drawn Reaction immediately (no deferred "sits in hand, then flies to badge" beat to
-            // account for), so the total is always accurate mid-loop with no extra bookkeeping.
-            // EnemyAI.PickCard never plays Reaction-type cards, so leaving one in hand would
-            // strand it there permanently unplayable.
-            while (_gameState.EnemyHand.Count + _gameState.EnemyDeadMansTurnCharges + _gameState.EnemyCounterGaleCharges < _config.MaxHandSize
+            // The enemy hand refills at the start of its turn too, with exactly the player's rule
+            // (see RefillPlayerHandRoutine): top the hand back up to MaxHandSize, charges on the
+            // badges don't count, and a reaction drawn here uses up one of the draws. The enemy
+            // charges a drawn Reaction immediately - EnemyAI.PickCard never plays Reaction-type
+            // cards, so leaving one in hand would strand it there permanently unplayable.
+            int enemyReactionsDrawn = 0;
+            while (_gameState.EnemyHand.Count + enemyReactionsDrawn < _config.MaxHandSize
                    && _gameState.EnemyDeck.Count > 0)
             {
                 CardSO enemyDrawn = _gameState.EnemyDeck.Draw();
@@ -428,6 +439,7 @@ namespace ThroneOfTides.Systems
                 if (enemyDrawn.CardType == CardType.Reaction)
                 {
                     ChargeReaction(enemyDrawn, DamageTarget.Enemy);
+                    enemyReactionsDrawn++;
                     continue;
                 }
 

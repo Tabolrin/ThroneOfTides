@@ -101,15 +101,22 @@ namespace ThroneOfTides.Systems.VFX
 
         private void OnImpact()
         {
-            if (_gunpowderWasActive)
+            // try/finally so a failure in the explosion can never leave the torch image stuck on
+            // screen - Completed is what tells CardPresentationPlayer to remove it.
+            try
             {
-                ExplosionEffectPool.PlayAt(_explosionPrefab, _context.OpponentAnchor.position, _explosionLifetime);
+                if (_gunpowderWasActive)
+                {
+                    ExplosionEffectPool.PlayAt(_explosionPrefab, _context.OpponentAnchor.position, _explosionLifetime);
 
-                CardSfxPlayer.Play(_explosionSfx, _context.OpponentAnchor.position);
-                ScreenShake.Trigger(ScreenShakeLevel.Level4);
+                    CardSfxPlayer.Play(_explosionSfx, _context.OpponentAnchor.position);
+                    ScreenShake.Trigger(ScreenShakeLevel.Level4);
+                }
             }
-
-            Completed?.Invoke();
+            finally
+            {
+                Completed?.Invoke();
+            }
         }
 
         private void OnDestroy() => _sequence?.Kill();

@@ -15855,3 +15855,195 @@ git commit -m "Fix hand overdraw, make enemy actions resolve and show surcharged
 - Cards in hand show their real cost in red while a Dead Man's Turn surcharge is pending, and a refused play explains why in the match log.
 - Added the WebGL template's .meta files."
 ```
+
+**You:** look at the latest built game log, after playing the torch and trigerring the combo the torch vfx image was stuck on screen without disappearing upon hitting the enemy ship as was intended. also, there was another instance of me trying to play a cannon ball while having 1 mana and it not allowing me to activate for some reason.
+
+also make sure the start turn draw actualy fills back up to 4 cards and not just drawin 2 cards (unless we chose to do that together and i firgot)
+
+**Claude:** Reading the latest build log for errors around the Torch effect and the refused Cannonball.
+  - `Bash: D="/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides"; ls -la "$D"; grep -n -iE "exception|error|null|warning|torch|cannot|mana|Player Turn|Card pla`
+  - `Bash: D="/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides"; sed -n 140,180p "$D/Player.log"; echo =====; cat "/c/Unity Projects/ThroneOfTides/Assets/_Gam`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\VFX\ExplosionEffectPool.cs`
+  - `Write: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\VFX\ExplosionEffectPool.cs`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts/Systems/VFX" && grep -n "private void OnImpact" -A22 CannonballVFXController.cs`
+
+**Claude:** Cannonball hides itself before the explosion, so it only lost its blast and sound. Torch removes itself last, which is why its image got stuck. Making Torch's cleanup run no matter what.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\VFX\TorchVFXController.cs`
+
+**Claude:** Now the Cannonball. The build log only records "Card played" lines, and refused plays log one too, so I'm searching both build logs for it.
+  - `Bash: D="/c/Users/User/AppData/LocalLow/DefaultCompany/Throne Of Tides"; for f in Player-prev.log Player.log; do echo "== $f"; grep -n "Player Turn\|Card played\|Turn`
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides/Assets/_Game/2. Scripts" && grep -n -i "mana" UI/GameHUD.cs | head -20; grep -n -i "IsPlayerTurn\|interactable\|enabled\s*="`
+  - `Read: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+
+**Claude:** Changing both refills (yours and the enemy's) to count only cards in hand, plus any reaction drawn during the same refill.
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+  - `Edit: C:\Unity Projects\ThroneOfTides\Assets\_Game\2. Scripts\Systems\TurnCoordinator.cs`
+
+**Claude:** I've fixed the stuck Torch image and the short refill, and added diagnostics for the Cannonball problem. Unity MCP is still disconnected, so none of this has been compiled or tested yet.
+
+**1. Torch image stuck on screen.** The build log has the exact error. Torch and Cannonball both get their explosion from a shared pool. That pool survives scene changes, but the explosions it created belonged to the battle scene, so Unity destroyed them when the scene changed. In your second battle the pool handed out one of those destroyed explosions and an error was thrown at Torch's impact. That happened before Torch could remove itself, so its image stayed up. Cannonball hit the same error but hides itself first, so it only lost its blast, sound and shake.
+- [ExplosionEffectPool.cs](Assets/_Game/2.%20Scripts/Systems/VFX/ExplosionEffectPool.cs): explosions now live under the pool's own surviving object, and any that were destroyed are skipped.
+- [TorchVFXController.cs](Assets/_Game/2.%20Scripts/Systems/VFX/TorchVFXController.cs): Torch now always removes itself, even if the explosion fails.
+
+**2. Turn start drew only 2.** That came from a rule I added in an earlier session: reaction charges on your badges counted toward the 4. Holding 2 charges meant the refill stopped at 2 cards in hand. You asked for reactions drawn during the refill to count, not charges you already hold, so this was my overreach. The refill now does exactly what you described:
+- 4 cards in hand draws nothing, 3 draws 1, and so on.
+- A reaction drawn during the refill still uses up one of the draws.
+- The enemy follows the same rule.
+
+The GDD still says charged reactions count toward the 4, so I'll update it if you want.
+
+**3. Cannonball refused with 1 mana.** I can't confirm the cause. The build log does show the Cannonball being played, but release builds don't log why a play is refused. Only two rules could refuse a 1-mana card when you have 1 mana:
+- **Most likely:** a pending Dead Man's Turn surcharge, which makes Cannonball cost 2. Its cost would have shown in red.
+- **Otherwise:** playing the card before that turn's draw had finished.
+
+Every refused play now states its reason in the match log, for example "Not enough mana for Cannonball: it costs 2 (1 + 1 from Dead Man's Turn) and you have 1". It's also written to the build's log, so if it happens again we'll know exactly which rule refused it.
+
+To test, check the Unity console is clean, then make a new build and play two battles in a row with a Torch combo in the second. Also play a turn where you hold reaction charges and check the refill still fills your hand to 4.
+
+**You:** got it about the reasn for the drawing behaviour - yes i want it to not count the charges i already had active before the draw as cards in hand - count only actual cards in the hand (before turning reaction cards into charges 0 those should still count)
+
+**Claude:** That's how it works now. The change I made last time already follows that rule, so nothing else needs to change.
+
+- **Charges you already held:** they don't count. A badge charge isn't a card in your hand.
+- **Reaction cards drawn during the refill:** they count as cards until they turn into charges. If you hold 3 cards and draw a reaction, that's your one draw for the turn, and you end with 3 cards plus a new charge.
+
+Some examples:
+
+| Before the draw | Draw | After |
+|---|---|---|
+| 4 cards, 2 charges | nothing | 4 cards, 2 charges |
+| 2 cards, 2 charges | 2 cards | 4 cards, 2 charges |
+| 3 cards, any charges | 1 card | 4 cards (or 3 cards + 1 new charge if it was a reaction) |
+
+The enemy uses the same rule, and so does the opening hand.
+
+The GDD and both HLDs still describe the old rule, where charges count toward the 4. Want me to update them?
+
+**You:** yes please
+
+**Claude:** Finding every place the documents describe the old refill rule.
+  - `Bash: cd "/c/Users/User/Downloads/Throne of Tides Documents" && for f in *.docx Extras/*.docx; do unzip -p "$f" word/document.xml | python -I -c " import sys,re,html`
+
+**Claude:** Several documents still describe the old rule. Checking the exact wording of one more line, in the GDD's balance notes.
+  - `Bash: cd "/c/Users/User/Downloads/Throne of Tides Documents" && for f in *.docx Extras/*.docx; do unzip -p "$f" word/document.xml | grep -o "[^>]*hand slot[^<]*" | se`
+  - `Write: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\scripts\patch_refill_docs.py`
+  - `Bash: python -I "C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad/scripts/patch_refill_docs.py"`
+
+**Claude:** Updated everywhere. Checking the summary HLD still fits on 3 pages, since its text got a little longer.
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; mkdir -p "$SP/render4" && "/c/Prog`
+
+**Claude:** I've updated the documents to the new rule: only cards in hand count toward the 4, charges already on your badges don't, and a reaction drawn during the refill still uses up a draw.
+
+| Document | What changed |
+|---|---|
+| GDD | Turn structure, the hand and deck section (with the 4 → 0, 3 → 1 example) and the balance note on reactions |
+| HLD | The refill function description and the "Hand Refill" flow, which now also notes the enemy uses the same rule |
+| HLD (Summary) | The turns rule |
+| Balance and Economy Model | A reaction's cost is now the refill draw it uses up, not "the hand slot a charge takes up" |
+| Iteration and Playtest Log | Entry 1 now notes that a later pass stopped counting charges |
+
+Every edited document still opens correctly, and the summary HLD is still 3 pages. The copies in Downloads and in the project's `Documentation` folder are both updated. I didn't change the Balance Model spreadsheet because none of its numbers depend on this rule.
+
+**You:** @"C:\Users\User\Videos\2026-10-24 10-45-32.mp4"
+get the best screenshots from the video for me to put on the itch page
+
+**Claude:** Checking what's available to read the video.
+  - `Bash: ls -la "/c/Users/User/Videos/2026-10-24 10-45-32.mp4"; which ffmpeg ffprobe 2>/dev/null; ls "/c/Program Files/ffmpeg/bin" 2>/dev/null; where.exe ffmpeg 2>/dev/n`
+
+**Claude:** No ffmpeg installed, so I'll read the video with OpenCV in the scratch Python environment.
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; "$SP/venv/Scripts/python.exe" -m p`
+
+**Claude:** The video is 2 minutes 11 seconds at 1280 x 720. I'll pull one frame per second into labeled contact sheets to find the best moments.
+  - `Write: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\scripts\video_sheets.py`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; "$SP/venv/Scripts/python.exe" -I "`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\frames\sheet_01.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\frames\sheet_02.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\frames\sheet_03.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\frames\sheet_04.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\frames\sheet_05.jpg`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; V="C:/Users/User/Videos/2026-10-24`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\framesA\sheet_01.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\framesB\sheet_01.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\framesC\sheet_01.jpg`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\framesC\sheet_02.jpg`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; "$SP/venv/Scripts/python.exe" -I -`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\t041.6.png`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\t064.0.png`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\t045.0.png`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\t022.6.png`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\t013.0.png`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\t004.0.png`
+
+**Claude:** Every frame shows the mouse cursor. I'll paint it out of each shot, then save the six screenshots plus a 630 x 500 cover image cropped from the title screen.
+  - `Write: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\scripts\export_shots.py`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; "$SP/venv/Scripts/python.exe" -I "`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\checks.png`
+  - `Read: C:\Users\User\Downloads\Throne of Tides Documents\itch Screenshots\00 - Cover (630x500).png`
+  - `Write: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\scripts\donor_patch.py`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; "$SP/venv/Scripts/python.exe" -I "`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\donors.png`
+  - `Write: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\scripts\cursor_erase.py`
+  - `Bash: SP="C:/Users/User/AppData/Local/Temp/claude/C--Unity-Projects-ThroneOfTides/d4aa6792-f851-49f6-890c-cdc76b6ae586/scratchpad"; "$SP/venv/Scripts/python.exe" -I "`
+  - `Read: C:\Users\User\AppData\Local\Temp\claude\C--Unity-Projects-ThroneOfTides\d4aa6792-f851-49f6-890c-cdc76b6ae586\scratchpad\cand\erase_checks.png`
+
+**Claude:** The cursor is now gone from all six shots. A couple of spots on the card borders and the Port scrollbar have tiny repairs, which are only visible zoomed in.
+  - `SendUserFile: Cover image plus six screenshots for the itch.io page, mouse cursor removed.`
+
+**Claude:** I pulled six screenshots and a cover image from the video and saved them in `Downloads\Throne of Tides Documents\itch Screenshots`. The mouse cursor has been removed from all of them.
+
+| File | Moment | Why it's a good pick |
+|---|---|---|
+| 00 - Cover (630x500) | Title screen, cropped to itch.io's cover size | Big logo plus the storm and ship mood. It still reads well as a small thumbnail |
+| 01 - Title Screen | 0:04 | Sets the art style and tone straight away |
+| 02 - Whale Ram Attack | 0:41 | The best action shot: the whale breaching into your ship, the -6 damage number, and the enemy's next card revealed |
+| 03 - Hail Storm Card | 0:45 | A card up close, so players can see the card design and read what it does |
+| 04 - Torch Ignites the Gunpowder | 1:04 | The signature combo: -8 damage under the hail storm, with the torch in flight and the match log telling the story |
+| 05 - Sea Map | 0:22 | Shows the campaign: three captains, the Port and your ship |
+| 06 - Port | 0:13 | Shows the deck building and upgrades |
+
+For the page I'd use **02, 04, 03, 05 and 06**, in that order. Lead with action, then show depth. The title screen works better as the cover than as a screenshot.
+
+**Notes:**
+- **Resolution:** the video was recorded at 1280 x 720, so the screenshots are that size too. That's fine for itch.io. If you record again at 1920 x 1080 they'll come out sharper.
+- **The stuck Torch bug:** I avoided everything after 1:04, because the leftover Torch image stays on screen from there on. The 04 shot catches the torch mid-flight, before the bug shows.
+- **Cursor repairs:** the cursor was removed by repainting only its own pixels. You'd only notice the repairs zoomed right in, on the Cannonball card border in 02 and the scrollbar in 06.
+
+**You:** look at the changes on the git repo and write here a short commit message and title
+  - `Bash: cd "/c/Unity Projects/ThroneOfTides" && git status --short | grep -v "\.recall" ; echo ---; git log --oneline -4; echo ---; git diff --stat | grep -v "\.recall"`
+
+**Claude:** These changes cover the Torch fix, the refill rule, the refused-play messages and the matching document updates. The `.recall/` logs are left out as before.
+
+**Title**
+```
+Fix stuck Torch VFX, refill to 4 cards in hand and explain refused plays
+```
+
+**Description**
+```
+- ExplosionEffectPool keeps its pooled explosions under its own
+  persistent object and skips destroyed ones. They used to be destroyed
+  on scene load, so the first explosion of the next battle threw and
+  left the Torch image stuck on screen.
+- Torch always finishes its effect, even if the explosion fails.
+- Turn-start refill (player and enemy) now tops the hand up to 4 counting
+  only cards in hand. Charges already on the badges no longer count, and a
+  reaction drawn during the refill still uses up a draw.
+- Every refused card play now gives its reason in the match log and in
+  the build's Player.log.
+- Updated the GDD, both HLDs, the balance model and the iteration log to
+  the new refill rule.
+```
+
+```bash
+git add "Assets/_Game/2. Scripts" Documentation
+```
+
+```bash
+git commit -m "Fix stuck Torch VFX, refill to 4 cards in hand and explain refused plays" -m "- ExplosionEffectPool keeps its pooled explosions under its own persistent object and skips destroyed ones. They used to be destroyed on scene load, so the first explosion of the next battle threw and left the Torch image stuck on screen.
+- Torch always finishes its effect, even if the explosion fails.
+- Turn-start refill (player and enemy) now tops the hand up to 4 counting only cards in hand. Charges already on the badges no longer count, and a reaction drawn during the refill still uses up a draw.
+- Every refused card play now gives its reason in the match log and in the build's Player.log.
+- Updated the GDD, both HLDs, the balance model and the iteration log to the new refill rule."
+```

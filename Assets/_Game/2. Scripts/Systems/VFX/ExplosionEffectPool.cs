@@ -2,17 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace ThroneOfTides.Systems.VFX
 {
     // Lazily-created, scene-persistent pool for one-shot impact VFX prefabs shared by card
-    // controllers (Cannonball, Torch). Replaces per-cast Instantiate/Destroy with Get/Release
-    // so frequently-played attack cards don't churn the GC/instantiation cost every play.
+    // controllers (Cannonball, Torch). Replaces per-cast Instantiate/Destroy with reuse so
+    // frequently-played attack cards don't churn the GC/instantiation cost every play.
+    //
+    // The pool itself survives scene loads (DontDestroyOnLoad), so its pooled instances are
+    // parented under it to survive too. They used to be created in the battle scene instead,
+    // which destroyed them on the next scene load while the pool kept handing them out - the
+    // first explosion of the next battle then threw, which aborted the calling VFX mid-impact
+    // (Torch's image stayed stuck on screen). Destroyed instances are also skipped on reuse, as
+    // a second line of defense.
     public class ExplosionEffectPool : MonoBehaviour
     {
         private static ExplosionEffectPool _instance;
-        private readonly Dictionary<GameObject, ObjectPool<GameObject>> _pools = new();
+        private readonly Dictionary<GameObject, Stack<GameObject>> _pools = new();
 
         private static ExplosionEffectPool Instance
         {
@@ -38,24 +44,29 @@ namespace ThroneOfTides.Systems.VFX
         {
             if (!_pools.TryGetValue(prefab, out var pool))
             {
-                pool = new ObjectPool<GameObject>(
-                    createFunc: () => Instantiate(prefab),
-                    actionOnGet: obj => obj.SetActive(true),
-                    actionOnRelease: obj => obj.SetActive(false),
-                    actionOnDestroy: Destroy,
-                    collectionCheck: false);
+                pool = new Stack<GameObject>();
                 _pools[prefab] = pool;
             }
 
-            GameObject instance = pool.Get();
+            GameObject instance = null;
+            while (pool.Count > 0 && instance == null)
+                instance = pool.Pop(); // Unity's == null also catches destroyed objects
+
+            if (instance == null)
+                instance = Instantiate(prefab, transform);
+
             instance.transform.SetPositionAndRotation(position, Quaternion.identity);
+            instance.SetActive(true);
             StartCoroutine(ReleaseAfter(pool, instance, lifetime));
         }
 
-        private IEnumerator ReleaseAfter(ObjectPool<GameObject> pool, GameObject instance, float lifetime)
+        private IEnumerator ReleaseAfter(Stack<GameObject> pool, GameObject instance, float lifetime)
         {
             yield return new WaitForSeconds(lifetime);
-            pool.Release(instance);
+            if (instance == null) yield break;
+
+            instance.SetActive(false);
+            pool.Push(instance);
         }
     }
 }
